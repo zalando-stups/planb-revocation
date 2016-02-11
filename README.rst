@@ -2,6 +2,12 @@
 Plan B Revocation Service
 =========================
 
+.. image:: https://travis-ci.org/zalando/planb-revocation.svg?branch=master
+    :target: https://travis-ci.org/zalando/planb-revocation
+
+.. image:: https://codecov.io/github/zalando/planb-revocation/coverage.svg?branch=master
+    :target: https://codecov.io/github/zalando/planb-revocation?branch=master
+
 Building:
 
 .. code-block:: bash
