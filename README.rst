@@ -12,7 +12,7 @@ Building:
 
 .. code-block:: bash
 
-    $ ./mvnw clean install
+    $ ./mvnw verify
 
 Docker Image
 ============
