@@ -37,6 +37,11 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.zalando.zmon</groupId>
+            <artifactId>zmon-actuator</artifactId>
+            <version>0.9.3</version>
+        </dependency>
+        <dependency>
             <groupId>org.bitbucket.b_c</groupId>
             <artifactId>jose4j</artifactId>
             <version>0.4.4</version>
@@ -44,11 +49,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.zalando.stups</groupId>
-            <artifactId>stups-jaxws-oauth2</artifactId>
-            <version>1.0.10</version>
         </dependency>
 
         <dependency>
