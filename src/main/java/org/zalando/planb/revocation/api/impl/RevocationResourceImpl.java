@@ -23,6 +23,7 @@ public class RevocationResourceImpl implements RevocationResource {
 
     @Override
     public HttpEntity<RevocationInfo> get() {
+
         // TODO make this real :)
         return new ResponseEntity<>(RevocationInfo.builder().meta("bla bla").revocations(
                     Arrays.asList(Revocation.builder().type(RevocationType.CLAIM).build())).build(), HttpStatus.OK);
@@ -30,6 +31,7 @@ public class RevocationResourceImpl implements RevocationResource {
 
     @Override
     public HttpEntity<String> post(final RevocationInfo rev) {
+
         // TODO make this real :)
         return new ResponseEntity<>(HttpStatus.OK);
     }
