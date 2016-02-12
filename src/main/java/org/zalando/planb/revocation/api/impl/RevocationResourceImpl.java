@@ -32,7 +32,7 @@ public class RevocationResourceImpl implements RevocationResource {
     @Override
     public HttpEntity<String> post(final RevocationInfo rev) {
 
-        // TODO make this real :)
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

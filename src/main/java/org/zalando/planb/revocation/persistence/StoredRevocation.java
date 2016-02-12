@@ -6,6 +6,23 @@ package org.zalando.planb.revocation.persistence;
 public class StoredRevocation {
     String type;
     RevocationData data;
+    Long revocedAt;
+    String revocedBy;
+
+    public StoredRevocation(RevocationData data, String type, String revokedBy) {
+        this.data = data;
+        this.type = type;
+        this.revocedBy = revokedBy;
+        this.revocedAt = System.currentTimeMillis();
+    }
+
+    public Long getRevocedAt() {
+        return revocedAt;
+    }
+
+    public void setRevocedAt(Long revocedAt) {
+        this.revocedAt = revocedAt;
+    }
 
     public String getType() {
         return type;

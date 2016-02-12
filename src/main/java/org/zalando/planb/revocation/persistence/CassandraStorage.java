@@ -15,4 +15,9 @@ public class CassandraStorage implements RevocationStore {
     public Collection<StoredRevocation> getRevocations(final long from) {
         return null;
     }
+
+    @Override
+    public boolean storeRevocation(StoredRevocation revocation) {
+
+    }
 }
