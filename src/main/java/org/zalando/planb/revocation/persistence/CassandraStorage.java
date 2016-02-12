@@ -17,7 +17,7 @@ public class CassandraStorage implements RevocationStore {
     }
 
     @Override
-    public boolean storeRevocation(StoredRevocation revocation) {
-
+    public boolean storeRevocation(final StoredRevocation revocation) {
+        throw new UnsupportedOperationException("@jmussler fix this!");
     }
 }

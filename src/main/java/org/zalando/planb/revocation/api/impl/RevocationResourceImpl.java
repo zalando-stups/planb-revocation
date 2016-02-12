@@ -12,8 +12,6 @@ import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
-import org.zalando.planb.revocation.persistence.RevocationStore;
-import org.zalando.planb.revocation.persistence.TokenRevocation;
 
 /**
  * TODO: small javadoc
@@ -23,20 +21,19 @@ import org.zalando.planb.revocation.persistence.TokenRevocation;
 @RestController
 public class RevocationResourceImpl implements RevocationResource {
 
-    private final RevocationStore store;
-
-    public RevocationResourceImpl(RevocationStore store) {
-        this.store=store;
-    }
-
     @Override
     public HttpEntity<RevocationInfo> get() {
-        store.getRevocations();
+
+        // TODO make this real :)
+        return new ResponseEntity<>(RevocationInfo.builder().meta("bla bla").revocations(
+                    Arrays.asList(Revocation.builder().type(RevocationType.CLAIM).build())).build(), HttpStatus.OK);
     }
 
     @Override
     public HttpEntity<String> post(final RevocationInfo rev) {
-        store.storeRevocation(new TokenRevocation(""));
+
+        // TODO @jmussler don't break it!
+        // store.storeRevocation(new TokenRevocation(""));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

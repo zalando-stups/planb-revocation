@@ -1,6 +1,7 @@
 package org.zalando.planb.revocation.persistence;
 
 import org.springframework.context.annotation.Bean;
+
 import org.zalando.planb.revocation.config.PlanBRevocationConfig;
 
 /**
@@ -9,9 +10,12 @@ import org.zalando.planb.revocation.config.PlanBRevocationConfig;
 public class PersistenceFactory {
 
     @Bean
-    public RevocationStore getRevocationStore(PlanBRevocationConfig config) {
-        if(config.getCassandraSeedNodes().isEmpty()) {
+    public RevocationStore getRevocationStore(final PlanBRevocationConfig config) {
+        if (config.getCassandraSeedNodes().isEmpty()) {
             return new InMemoryStore();
         }
+
+        // TODO @jmussler fix this!
+        return null;
     }
 }
