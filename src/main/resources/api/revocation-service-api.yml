@@ -1,0 +1,119 @@
+swagger: '2.0'
+
+info:
+  title: Plan B Revocation API
+  description: API for managing OAuth 2 token revocations
+  version: "1.0"
+
+securityDefinitions:
+  oauth2:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: none
+    scopes:
+      uid: user identitiy
+
+security:
+  - oauth2:
+    - uid
+
+paths:
+  /api/revocations:
+    get:
+      summary: Get revocated tokens
+      description: |
+        Gets all revocated tokens
+      tags:
+        - Revocation
+      parameters:
+        - name: from
+          description: lower time limit for the revocation timestamp
+          in: query
+          type: string
+          format: date-time
+          required: false
+      responses:
+        # Response code
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Revocations'
+    post:
+      summary: Revocate a token
+      description: |
+        Revocates tokens, making them invalid
+      tags:
+        - Revocation
+      parameters:
+        - name: revocation_list
+          description: a list of tokens to revocate
+          in: body
+          schema:
+            $ref: '#/definitions/Revocations'
+      responses:
+        # Response code
+        200:
+          description: Revocation info stored
+
+definitions:
+  Revocations:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          force_refresh:
+            type: string
+            format: date-time
+      revocations:
+        type: array
+        items:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [ "TOKEN", "CLAIM", "GLOBAL" ]
+            revoked_at:
+              type: string
+              format: date-time
+            data:
+              type: object
+              format: '#/definitions/Data'
+  Data:
+    type: object
+  Claim:
+    allOf:
+    - $ref: '#/definitions/Data'
+    - type: object
+      properties:
+        name:
+          type: string
+          description: The claim of the tokens to revoke
+        value_hash:
+          type: string
+          description: Value of the claim, hashed
+        issued_before:
+          type: string
+          format: date-time
+          description: Upper time bound for tokens
+  Global:
+    allOf:
+    - $ref: '#/definitions/Data'
+    - type: object
+      properties:
+        issued_before:
+          type: string
+          format: date-time
+          description: Upper time bound for tokens
+  Token:
+    allOf:
+    - $ref: '#/definitions/Data'
+    - type: object
+      properties:
+        token_hash:
+          type: string
+          description: Token hash
+        revoked_at:
+          type: string
+          format: date-time
+          description: Timestamp of the revocation
