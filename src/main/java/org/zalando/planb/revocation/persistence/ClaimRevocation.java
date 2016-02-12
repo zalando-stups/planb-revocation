@@ -4,27 +4,38 @@ package org.zalando.planb.revocation.persistence;
  * Created by jmussler on 11.02.16.
  */
 public class ClaimRevocation extends RevocationData {
-    public String hashedClaim;
-    public long issued_before;
+    // attribute name
+    public String claimName;
+    public String claimValue;
+    public long issuedBefore;
 
-    public ClaimRevocation(String hashedClaim, long issued_before) {
-        this.hashedClaim = hashedClaim;
-        this.issued_before = issued_before;
+    public ClaimRevocation(String claimName, String claimValue, long issuedBefore) {
+        this.claimName = claimName;
+        this.claimValue = claimValue;
+        this.issuedBefore = issuedBefore;
     }
 
-    public long getIssued_before() {
-        return issued_before;
+    public String getClaimName() {
+        return claimName;
     }
 
-    public void setIssued_before(long issued_before) {
-        this.issued_before = issued_before;
+    public void setClaimName(String claimName) {
+        this.claimName = claimName;
     }
 
-    public String getHashedClaim() {
-        return hashedClaim;
+    public String getClaimValue() {
+        return claimValue;
     }
 
-    public void setHashedClaim(String hashedClaim) {
-        this.hashedClaim = hashedClaim;
+    public void setClaimValue(String claimValue) {
+        this.claimValue = claimValue;
+    }
+
+    public long getIssuedBefore() {
+        return issuedBefore;
+    }
+
+    public void setIssuedBefore(long issuedBefore) {
+        this.issuedBefore = issuedBefore;
     }
 }

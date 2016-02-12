@@ -8,4 +8,5 @@ import java.util.Collection;
 public interface RevocationStore {
     Collection<StoredRevocation> getRevocations();
     Collection<StoredRevocation> getRevocations(long from);
+    boolean storeRevocation(StoredRevocation revocation);
 }
