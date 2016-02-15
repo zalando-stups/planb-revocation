@@ -17,11 +17,11 @@ import java.util.Collection;
  *
  * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
-@RequestMapping(value = "/api/revocations", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/revocations", produces = MediaType.APPLICATION_JSON_VALUE)
 public interface RevocationResource {
 
     @RequestMapping(method = RequestMethod.GET)
-    HttpEntity<RevocationInfo> get(@RequestParam(value="from") long from);
+    HttpEntity<RevocationInfo> get(@RequestParam(value="from") Long from);
 
     @RequestMapping(method = RequestMethod.POST)
     HttpEntity<String> post(Revocation revocations);

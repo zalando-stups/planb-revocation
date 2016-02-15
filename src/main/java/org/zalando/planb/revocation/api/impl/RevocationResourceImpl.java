@@ -29,7 +29,7 @@ public class RevocationResourceImpl implements RevocationResource {
     RevocationStore storage;
 
     @Override
-    public HttpEntity<RevocationInfo> get(long from) {
+    public HttpEntity<RevocationInfo> get(Long from) {
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
 
         List<Revocation> apiRevocations = new ArrayList<>(revocations.size());

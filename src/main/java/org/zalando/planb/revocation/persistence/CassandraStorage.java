@@ -89,7 +89,7 @@ public class CassandraStorage implements RevocationStore {
     }
 
     @Override
-    public Collection<StoredRevocation> getRevocations(final long from) {
+    public Collection<StoredRevocation> getRevocations(final Long from) {
 
         Collection<StoredRevocation> revocations = new ArrayList<>();
 
