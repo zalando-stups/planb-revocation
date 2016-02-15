@@ -1,7 +1,5 @@
 package org.zalando.planb.revocation.domain;
 
-import java.time.Instant;
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,7 +14,7 @@ public class Revocation {
 
     private RevocationType type;
 
-    private Instant revokedAt;
+    private Long revokedAt;
 
     private RevocationData data;
 }

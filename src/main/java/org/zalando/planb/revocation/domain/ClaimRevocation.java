@@ -1,7 +1,5 @@
 package org.zalando.planb.revocation.domain;
 
-import java.time.Instant;
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,5 +15,5 @@ public class ClaimRevocation implements RevocationData {
 
     private String valueHash;
 
-    private Instant issuedBefore;
+    private Long issuedBefore;
 }

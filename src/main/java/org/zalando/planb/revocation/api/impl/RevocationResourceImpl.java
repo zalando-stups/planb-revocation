@@ -1,7 +1,5 @@
 package org.zalando.planb.revocation.api.impl;
 
-import java.time.Instant;
-
 import java.util.Arrays;
 
 import org.springframework.http.HttpEntity;
@@ -30,9 +28,9 @@ public class RevocationResourceImpl implements RevocationResource {
         // TODO implement logic here
         return new ResponseEntity<>(RevocationInfo.builder().revocations(
                     Arrays.asList(
-                        Revocation.builder().type(RevocationType.CLAIM).revokedAt(Instant.now()).data(
-                            ClaimRevocation.builder().name("sub").valueHash("asdpoifh").issuedBefore(Instant.now())
-                                    .build()).build())).build(), HttpStatus.OK);
+                        Revocation.builder().type(RevocationType.CLAIM).revokedAt(System.currentTimeMillis()).data(
+                            ClaimRevocation.builder().name("sub").valueHash("asdpoifh").issuedBefore(
+                                System.currentTimeMillis()).build()).build())).build(), HttpStatus.OK);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package org.zalando.planb.revocation.domain;
 
-import java.time.Instant;
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,5 +13,5 @@ import lombok.Getter;
 public class TokenRevocation implements RevocationData {
     private String tokenHash;
 
-    private Instant revokedAt;
+    private Long revokedAt;
 }
