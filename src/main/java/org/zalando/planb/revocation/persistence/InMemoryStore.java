@@ -13,11 +13,6 @@ public class InMemoryStore implements RevocationStore {
     private List<StoredRevocation> revocations = new ArrayList<>();
 
     @Override
-    public Collection<StoredRevocation> getRevocations() {
-        return revocations;
-    }
-
-    @Override
     public Collection<StoredRevocation> getRevocations(long from) {
         return revocations.stream().filter(x -> x.getRevocedAt() > from).collect(Collectors.toList());
     }

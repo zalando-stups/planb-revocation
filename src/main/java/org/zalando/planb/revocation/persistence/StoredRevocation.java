@@ -11,6 +11,11 @@ public class StoredRevocation {
 
     public StoredRevocation(RevocationData data, String type, String revokedBy) {
         this.data = data;
+
+        if(!type.equals(type.toUpperCase())) {
+            throw new IllegalArgumentException();
+        }
+
         this.type = type;
         this.revocedBy = revokedBy;
         this.revocedAt = System.currentTimeMillis();
@@ -38,5 +43,13 @@ public class StoredRevocation {
 
     public void setData(RevocationData data) {
         this.data = data;
+    }
+
+    public String getRevocedBy() {
+        return revocedBy;
+    }
+
+    public void setRevocedBy(String revocedBy) {
+        this.revocedBy = revocedBy;
     }
 }
