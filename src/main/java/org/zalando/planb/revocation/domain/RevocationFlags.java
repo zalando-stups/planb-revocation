@@ -6,5 +6,6 @@ package org.zalando.planb.revocation.domain;
  * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
 public enum RevocationFlags {
-    FORCE_REFRESH
+    FORCE_REFRESH_FROM,
+    FORCED_AT
 }

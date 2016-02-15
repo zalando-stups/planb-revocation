@@ -1,5 +1,7 @@
 package org.zalando.planb.revocation.api.impl;
 
+import java.time.Instant;
+
 import java.util.Arrays;
 
 import org.springframework.http.HttpEntity;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.zalando.planb.revocation.api.RevocationResource;
+import org.zalando.planb.revocation.domain.ClaimRevocation;
 import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
@@ -24,16 +27,18 @@ public class RevocationResourceImpl implements RevocationResource {
     @Override
     public HttpEntity<RevocationInfo> get() {
 
-        // TODO make this real :)
-        return new ResponseEntity<>(RevocationInfo.builder().meta("bla bla").revocations(
-                    Arrays.asList(Revocation.builder().type(RevocationType.CLAIM).build())).build(), HttpStatus.OK);
+        // TODO implement logic here
+        return new ResponseEntity<>(RevocationInfo.builder().revocations(
+                    Arrays.asList(
+                        Revocation.builder().type(RevocationType.CLAIM).revokedAt(Instant.now()).data(
+                            ClaimRevocation.builder().name("sub").valueHash("asdpoifh").issuedBefore(Instant.now())
+                                    .build()).build())).build(), HttpStatus.OK);
     }
 
     @Override
     public HttpEntity<String> post(final RevocationInfo rev) {
 
-        // TODO @jmussler don't break it!
-        // store.storeRevocation(new TokenRevocation(""));
+        // TODO implement logic here
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
