@@ -14,7 +14,7 @@ public class InMemoryStore implements RevocationStore {
 
     @Override
     public Collection<StoredRevocation> getRevocations(long from) {
-        return revocations.stream().filter(x -> x.getRevocedAt() > from).collect(Collectors.toList());
+        return revocations.stream().filter(x -> x.getRevokedAt() > from).collect(Collectors.toList());
     }
 
     @Override

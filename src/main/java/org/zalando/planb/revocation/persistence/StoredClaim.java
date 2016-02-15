@@ -3,13 +3,13 @@ package org.zalando.planb.revocation.persistence;
 /**
  * Created by jmussler on 11.02.16.
  */
-public class ClaimRevocation extends RevocationData {
+public class StoredClaim extends RevocationData {
     // attribute name
     public String claimName;
     public String claimValue;
     public long issuedBefore;
 
-    public ClaimRevocation(String claimName, String claimValue, long issuedBefore) {
+    public StoredClaim(String claimName, String claimValue, long issuedBefore) {
         this.claimName = claimName;
         this.claimValue = claimValue;
         this.issuedBefore = issuedBefore;

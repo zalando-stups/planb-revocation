@@ -3,10 +3,10 @@ package org.zalando.planb.revocation.persistence;
 /**
  * Created by jmussler on 11.02.16.
  */
-public class TokenRevocation extends RevocationData {
+public class StoredToken extends RevocationData {
     String tokenHash;
 
-    public TokenRevocation(String tokenHash) {
+    public StoredToken(String tokenHash) {
         this.tokenHash = tokenHash;
     }
 

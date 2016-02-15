@@ -3,10 +3,10 @@ package org.zalando.planb.revocation.persistence;
 /**
  * Created by jmussler on 11.02.16.
  */
-public class GlobalRevocation extends RevocationData {
+public class StoredGlobal extends RevocationData {
     long issued_before;
 
-    public GlobalRevocation(long issued_before) {
+    public StoredGlobal(long issued_before) {
         this.issued_before = issued_before;
     }
 
