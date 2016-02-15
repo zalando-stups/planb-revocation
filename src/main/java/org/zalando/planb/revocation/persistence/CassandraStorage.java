@@ -62,19 +62,41 @@ public class CassandraStorage implements RevocationStore {
 
     final static ObjectMapper mapper = new ObjectMapper();
 
-    @Override
-    public Collection<StoredRevocation> getRevocations(final long from) {
-        long currentTime = System.currentTimeMillis();
-        long delta = currentTime - from;
+    static class Bucket {
+        public String date;
+        public String interval;
 
-        Collection<StoredRevocation> revocations = new ArrayList<>();
+        Bucket(String d, String i) {
+            date = d;
+            interval = i;
+        }
+    }
+
+    protected static List<Bucket> getBuckets(final long from, final long currentTime) {
+        List<Bucket> buckets = new ArrayList<>();
+        long delta = currentTime - from;
 
         while (delta > 0) {
             String bucket_date = LocalDateFormatter.get().format(new Date(currentTime-delta));
             String bucket_interval = "" + getInterval(currentTime-delta);
-            LOG.info("Selecting bucket: {} {}", bucket_date, bucket_interval);
 
-            ResultSet rs = session.execute(getFrom.bind(bucket_date, bucket_interval, from));
+            buckets.add(new Bucket(bucket_date, bucket_interval));
+
+            delta -= 8*60*60*1000; // 8 hour buckets
+        }
+        return buckets;
+    }
+
+    @Override
+    public Collection<StoredRevocation> getRevocations(final long from) {
+
+        Collection<StoredRevocation> revocations = new ArrayList<>();
+
+        for(Bucket b : getBuckets(from, System.currentTimeMillis())) {
+
+            LOG.info("Selecting bucket: {} {}", b.date, b.interval);
+
+            ResultSet rs = session.execute(getFrom.bind(b.date, b.interval, from));
             List<Row> rows = rs.all();
 
             for(Row r : rows) {
@@ -90,14 +112,12 @@ public class CassandraStorage implements RevocationStore {
                     LOG.error("Failed to read revocation");
                 }
             }
-
-            delta -= 8*60*60*1000; // 8 hour buckets
         }
 
         return revocations;
     }
 
-    private long getInterval(long timestamp) {
+    private static long getInterval(long timestamp) {
         long hours = timestamp / 1000 / 60 / 60;
         long segment = (hours % 24) / 8;
         return segment;
