@@ -83,6 +83,7 @@ public class CassandraStorage implements RevocationStore {
                     String unmapped_data = r.getString("revocation_data");
                     RevocationData data = dataMappers.get(type).get(unmapped_data);
                     StoredRevocation revocation = new StoredRevocation(data, type, r.getString("revoked_by"));
+                    revocation.setRevocedAt(r.getLong("revoked_at"));
                     revocations.add(revocation);
                 }
                 catch(IOException ex) {
