@@ -1,3 +1,2 @@
-#
-#
-#
+api:
+  swagger: classpath:api/revocation-service-api.yml
