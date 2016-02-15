@@ -10,11 +10,10 @@ import lombok.Getter;
  */
 @Getter
 @Builder
-public class Revocation {
+public class ClaimRevocation implements RevocationData {
+    private String name;
 
-    private RevocationType type;
+    private String valueHash;
 
-    private Long revokedAt;
-
-    private RevocationData data;
+    private Long issuedBefore;
 }

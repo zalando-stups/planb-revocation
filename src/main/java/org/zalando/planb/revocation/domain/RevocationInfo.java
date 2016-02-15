@@ -1,20 +1,21 @@
 package org.zalando.planb.revocation.domain;
 
+import java.util.EnumMap;
 import java.util.List;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
 /**
  * TODO: small javadoc
  *
  * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
-@Data
+@Getter
 @Builder
 public class RevocationInfo {
 
-    private String meta;
+    private EnumMap<RevocationFlags, String> meta;
 
     private List<Revocation> revocations;
 }
