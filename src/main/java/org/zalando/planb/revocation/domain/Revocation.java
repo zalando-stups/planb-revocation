@@ -5,19 +5,20 @@ import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
 /**
  * TODO: small javadoc
  *
  * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
-@Data
+@Getter
 @Builder
 public class Revocation {
 
     private RevocationType type;
 
-    private Date revocatedAt;
+    private Date revokedAt;
 
-    private List<String> data;
+    private List<RevocationData> data;
 }

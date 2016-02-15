@@ -1,10 +1,8 @@
 package org.zalando.planb.revocation.domain;
 
-import java.util.EnumMap;
-import java.util.List;
+import java.time.Instant;
 
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 
 /**
@@ -14,9 +12,8 @@ import lombok.Getter;
  */
 @Getter
 @Builder
-public class RevocationInfo {
+public class TokenRevocation implements RevocationData {
+    private String tokenHash;
 
-    private EnumMap<RevocationFlags, String> meta;
-
-    private List<Revocation> revocations;
+    private Instant revokedAt;
 }
