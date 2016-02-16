@@ -1,31 +1,36 @@
 package org.zalando.planb.revocation;
 
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestTemplate;
-import org.zalando.planb.revocation.domain.RevocationType;
-import org.zalando.planb.revocation.persistence.RevocationStore;
-import org.zalando.planb.revocation.persistence.StoredRevocation;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import org.json.JSONObject;
+
+import org.junit.Test;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.WebIntegrationTest;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import org.springframework.test.context.ActiveProfiles;
+
+import org.springframework.web.client.RestTemplate;
+
+import org.zalando.planb.revocation.persistence.RevocationStore;
+import org.zalando.planb.revocation.persistence.StoredRevocation;
+
+import lombok.extern.slf4j.Slf4j;
 
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
 @ActiveProfiles("it")
+@Slf4j
 public class PlanBRevocationIT extends AbstractSpringTest {
-
-    private static final Logger log = LoggerFactory.getLogger(PlanBRevocationIT.class);
 
     @Value("${local.server.port}")
     private int port;
@@ -39,20 +44,19 @@ public class PlanBRevocationIT extends AbstractSpringTest {
         ResponseEntity<String> response = rest.getForEntity(URI.create("http://localhost:" + port + "/health"),
                 String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        log.info(response.getBody());
     }
 
     @Test
     public void jsonFieldsAreSnakeCase() {
-        revocationStore.storeRevocation(StoredRevocation.builder().type(RevocationType.CLAIM).build());
+
+        // A Stored revocation always have a revokedAd field set to current time
+        revocationStore.storeRevocation(new StoredRevocation(null, null, null));
 
         RestTemplate rest = new RestTemplate();
         ResponseEntity<String> response = rest.getForEntity(URI.create("http://localhost:" + port + "/revocations"),
                 String.class);
+        JSONObject jsonBody = new JSONObject(response.getBody());
 
-        // TODO finish this test
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        log.info(response.getBody());
+        assertThat(jsonBody.getJSONArray("revocations").getJSONObject(0).get("revoked_at")).isNotNull();
     }
-
 }
