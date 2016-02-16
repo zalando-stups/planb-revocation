@@ -159,7 +159,7 @@
                         <id>start-cassandra</id>
                         <goals>
                             <goal>start</goal>
-                            <goal>cql-exec</goal>
+                            <!--<goal>cql-exec</goal>-->
                         </goals>
                         <configuration>
                             <listenAddress>127.0.0.1</listenAddress>

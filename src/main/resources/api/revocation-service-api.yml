@@ -62,9 +62,10 @@ definitions:
       meta:
         type: object
         properties:
-          force_refresh:
+          force_refresh_from:
             type: string
             format: date-time
+            description: Informs the caller to get the tokens that were revoked revoked from the specified timestamp
       revocations:
         type: array
         items:

@@ -47,6 +47,16 @@ public class PlanBRevocationIT extends AbstractSpringTest {
     }
 
     @Test
+    public void returnsSwaggerSpec() {
+        RestTemplate rest = new RestTemplate();
+        ResponseEntity<String> response = rest.getForEntity(URI.create("http://localhost:" + port + "/swagger.json"),
+                String.class);
+        JSONObject jsonBody = new JSONObject(response.getBody());
+
+        assertThat(jsonBody.get("swagger")).isNotNull();
+    }
+
+    @Test
     public void jsonFieldsAreSnakeCase() {
 
         // A Stored revocation always have a revokedAd field set to current time
