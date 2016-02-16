@@ -1,6 +1,7 @@
 package org.zalando.planb.revocation.api.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -53,7 +54,12 @@ public class RevocationResourceImpl implements RevocationResource {
         }
 
         RevocationInfo wrapper = RevocationInfo.builder().revocations(apiRevocations).build();
-        return new ResponseEntity<>(wrapper, HttpStatus.OK);
+//        return new ResponseEntity<>(wrapper, HttpStatus.OK);
+        return new ResponseEntity<>(RevocationInfo.builder().revocations(
+                Arrays.asList(
+                        Revocation.builder().type(RevocationType.CLAIM).revokedAt(System.currentTimeMillis()).data(
+                                ClaimRevocation.builder().name("sub").valueHash("asdpoifh").issuedBefore(
+                                        System.currentTimeMillis()).build()).build())).build(), HttpStatus.OK);
     }
 
     @Override

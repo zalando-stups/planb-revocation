@@ -1,41 +1,18 @@
 package org.zalando.planb.revocation.persistence;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 /**
  * Created by jmussler on 11.02.16.
  */
+@Data
+@AllArgsConstructor
 public class StoredClaim extends RevocationData {
-    // attribute name
-    public String claimName;
-    public String claimValue;
-    public long issuedBefore;
 
-    public StoredClaim(String claimName, String claimValue, long issuedBefore) {
-        this.claimName = claimName;
-        this.claimValue = claimValue;
-        this.issuedBefore = issuedBefore;
-    }
+    private String claimName;
 
-    public String getClaimName() {
-        return claimName;
-    }
+    private String claimValue;
 
-    public void setClaimName(String claimName) {
-        this.claimName = claimName;
-    }
-
-    public String getClaimValue() {
-        return claimValue;
-    }
-
-    public void setClaimValue(String claimValue) {
-        this.claimValue = claimValue;
-    }
-
-    public long getIssuedBefore() {
-        return issuedBefore;
-    }
-
-    public void setIssuedBefore(long issuedBefore) {
-        this.issuedBefore = issuedBefore;
-    }
+    private long issuedBefore;
 }
