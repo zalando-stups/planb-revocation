@@ -1,7 +1,8 @@
 package org.zalando.planb.revocation.persistence;
 
-import lombok.Data;
 import org.zalando.planb.revocation.domain.RevocationType;
+
+import lombok.Data;
 
 /**
  * Created by jmussler on 11.02.16.
@@ -13,7 +14,7 @@ public class StoredRevocation {
     Long revokedAt;
     String revokedBy;
 
-    public StoredRevocation(RevocationData data, RevocationType type, String revokedBy) {
+    public StoredRevocation(final RevocationData data, final RevocationType type, final String revokedBy) {
         this.data = data;
         this.type = type;
         this.revokedBy = revokedBy;
