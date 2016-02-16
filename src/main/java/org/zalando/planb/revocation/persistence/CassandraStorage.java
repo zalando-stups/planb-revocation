@@ -73,18 +73,27 @@ public class CassandraStorage implements RevocationStore {
         }
     }
 
-    protected static List<Bucket> getBuckets(final long from, final long currentTime) {
-        List<Bucket> buckets = new ArrayList<>();
-        long delta = currentTime - from;
+    private static final long BUCKET_LENGTH = 8*60*60*1000; // 8 Hours per bucket/row
 
-        while (delta > 0) {
-            String bucket_date = LocalDateFormatter.get().format(new Date(currentTime-delta));
-            String bucket_interval = "" + getInterval(currentTime-delta);
+    protected static List<Bucket> getBuckets(long from, final long currentTime) {
+        List<Bucket> buckets = new ArrayList<>();
+
+        final long maxTime = ( ( currentTime / BUCKET_LENGTH ) * BUCKET_LENGTH ) + BUCKET_LENGTH;
+        LOG.debug("{} {}", currentTime, maxTime);
+
+        do {
+            String bucket_date = LocalDateFormatter.get().format(new Date(from));
+            String bucket_interval = "" + getInterval(from);
+
 
             buckets.add(new Bucket(bucket_date, bucket_interval));
 
-            delta -= 8*60*60*1000; // 8 hour buckets
-        }
+            from += BUCKET_LENGTH;
+
+            LOG.debug("bucket: {} {}", bucket_date, bucket_interval);
+
+        } while(from < maxTime);
+
         return buckets;
     }
 
