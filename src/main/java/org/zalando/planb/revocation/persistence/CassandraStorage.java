@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.planb.revocation.LocalDateFormatter;
-import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationType;
 
 import java.io.IOException;
@@ -57,7 +56,7 @@ public class CassandraStorage implements RevocationStore {
         dataMappers.put(RevocationType.GLOBAL, new GlobalMapper());
         dataMappers.put(RevocationType.CLAIM, new ClaimMapper());
 
-        getFrom = session.prepare("SELECT FROM revocation.revocation WHERE (bucket_date = ? AND bucket_interval = ?) AND revoked_at > ?");
+        getFrom = session.prepare("SELECT revocation_type, revocation_data, revoked_by, revoked_at FROM revocation.revocation WHERE (bucket_date = ? AND bucket_interval = ?) AND revoked_at > ?");
         storeRevocation = session.prepare("INSERT INTO revocation.revocation(bucket_date, bucket_interval, revocation_type, revocation_data, revoked_by, revoked_at) VALUES (?, ?, ?, ?, ?, ?)");
     }
 
@@ -84,7 +83,6 @@ public class CassandraStorage implements RevocationStore {
         do {
             String bucket_date = LocalDateFormatter.get().format(new Date(from));
             String bucket_interval = "" + getInterval(from);
-
 
             buckets.add(new Bucket(bucket_date, bucket_interval));
 
