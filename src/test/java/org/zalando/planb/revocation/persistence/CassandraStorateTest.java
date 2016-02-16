@@ -5,7 +5,9 @@ import org.zalando.planb.revocation.LocalTimeFormatter;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,5 +75,21 @@ public class CassandraStorateTest {
 
         List<CassandraStorage.Bucket> buckets =CassandraStorage.getBuckets(fromDate.getTime(), currentDate.getTime());
         assertThat(buckets.size()).isEqualTo(4);
+    }
+
+    @Test
+    public void testInterval() throws ParseException {
+        Map<String, Integer> data = new HashMap<>();
+
+        data.put("2016-02-16 00:00:00.000+00", 0);
+        data.put("2016-02-16 01:00:00.000+00", 0);
+        data.put("2016-02-16 08:00:00.000+00", 1);
+        data.put("2016-02-16 15:59:59.999+00", 1);
+        data.put("2016-02-16 16:00:00.000+00", 2);
+        data.put("2016-02-16 23:59:59.999+00", 2);
+
+        for(Map.Entry<String, Integer> e : data.entrySet()) {
+            assertThat(CassandraStorage.getInterval(LocalTimeFormatter.get().parse(e.getKey()).getTime())).isEqualTo((long)e.getValue());
+        }
     }
 }

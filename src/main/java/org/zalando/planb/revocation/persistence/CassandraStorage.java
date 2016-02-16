@@ -127,7 +127,7 @@ public class CassandraStorage implements RevocationStore {
         return revocations;
     }
 
-    private static long getInterval(long timestamp) {
+    protected static long getInterval(long timestamp) {
         long hours = timestamp / 1000 / 60 / 60;
         long segment = (hours % 24) / 8;
         return segment;
