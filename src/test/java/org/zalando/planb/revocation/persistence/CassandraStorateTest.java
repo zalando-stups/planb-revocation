@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by jmussler on 16.02.16.
  */
-public class CassandraStorateUT {
+public class CassandraStorateTest {
 
     @Test
     public void testSameInteral() throws ParseException {
