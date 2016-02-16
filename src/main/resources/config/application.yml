@@ -4,16 +4,16 @@ api:
 cassandra:
   keyspace: revocation
 
-management:
-  port: 7979
-  security:
-    enabled: false
+#management:
+#  port: 7979
+#  security:
+#    enabled: false
 
 ---
 
 spring:
-  profiles: it
+  profiles: local
 
 cassandra:
   contactPoints: 127.0.0.1
-  clusterName: Test Cluster
+  clusterName: Local Cluster

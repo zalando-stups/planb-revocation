@@ -9,16 +9,14 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import com.datastax.driver.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.zalando.planb.revocation.LocalDateFormatter;
+import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.RevocationType;
-
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,10 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CassandraStorage implements RevocationStore {
 
-    @Autowired
-    private Session session;
+    private final Session session;
 
     private final PreparedStatement getFrom;
+
     private final PreparedStatement storeRevocation;
 
     private final Map<RevocationType, RevocationDataMapper> dataMappers = new EnumMap<>(RevocationType.class);
@@ -63,14 +61,19 @@ public class CassandraStorage implements RevocationStore {
         }
     }
 
-    public CassandraStorage() {
+    public CassandraStorage(CassandraProperties cassandraProperties) {
+        Cluster cluster = Cluster.builder().addContactPoints(cassandraProperties.getContactPoints().split(","))
+                .withClusterName(cassandraProperties.getClusterName())
+                .withPort(cassandraProperties.getPort()).build();
+
+        session = cluster.connect(cassandraProperties.getKeyspace());
 
         dataMappers.put(RevocationType.TOKEN, new TokenMapper());
         dataMappers.put(RevocationType.GLOBAL, new GlobalMapper());
         dataMappers.put(RevocationType.CLAIM, new ClaimMapper());
 
-        getFrom = session.prepare(
-                "SELECT FROM revocation.revocation WHERE (bucket_date = ? AND bucket_interval = ?) AND revoked_at > ?");
+        getFrom = session.prepare("SELECT revocation_type, revocation_data, revoked_by, revoked_at FROM revocation" +
+                ".revocation WHERE (bucket_date = ?) AND (bucket_interval = ?) AND (revoked_at > ?)");
         storeRevocation = session.prepare(
                 "INSERT INTO revocation.revocation(bucket_date, bucket_interval, revocation_type, revocation_data, revoked_by, revoked_at) VALUES (?, ?, ?, ?, ?, ?)");
     }

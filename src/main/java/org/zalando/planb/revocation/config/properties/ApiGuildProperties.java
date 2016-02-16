@@ -1,4 +1,4 @@
-package org.zalando.planb.revocation.config;
+package org.zalando.planb.revocation.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

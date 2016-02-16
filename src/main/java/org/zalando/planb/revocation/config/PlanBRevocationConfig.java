@@ -2,12 +2,19 @@ package org.zalando.planb.revocation.config;
 
 import java.util.List;
 
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.util.StringUtils;
+import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
+import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.persistence.CassandraStorage;
+import org.zalando.planb.revocation.persistence.InMemoryStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.service.SwaggerService;
 import org.zalando.planb.revocation.service.impl.SwaggerFromYamlFileService;
@@ -21,16 +28,18 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.Getter;
 
 @Configuration
+@EnableConfigurationProperties({ CassandraProperties.class, ApiGuildProperties.class })
 @Getter
 public class PlanBRevocationConfig {
-    List<String> cassandraSeedNodes;
-    List<SaltConfig> saltList;
+    private List<String> cassandraSeedNodes;
+
+    private List<SaltConfig> saltList;
 
     @Autowired
-    CassandraProperties cassandraProperties;
+    private CassandraProperties cassandraProperties;
 
     @Autowired
-    ApiGuildProperties apiGuildProperties;
+    private ApiGuildProperties apiGuildProperties;
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -41,16 +50,11 @@ public class PlanBRevocationConfig {
 
     @Bean
     public RevocationStore revocationStore() {
-        return new CassandraStorage();
-    }
+        if(StringUtils.isEmpty(cassandraProperties.getContactPoints())) {
+            return new InMemoryStore();
+        }
 
-    @Bean
-    Session session() {
-        Cluster cluster = Cluster.builder().addContactPoints(cassandraProperties.getContactPoints().split(","))
-                                 .withClusterName(cassandraProperties.getClusterName())
-                                 .withPort(cassandraProperties.getPort()).build();
-
-        return cluster.connect(cassandraProperties.getKeyspace());
+        return new CassandraStorage(cassandraProperties);
     }
 
     @Bean
