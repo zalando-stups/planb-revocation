@@ -4,6 +4,13 @@ api:
 cassandra:
   keyspace: revocation
 
+security:
+  oauth2:
+    resource:
+      # Get environment variable
+      tokenInfoUri: ${TOKENINFO_URI}
+      revoke: "#oauth2.isOAuth() && #oauth2.hasScope('token.revoke')"
+
 #management:
 #  port: 7979
 #  security:
@@ -17,3 +24,19 @@ spring:
 cassandra:
   contactPoints: 127.0.0.1
   clusterName: Local Cluster
+
+logging:
+  level:
+    de.zalando.planb.revocation: DEBUG
+
+---
+
+spring:
+  profiles: local
+
+security:
+  oauth2:
+    resource:
+      # Greendale Dev OpenAM
+      tokenInfoUri: "https://auth.zalando.com/z/oauth2/tokeninfo"
+      revoke: "#oauth2.isOAuth()"

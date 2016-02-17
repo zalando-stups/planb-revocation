@@ -44,9 +44,18 @@
         <dependency>
             <groupId>org.zalando.stups</groupId>
             <artifactId>stups-spring-oauth2-server</artifactId>
-            <version>1.0.10-RC1</version>
+            <version>${stups-spring-oauth2-support.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.zalando.stups</groupId>
+            <artifactId>tokens</artifactId>
+            <version>0.9.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.6</version>
+        </dependency>
         <dependency>
             <groupId>org.zalando.zmon</groupId>
             <artifactId>zmon-actuator</artifactId>
@@ -184,9 +193,9 @@
                             <cqlVersion>3.0.0</cqlVersion>
                             <script>revocation_schema.cql</script>
                             <!--<cqlScript>src/test/resources/testdata.cql</cqlScript>-->
-			    <systemPropertyVariables>
-                               <jna.nosys>True</jna.nosys>
-			    </systemPropertyVariables>
+                            <systemPropertyVariables>
+                                <jna.nosys>True</jna.nosys>
+                            </systemPropertyVariables>
                         </configuration>
                     </execution>
                     <execution>

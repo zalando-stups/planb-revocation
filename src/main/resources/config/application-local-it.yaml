@@ -1,6 +1,0 @@
-logging:
-  level:
-    de.zalando.planb: DEBUG
-
-cassandra:
-  keyspace: revocation
