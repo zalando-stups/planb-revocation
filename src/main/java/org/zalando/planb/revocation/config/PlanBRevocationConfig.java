@@ -1,6 +1,8 @@
 package org.zalando.planb.revocation.config;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,10 @@ public class PlanBRevocationConfig {
     private List<String> cassandraSeedNodes;
 
     private List<SaltConfig> saltList;
+
+    private String oauth2TokenInfoUrl;
+
+    private Map<String, String> oauth2Scopes = new HashMap<>(0);
 
     @Autowired
     private CassandraProperties cassandraProperties;
