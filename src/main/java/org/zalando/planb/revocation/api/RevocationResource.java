@@ -2,15 +2,11 @@ package org.zalando.planb.revocation.api;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
 import org.springframework.web.bind.annotation.RequestParam;
 import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationInfo;
-
-import java.util.Collection;
 
 /**
  * TODO: small javadoc
