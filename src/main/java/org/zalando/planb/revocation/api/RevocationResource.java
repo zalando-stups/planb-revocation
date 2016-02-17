@@ -21,7 +21,7 @@ import java.util.Collection;
 public interface RevocationResource {
 
     @RequestMapping(method = RequestMethod.GET)
-    HttpEntity<RevocationInfo> get(@RequestParam(value="from") Long from);
+    HttpEntity<RevocationInfo> get(@RequestParam(value="from", required = true) long from);
 
     @RequestMapping(method = RequestMethod.POST)
     HttpEntity<String> post(Revocation revocations);

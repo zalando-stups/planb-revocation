@@ -12,7 +12,7 @@ cassandra:
 ---
 
 spring:
-  profiles: local
+  profiles: it
 
 cassandra:
   contactPoints: 127.0.0.1

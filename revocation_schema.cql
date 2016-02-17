@@ -3,10 +3,10 @@ CREATE SCHEMA revocation
 
 CREATE TABLE revocation.revocation (
     bucket_date TEXT,
-    bucket_interval INT,    -- 0: 0-8 1: 8-16 2:16-24
+    bucket_interval BIGINT,    -- 0: 0-8 1: 8-16 2:16-24
     revocation_type TEXT,
     revocation_data TEXT,
-    revoked_at TIMESTAMP,
+    revoked_at BIGINT,
     revoked_by TEXT,
     PRIMARY KEY ((bucket_date, bucket_interval), revoked_at)
 )

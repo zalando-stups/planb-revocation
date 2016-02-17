@@ -27,7 +27,7 @@ public class CassandraStorateTest {
         List<CassandraStorage.Bucket> buckets =CassandraStorage.getBuckets(fromDate.getTime(), currentDate.getTime());
         assertThat(buckets.size()).isEqualTo(1);
         assertThat(buckets.get(0).date).isEqualTo("2016-02-16");
-        assertThat(buckets.get(0).interval).isEqualTo("1");
+        assertThat(buckets.get(0).interval).isEqualTo(1);
     }
 
     @Test
@@ -41,11 +41,11 @@ public class CassandraStorateTest {
         List<CassandraStorage.Bucket> buckets =CassandraStorage.getBuckets(fromDate.getTime(), currentDate.getTime());
         assertThat(buckets.size()).isEqualTo(2);
         assertThat(buckets.get(0).date).isEqualTo("2016-02-16");
-        assertThat(buckets.get(0).interval).isEqualTo("1");
+        assertThat(buckets.get(0).interval).isEqualTo(1);
 
 
         assertThat(buckets.get(1).date).isEqualTo("2016-02-16");
-        assertThat(buckets.get(1).interval).isEqualTo("2");
+        assertThat(buckets.get(1).interval).isEqualTo(2);
     }
 
     @Test
@@ -59,10 +59,10 @@ public class CassandraStorateTest {
         List<CassandraStorage.Bucket> buckets =CassandraStorage.getBuckets(fromDate.getTime(), currentDate.getTime());
         assertThat(buckets.size()).isEqualTo(2);
         assertThat(buckets.get(0).date).isEqualTo("2016-02-16");
-        assertThat(buckets.get(0).interval).isEqualTo("2");
+        assertThat(buckets.get(0).interval).isEqualTo(2);
 
         assertThat(buckets.get(1).date).isEqualTo("2016-02-17");
-        assertThat(buckets.get(1).interval).isEqualTo("0");
+        assertThat(buckets.get(1).interval).isEqualTo(0);
     }
 
     @Test

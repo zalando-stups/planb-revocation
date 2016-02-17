@@ -21,10 +21,12 @@ import org.springframework.test.context.ActiveProfiles;
 
 import org.springframework.web.client.RestTemplate;
 
+import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.persistence.StoredRevocation;
 
 import lombok.extern.slf4j.Slf4j;
+import org.zalando.planb.revocation.persistence.StoredToken;
 
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
@@ -59,11 +61,16 @@ public class PlanBRevocationIT extends AbstractSpringTest {
     @Test
     public void jsonFieldsAreSnakeCase() {
 
+        long currentTime = System.currentTimeMillis();
+
         // A Stored revocation always have a revokedAd field set to current time
-        revocationStore.storeRevocation(new StoredRevocation(null, null, null));
+        StoredRevocation revocation = new StoredRevocation(new StoredToken("abcdef"), RevocationType.TOKEN, "int-test");
+        revocation.setRevokedAt(currentTime);
+
+        revocationStore.storeRevocation(revocation);
 
         RestTemplate rest = new RestTemplate();
-        ResponseEntity<String> response = rest.getForEntity(URI.create("http://localhost:" + port + "/revocations"),
+        ResponseEntity<String> response = rest.getForEntity(URI.create("http://localhost:" + port + "/revocations?from="+(currentTime-1000)),
                 String.class);
         JSONObject jsonBody = new JSONObject(response.getBody());
 
