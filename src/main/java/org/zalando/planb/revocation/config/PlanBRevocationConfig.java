@@ -52,6 +52,6 @@ public class PlanBRevocationConfig {
 
     @Bean
     public SwaggerService swaggerService() {
-        return new SwaggerFromYamlFileService(apiGuildProperties.getSwagger());
+        return new SwaggerFromYamlFileService(apiGuildProperties.getSwaggerPath());
     }
 }

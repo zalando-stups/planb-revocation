@@ -10,8 +10,8 @@ import lombok.Data;
  * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
 @Data
-@ConfigurationProperties(prefix = "api")
+@ConfigurationProperties(prefix = "api.swagger")
 public class ApiGuildProperties {
 
-    private String swagger;
+    private String swaggerPath;
 }
