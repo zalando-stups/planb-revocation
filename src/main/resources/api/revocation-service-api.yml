@@ -41,15 +41,15 @@ paths:
     post:
       summary: Revocate a token
       description: |
-        Revocates tokens, making them invalid
+        Revokes tokens, making them invalid
       tags:
         - Revocation
       parameters:
-        - name: revocation_list
-          description: a list of tokens to revocate
+        - name: revocations
+          description: a revocation object
           in: body
           schema:
-            $ref: '#/definitions/Revocations'
+            $ref: '#/definitions/Revocation'
       responses:
         # Response code
         200:
@@ -69,17 +69,20 @@ definitions:
       revocations:
         type: array
         items:
-          type: object
-          properties:
-            type:
-              type: string
-              enum: [ "TOKEN", "CLAIM", "GLOBAL" ]
-            revoked_at:
-              type: string
-              format: date-time
-            data:
-              type: object
-              format: '#/definitions/Data'
+          $ref: '#/definitions/Revocation'
+  Revocation:
+    type: object
+    properties:
+      type:
+        type: string
+        enum: [ "TOKEN", "CLAIM", "GLOBAL" ]
+      revoked_at:
+        type: string
+        format: date-time
+      data:
+        type: object
+        format: '#/definitions/Data'
+
   Data:
     type: object
   Claim:
