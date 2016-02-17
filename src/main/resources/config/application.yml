@@ -1,5 +1,6 @@
 api:
-  swagger: classpath:api/revocation-service-api.yml
+  swagger:
+    swagger-path: classpath:api/revocation-service-api.yml
 
 cassandra:
   keyspace: revocation
@@ -8,12 +9,3 @@ cassandra:
 #  port: 7979
 #  security:
 #    enabled: false
-
----
-
-spring:
-  profiles: it
-
-cassandra:
-  contactPoints: 127.0.0.1
-  clusterName: Local Cluster
