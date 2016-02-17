@@ -7,6 +7,7 @@ package org.zalando.planb.revocation.api.exception;
  */
 public class YamlParsingException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
     private static final String MESSAGE = "Error parsing YAML file";
 
     public YamlParsingException() {
