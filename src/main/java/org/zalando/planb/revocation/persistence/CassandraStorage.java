@@ -1,6 +1,10 @@
 package org.zalando.planb.revocation.persistence;
 
 import com.datastax.driver.core.*;
+import com.datastax.driver.core.querybuilder.BindMarker;
+import com.datastax.driver.core.querybuilder.Clause;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -12,12 +16,33 @@ import org.zalando.planb.revocation.domain.RevocationType;
 import java.io.IOException;
 import java.util.*;
 
+import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+
 /**
  * Created by jmussler on 11.02.16.
  */
 public class CassandraStorage implements RevocationStore {
 
     private static final Logger LOG = LoggerFactory.getLogger(CassandraStorage.class);
+    public static final String REVOCATION_TABLE = "revocation";
+    private static final RegularStatement SELECT_STATEMENT = QueryBuilder.select()
+            .column("revocation_type")
+            .column("revocation_data")
+            .column("revoked_by")
+            .column("revoked_at")
+            .from(REVOCATION_TABLE)
+            .where(eq("bucket_date", bindMarker()))
+            .and(eq("bucket_interval", bindMarker()))
+            .and(eq("revoked_at", bindMarker()));
+
+    private static final RegularStatement INSERT_STATEMENT = QueryBuilder.insertInto(REVOCATION_TABLE)
+            .value("bucket_date", bindMarker())
+            .value("bucket_interval", bindMarker())
+            .value("revocation_type", bindMarker())
+            .value("revocation_data", bindMarker())
+            .value("revoked_by", bindMarker())
+            .value("revoked_at", bindMarker());
 
     private final Session session;
 
@@ -61,9 +86,8 @@ public class CassandraStorage implements RevocationStore {
         dataMappers.put(RevocationType.GLOBAL, new GlobalMapper());
         dataMappers.put(RevocationType.CLAIM, new ClaimMapper());
 
-        getFrom = session.prepare("SELECT revocation_type, revocation_data, revoked_by, revoked_at FROM revocation" +
-                ".revocation WHERE (bucket_date = ?) AND (bucket_interval = ?) AND (revoked_at > ?)");
-        storeRevocation = session.prepare("INSERT INTO revocation.revocation(bucket_date, bucket_interval, revocation_type, revocation_data, revoked_by, revoked_at) VALUES (?, ?, ?, ?, ?, ?)");
+        getFrom = session.prepare(SELECT_STATEMENT);
+        storeRevocation = session.prepare(INSERT_STATEMENT);
     }
 
     final static ObjectMapper mapper = new ObjectMapper();
