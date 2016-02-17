@@ -1,15 +1,12 @@
 package org.zalando.planb.revocation.config;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
+import org.zalando.planb.revocation.config.properties.ApiSecurityProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.persistence.CassandraStorage;
 import org.zalando.planb.revocation.persistence.InMemoryStore;
@@ -23,16 +20,13 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.Getter;
 
 @Configuration
-@EnableConfigurationProperties({ CassandraProperties.class, ApiGuildProperties.class })
+@EnableConfigurationProperties({ CassandraProperties.class, ApiGuildProperties.class, ApiSecurityProperties.class })
 @Getter
 public class PlanBRevocationConfig {
-    private List<String> cassandraSeedNodes;
 
-    private List<SaltConfig> saltList;
-
-    private String oauth2TokenInfoUrl;
-
-    private Map<String, String> oauth2Scopes = new HashMap<>(0);
+//    private List<String> cassandraSeedNodes;
+//
+//    private List<SaltConfig> saltList;
 
     @Autowired
     private CassandraProperties cassandraProperties;
