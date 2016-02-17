@@ -1,0 +1,16 @@
+
+cassandra:
+  contactPoints: 127.0.0.1
+  clusterName: Local Cluster
+
+security:
+  oauth2:
+    resource:
+      token-info-uri: http://localhost:${wiremock.port:10080}/tokeninfo
+
+api:
+  security:
+    oauth2-scopes:
+      revokeStandard: "#oauth2.hasScope('uid') && #oauth2.hasRealm('/services')"
+      readApi: "#oauth2.hasScope('uid') && #oauth2.hasRealm('/services')"
+      write: "#oauth2.hasScope('uid') && #oauth2.hasRealm('/services')"

@@ -44,7 +44,7 @@
         <dependency>
             <groupId>org.zalando.stups</groupId>
             <artifactId>stups-spring-oauth2-server</artifactId>
-            <version>1.0.10-RC1</version>
+            <version>${stups-spring-oauth2-support.version}</version>
         </dependency>
 
         <dependency>
@@ -86,7 +86,6 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.16</version>
         </dependency>
 
         <dependency>
@@ -110,6 +109,17 @@
             <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>1.58</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
@@ -132,6 +142,7 @@
                                 <portName>cassandra.storagePort</portName>
                                 <portName>cassandra.stopPort</portName>
                                 <portName>cassandra.nativeTransportPort</portName>
+                                <portName>wiremock.port</portName>
                             </portNames>
                         </configuration>
                     </execution>
@@ -150,6 +161,7 @@
                             <systemPropertyVariables>
                                 <cassandra.listenAddress>127.0.0.1</cassandra.listenAddress>
                                 <cassandra.port>${cassandra.nativeTransportPort}</cassandra.port>
+                                <wiremock.tokeninfo.port>${wiremock.port}</wiremock.tokeninfo.port>
                             </systemPropertyVariables>
                         </configuration>
                     </execution>
@@ -214,6 +226,43 @@
                 </executions>
             </plugin>
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.codehaus.mojo
+                                        </groupId>
+                                        <artifactId>
+                                            build-helper-maven-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [1.8,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>
+                                                reserve-network-port
+                                            </goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
     <profiles>
