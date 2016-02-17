@@ -24,9 +24,9 @@ import org.springframework.web.client.RestTemplate;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.persistence.StoredRevocation;
+import org.zalando.planb.revocation.persistence.StoredToken;
 
 import lombok.extern.slf4j.Slf4j;
-import org.zalando.planb.revocation.persistence.StoredToken;
 
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
@@ -69,9 +69,12 @@ public class PlanBRevocationIT extends AbstractSpringTest {
 
         revocationStore.storeRevocation(revocation);
 
+        revocationStore.getRevocations(currentTime - 100000);
+
         RestTemplate rest = new RestTemplate();
-        ResponseEntity<String> response = rest.getForEntity(URI.create("http://localhost:" + port + "/revocations?from="+(currentTime-1000)),
-                String.class);
+        ResponseEntity<String> response = rest.getForEntity(URI.create(
+                    "http://localhost:" + port + "/revocations?from=" + (currentTime - 1000)), String.class);
+
         JSONObject jsonBody = new JSONObject(response.getBody());
 
         assertThat(jsonBody.getJSONArray("revocations").getJSONObject(0).get("revoked_at")).isNotNull();

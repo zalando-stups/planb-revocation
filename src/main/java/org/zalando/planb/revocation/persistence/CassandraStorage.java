@@ -1,23 +1,36 @@
 package org.zalando.planb.revocation.persistence;
 
-import com.datastax.driver.core.*;
-import com.datastax.driver.core.querybuilder.BindMarker;
-import com.datastax.driver.core.querybuilder.Clause;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
+
+import java.io.IOException;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.zalando.planb.revocation.LocalDateFormatter;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.RevocationType;
 
-import java.io.IOException;
-import java.util.*;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.RegularStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Created by jmussler on 11.02.16.
@@ -26,23 +39,20 @@ public class CassandraStorage implements RevocationStore {
 
     private static final Logger LOG = LoggerFactory.getLogger(CassandraStorage.class);
     public static final String REVOCATION_TABLE = "revocation";
-    private static final RegularStatement SELECT_STATEMENT = QueryBuilder.select()
-            .column("revocation_type")
-            .column("revocation_data")
-            .column("revoked_by")
-            .column("revoked_at")
-            .from(REVOCATION_TABLE)
-            .where(eq("bucket_date", bindMarker()))
-            .and(eq("bucket_interval", bindMarker()))
-            .and(eq("revoked_at", bindMarker()));
+    private static final RegularStatement SELECT_STATEMENT = QueryBuilder.select().column("revocation_type")
+                                                                         .column("revocation_data").column("revoked_by")
+                                                                         .column("revoked_at").from(REVOCATION_TABLE)
+                                                                         .where(eq("bucket_date", bindMarker()))
+                                                                         .and(eq("bucket_interval", bindMarker())).and(
+                                                                             gt("revoked_at", bindMarker()));
 
     private static final RegularStatement INSERT_STATEMENT = QueryBuilder.insertInto(REVOCATION_TABLE)
-            .value("bucket_date", bindMarker())
-            .value("bucket_interval", bindMarker())
-            .value("revocation_type", bindMarker())
-            .value("revocation_data", bindMarker())
-            .value("revoked_by", bindMarker())
-            .value("revoked_at", bindMarker());
+                                                                         .value("bucket_date", bindMarker())
+                                                                         .value("bucket_interval", bindMarker())
+                                                                         .value("revocation_type", bindMarker())
+                                                                         .value("revocation_data", bindMarker())
+                                                                         .value("revoked_by", bindMarker()).value(
+                                                                             "revoked_at", bindMarker());
 
     private final Session session;
 
@@ -54,7 +64,7 @@ public class CassandraStorage implements RevocationStore {
 
     private static class GlobalMapper implements RevocationDataMapper {
         @Override
-        public RevocationData get(String data) throws IOException {
+        public RevocationData get(final String data) throws IOException {
             StoredGlobal r = mapper.readValue(data, StoredGlobal.class);
             return r;
         }
@@ -62,7 +72,7 @@ public class CassandraStorage implements RevocationStore {
 
     private static class ClaimMapper implements RevocationDataMapper {
         @Override
-        public RevocationData get(String data) throws IOException {
+        public RevocationData get(final String data) throws IOException {
             StoredClaim r = mapper.readValue(data, StoredClaim.class);
             return r;
         }
@@ -70,16 +80,16 @@ public class CassandraStorage implements RevocationStore {
 
     private static class TokenMapper implements RevocationDataMapper {
         @Override
-        public RevocationData get(String data) throws IOException {
+        public RevocationData get(final String data) throws IOException {
             StoredToken r = mapper.readValue(data, StoredToken.class);
             return r;
         }
     }
 
-    public CassandraStorage(CassandraProperties cassandraProperties) {
+    public CassandraStorage(final CassandraProperties cassandraProperties) {
         Cluster cluster = Cluster.builder().addContactPoints(cassandraProperties.getContactPoints().split(","))
-                .withClusterName(cassandraProperties.getClusterName())
-                .withPort(cassandraProperties.getPort()).build();
+                                 .withClusterName(cassandraProperties.getClusterName())
+                                 .withPort(cassandraProperties.getPort()).build();
 
         session = cluster.connect(cassandraProperties.getKeyspace());
         dataMappers.put(RevocationType.TOKEN, new TokenMapper());
@@ -90,13 +100,13 @@ public class CassandraStorage implements RevocationStore {
         storeRevocation = session.prepare(INSERT_STATEMENT);
     }
 
-    final static ObjectMapper mapper = new ObjectMapper();
+    static final ObjectMapper mapper = new ObjectMapper();
 
     static class Bucket {
         public String date;
         public long interval;
 
-        Bucket(String d, long i) {
+        Bucket(final String d, final long i) {
             date = d;
             interval = i;
         }
@@ -131,8 +141,9 @@ public class CassandraStorage implements RevocationStore {
         Collection<StoredRevocation> revocations = new ArrayList<>();
 
         long currentTime = System.currentTimeMillis();
-        if((currentTime - from) > (2 * 24 * 60 * 60 * 1000)) {
-            throw new IllegalArgumentException("From Timestamp is too old!"); // avoid erroneous query of too many buckets
+        if ((currentTime - from) > (2 * 24 * 60 * 60 * 1000)) {
+            throw new IllegalArgumentException("From Timestamp is too old!"); // avoid erroneous query of too many
+                                                                              // buckets
         }
 
         for (Bucket b : getBuckets(from, currentTime)) {
@@ -159,7 +170,7 @@ public class CassandraStorage implements RevocationStore {
         return revocations;
     }
 
-    protected static long getInterval(long timestamp) {
+    protected static long getInterval(final long timestamp) {
         long hours = timestamp / 1000 / 60 / 60;
         long segment = (hours % 24) / 8;
         return segment;
@@ -173,7 +184,8 @@ public class CassandraStorage implements RevocationStore {
             String data = mapper.writeValueAsString(revocation.getData());
             LOG.debug("Storing in bucket: {} {} {}", date, interval, data);
 
-            BoundStatement bs = storeRevocation.bind(date, interval, revocation.getType().name(), data, revocation.getRevokedBy(), revocation.getRevokedAt());
+            BoundStatement bs = storeRevocation.bind(date, interval, revocation.getType().name(), data,
+                    revocation.getRevokedBy(), revocation.getRevokedAt());
             session.execute(bs);
             return true;
         } catch (JsonProcessingException ex) {
