@@ -25,6 +25,11 @@ cassandra:
   contactPoints: 127.0.0.1
   clusterName: Local Cluster
 
+security:
+  oauth2:
+    resource:
+      tokenInfoUri: "http://localhost:${wiremock.port:10080}/tokeninfo"
+
 logging:
   level:
     de.zalando.planb.revocation: DEBUG
@@ -37,6 +42,5 @@ spring:
 security:
   oauth2:
     resource:
-      # Greendale Dev OpenAM
       tokenInfoUri: "https://auth.zalando.com/z/oauth2/tokeninfo"
       revoke: "#oauth2.isOAuth()"

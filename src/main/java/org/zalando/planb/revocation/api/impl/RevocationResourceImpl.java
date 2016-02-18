@@ -10,6 +10,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.zalando.planb.revocation.api.RevocationResource;
@@ -39,57 +40,60 @@ public class RevocationResourceImpl implements RevocationResource {
     RevocationStore storage;
 
     @Override
-    public HttpEntity<RevocationInfo> get(final long from) {
+    public HttpEntity<RevocationInfo> get(final Long from) {
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
 
         List<Revocation> apiRevocations = new ArrayList<>(revocations.size());
         for (StoredRevocation stored : revocations) {
             final RevocationData data = stored.getData();
 
-            org.zalando.planb.revocation.domain.RevocationData apiData = null;
+            Revocation newRevocation = new Revocation();
+            newRevocation.setRevokedAt(stored.getRevokedAt());
+            newRevocation.setType(stored.getType());
+
             if (data instanceof StoredGlobal) {
-                apiData = GlobalRevocation.builder().issuedBefore(((StoredGlobal) data).getIssued_before()).build();
+                GlobalRevocation apiData = new GlobalRevocation();
+                apiData.setIssuedBefore(((StoredGlobal) data).getIssued_before());
+                newRevocation.setData(apiData);
             } else if (data instanceof StoredClaim) {
 
                 // here hash from stored value to hashed value sha-2
                 throw new NotImplementedException();
             } else if (data instanceof StoredToken) {
-                apiData = TokenRevocation.builder().tokenHash(((StoredToken) data).getTokenHash()).build();
+                TokenRevocation apiData = new TokenRevocation();
+                apiData.setTokenHash(((StoredToken) data).getTokenHash());
+                newRevocation.setData(apiData);
             }
 
-            Revocation revocation = Revocation.builder().data(apiData).revokedAt(stored.getRevokedAt())
-                                              .type(stored.getType()).build();
-            apiRevocations.add(revocation);
+            apiRevocations.add(newRevocation);
         }
 
-        RevocationInfo wrapper = RevocationInfo.builder().revocations(apiRevocations).build();
-        return new ResponseEntity<>(wrapper, HttpStatus.OK);
+
+        RevocationInfo responseBody = new RevocationInfo();
+        responseBody.setRevocations(apiRevocations);
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Override
-    public HttpEntity<String> post(final Revocation r) {
+    public HttpEntity<String> post(@RequestBody final Revocation r) {
         RevocationData data = null;
         switch (r.getType()) {
-
-            case CLAIM : {
+            case CLAIM :
                 ClaimRevocation cr = (ClaimRevocation) r.getData();
 
                 // hash value is not hashed on the way in
                 data = new StoredClaim(cr.getName(), cr.getValueHash(), cr.getIssuedBefore());
                 break;
-            }
 
-            case TOKEN : {
+            case TOKEN :
                 TokenRevocation tr = (TokenRevocation) r.getData();
                 data = new StoredToken(tr.getTokenHash());
                 break;
-            }
 
-            case GLOBAL : {
+            case GLOBAL :
                 GlobalRevocation gr = (GlobalRevocation) r.getData();
                 data = new StoredGlobal(gr.getIssuedBefore());
                 break;
-            }
         }
 
         if (null == data) {

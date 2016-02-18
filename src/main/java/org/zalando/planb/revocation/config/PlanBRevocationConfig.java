@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.Getter;
 
 @Configuration
-@EnableConfigurationProperties({ CassandraProperties.class, ApiGuildProperties.class })
+@EnableConfigurationProperties({CassandraProperties.class, ApiGuildProperties.class})
 @Getter
 public class PlanBRevocationConfig {
     private List<String> cassandraSeedNodes;
@@ -38,14 +38,13 @@ public class PlanBRevocationConfig {
 
     @Bean
     public ObjectMapper objectMapper() {
-        ObjectMapper om = new ObjectMapper();
-        om.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
-        return om;
+        return new ObjectMapper().setPropertyNamingStrategy(
+                PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     }
 
     @Bean
     public RevocationStore revocationStore() {
-        if(StringUtils.isEmpty(cassandraProperties.getContactPoints())) {
+        if (StringUtils.isEmpty(cassandraProperties.getContactPoints())) {
             return new InMemoryStore();
         }
 
