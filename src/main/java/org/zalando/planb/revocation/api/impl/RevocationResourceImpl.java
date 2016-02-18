@@ -9,6 +9,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.domain.ClaimRevocation;
@@ -23,6 +24,10 @@ import org.zalando.planb.revocation.persistence.StoredGlobal;
 import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 /**
  * TODO: small javadoc
  *
@@ -34,8 +39,12 @@ public class RevocationResourceImpl implements RevocationResource {
     @Autowired
     RevocationStore storage;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Override
-    public HttpEntity<RevocationInfo> get(final Long from) {
+    public HttpEntity<String> get(@RequestParam(value = "from", required = true) final Long from)
+            throws JsonProcessingException {
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
 
         List<Revocation> apiRevocations = new ArrayList<>(revocations.size());
@@ -66,7 +75,8 @@ public class RevocationResourceImpl implements RevocationResource {
 
         RevocationInfo responseBody = new RevocationInfo();
         responseBody.setRevocations(apiRevocations);
-        return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        return new ResponseEntity<>(objectMapper.writeValueAsString(responseBody), HttpStatus.OK);
     }
 
     @Override

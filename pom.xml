@@ -43,6 +43,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
@@ -101,6 +105,12 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.ryantenney.metrics</groupId>
+            <artifactId>metrics-spring</artifactId>
+            <version>3.1.3</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -151,6 +161,7 @@
                                 <portName>cassandra.storagePort</portName>
                                 <portName>cassandra.stopPort</portName>
                                 <portName>cassandra.nativeTransportPort</portName>
+                                <portName>wiremock.port</portName>
                             </portNames>
                         </configuration>
                     </execution>
@@ -169,6 +180,7 @@
                             <systemPropertyVariables>
                                 <cassandra.listenAddress>127.0.0.1</cassandra.listenAddress>
                                 <cassandra.port>${cassandra.nativeTransportPort}</cassandra.port>
+                                <wiremock.tokeninfo.port>${wiremock.port}</wiremock.tokeninfo.port>
                             </systemPropertyVariables>
                         </configuration>
                     </execution>
@@ -203,9 +215,11 @@
                             <cqlVersion>3.0.0</cqlVersion>
                             <script>revocation_schema.cql</script>
                             <!--<cqlScript>src/test/resources/testdata.cql</cqlScript>-->
+                            <!-- 
                             <systemPropertyVariables>
                                 <jna.nosys>True</jna.nosys>
                             </systemPropertyVariables>
+                             -->
                         </configuration>
                     </execution>
                     <execution>

@@ -1,7 +1,13 @@
 package org.zalando.planb.revocation;
 
-import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.StrictAssertions.assertThat;
+import static org.springframework.http.RequestEntity.get;
+import static org.springframework.http.RequestEntity.post;
+
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
+
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +27,6 @@ import org.zalando.planb.revocation.domain.TokenRevocation;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
-
-import java.net.URI;
-
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.RequestEntity.post;
-import static org.springframework.http.RequestEntity.get;
 
 /**
  * Created by rreis on 17/02/16.
@@ -65,6 +64,9 @@ public class RevocationResourceIT extends AbstractSpringTest {
                 "/revocations?from=" + FIVE_MINUTES_AGO))
                 .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).build(), String.class);
 
+        long contentLength = response.getHeaders().getContentLength();
+        System.out.println("CONTENT_LENGTH GET JSON : " + contentLength);
+
         JSONObject jsonBody = new JSONObject(response.getBody());
 
 
@@ -93,8 +95,15 @@ public class RevocationResourceIT extends AbstractSpringTest {
         revocation.setTokenHash("aslkjdlaksdj");
         requestBody.setData(revocation);
 
-        assertThat(restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
-                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), Revocation.class)
-                .getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<Revocation> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
+                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), Revocation.class);
+        System.out.println(responseEntity.getHeaders().getContentLength());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        try {
+            TimeUnit.SECONDS.sleep(20);
+        } catch (InterruptedException e) {
+            // don't care
+        }
     }
 }
