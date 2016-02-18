@@ -24,10 +24,14 @@ public class PlanBRevocationIT extends AbstractSpringTest {
     @Value("${local.server.port}")
     private int port;
 
+    @Value("${management.port}")
+    private int mgmtPort;
+
+
     @Test
     public void returnsHealth() {
         RestTemplate rest = new RestTemplate();
-        ResponseEntity<String> response = rest.getForEntity(URI.create("http://localhost:" + port + "/health"),
+        ResponseEntity<String> response = rest.getForEntity(URI.create("http://localhost:" + mgmtPort + "/health"),
                 String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
