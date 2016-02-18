@@ -4,17 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import java.util.Map;
 
 import org.json.JSONObject;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.context.ApplicationContext;
-
 import org.yaml.snakeyaml.Yaml;
-
 import org.zalando.planb.revocation.api.exception.YamlParsingException;
 import org.zalando.planb.revocation.service.SwaggerService;
 
