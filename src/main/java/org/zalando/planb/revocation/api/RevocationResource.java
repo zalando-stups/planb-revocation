@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.zalando.planb.revocation.domain.Revocation;
-import org.zalando.planb.revocation.domain.RevocationInfo;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * TODO: small javadoc
@@ -17,7 +18,7 @@ import org.zalando.planb.revocation.domain.RevocationInfo;
 public interface RevocationResource {
 
     @RequestMapping(method = RequestMethod.GET)
-    HttpEntity<RevocationInfo> get(Long from);
+    HttpEntity<String> get(@RequestParam(value = "from", required = true) Long from) throws JsonProcessingException;
 
     @RequestMapping(method = RequestMethod.POST)
     HttpEntity<String> post(Revocation revocations);

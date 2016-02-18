@@ -62,6 +62,9 @@ public class RevocationResourceIT extends AbstractSpringTest {
         ResponseEntity<String> response = restTemplate.exchange(get(URI.create(basePath() +
                 "/revocations?from=" + FIVE_MINUTES_AGO)).build(), String.class);
 
+        long contentLength = response.getHeaders().getContentLength();
+        System.out.println("CONTENT_LENGTH GET JSON : " + contentLength);
+
         JSONObject jsonBody = new JSONObject(response.getBody());
 
 
@@ -99,8 +102,8 @@ public class RevocationResourceIT extends AbstractSpringTest {
         revocation.setTokenHash("aslkjdlaksdj");
         requestBody.setData(revocation);
 
-        assertThat(restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
-                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), Revocation.class)
-                .getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<Revocation> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
+                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), Revocation.class);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }
