@@ -14,7 +14,7 @@ security:
   oauth2:
     resource:
       # Get Environment variable
-      tokenInfoUri: ${TOKENINFO_URI}
+      tokenInfoUri: ${TOKENINFO_URL}
 
 management:
   port: 7979
