@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
+import org.zalando.planb.revocation.config.properties.MessageDigestProperties;
 import org.zalando.planb.revocation.persistence.CassandraStorage;
 import org.zalando.planb.revocation.persistence.InMemoryStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
@@ -17,6 +18,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import lombok.Getter;
+import org.zalando.planb.revocation.util.MessageHasher;
+
+import java.security.MessageDigest;
 
 @Configuration
 @EnableConfigurationProperties({CassandraProperties.class, ApiGuildProperties.class})
@@ -24,10 +28,13 @@ import lombok.Getter;
 public class PlanBRevocationConfig {
 //    private List<String> cassandraSeedNodes;
 //
-//    private List<SaltConfig> saltList;
+//    private List<MessageDigestConfig> saltList;
 
     @Autowired
     private CassandraProperties cassandraProperties;
+
+    @Autowired
+    private MessageDigestProperties messageDigestProperties;
 
     @Autowired
     private ApiGuildProperties apiGuildProperties;
@@ -36,6 +43,11 @@ public class PlanBRevocationConfig {
     public ObjectMapper objectMapper() {
         return new ObjectMapper().setPropertyNamingStrategy(
                 PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+    }
+
+    @Bean
+    public MessageHasher messageHasher() {
+        return new MessageHasher(messageDigestProperties.getAlgorithm(), messageDigestProperties.getSaltFile());
     }
 
     @Bean

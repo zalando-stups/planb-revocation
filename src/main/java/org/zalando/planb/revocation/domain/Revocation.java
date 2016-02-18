@@ -3,7 +3,6 @@ package org.zalando.planb.revocation.domain;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,7 +22,7 @@ public class Revocation {
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes({
-            @JsonSubTypes.Type(value = TokenRevocation.class, name = "TOKEN"),
+            @JsonSubTypes.Type(value = TokenRevocationData.class, name = "TOKEN"),
             @JsonSubTypes.Type(value = ClaimRevocation.class, name = "CLAIM"),
             @JsonSubTypes.Type(value = GlobalRevocation.class, name = "GLOBAL"),
     })

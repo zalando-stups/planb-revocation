@@ -16,7 +16,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.zalando.planb.revocation.LocalDateFormatter;
+import org.zalando.planb.revocation.util.LocalDateFormatter;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.RevocationType;
 

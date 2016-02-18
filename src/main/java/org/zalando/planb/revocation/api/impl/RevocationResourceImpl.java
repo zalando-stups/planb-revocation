@@ -16,7 +16,7 @@ import org.zalando.planb.revocation.domain.ClaimRevocation;
 import org.zalando.planb.revocation.domain.GlobalRevocation;
 import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationInfo;
-import org.zalando.planb.revocation.domain.TokenRevocation;
+import org.zalando.planb.revocation.domain.TokenRevocationData;
 import org.zalando.planb.revocation.persistence.RevocationData;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.persistence.StoredClaim;
@@ -64,7 +64,7 @@ public class RevocationResourceImpl implements RevocationResource {
                 // here hash from stored value to hashed value sha-2
                 throw new RuntimeException("NOT_IMPLEMENTED_YET");
             } else if (data instanceof StoredToken) {
-                TokenRevocation apiData = new TokenRevocation();
+                TokenRevocationData apiData = new TokenRevocationData();
                 apiData.setTokenHash(((StoredToken) data).getTokenHash());
                 newRevocation.setData(apiData);
             }
@@ -91,7 +91,7 @@ public class RevocationResourceImpl implements RevocationResource {
                 break;
 
             case TOKEN :
-                TokenRevocation tr = (TokenRevocation) r.getData();
+                TokenRevocationData tr = (TokenRevocationData) r.getData();
                 data = new StoredToken(tr.getTokenHash());
                 break;
 

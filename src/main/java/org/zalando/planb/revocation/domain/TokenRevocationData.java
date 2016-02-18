@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class TokenRevocation implements RevocationData {
+public class TokenRevocationData implements RevocationData {
     @JsonProperty("token_hash")
     private String tokenHash;
 

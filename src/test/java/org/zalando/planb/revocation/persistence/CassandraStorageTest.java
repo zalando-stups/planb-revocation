@@ -1,7 +1,7 @@
 package org.zalando.planb.revocation.persistence;
 
 import org.junit.Test;
-import org.zalando.planb.revocation.LocalTimeFormatter;
+import org.zalando.planb.revocation.util.LocalTimeFormatter;
 
 import java.text.ParseException;
 import java.util.Date;
