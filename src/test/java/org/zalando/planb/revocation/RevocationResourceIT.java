@@ -27,6 +27,7 @@ import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.RequestEntity.post;
+import static org.springframework.http.RequestEntity.get;
 
 /**
  * Created by rreis on 17/02/16.
@@ -60,8 +61,9 @@ public class RevocationResourceIT extends AbstractSpringTest {
         revocation.setRevokedAt(currentTime);
         revocationStore.storeRevocation(revocation);
 
-        ResponseEntity<String> response = restTemplate.getForEntity(URI.create(
-                basePath() + "/revocations?from=" + FIVE_MINUTES_AGO), String.class);
+        ResponseEntity<String> response = restTemplate.exchange(get(URI.create(basePath() +
+                "/revocations?from=" + FIVE_MINUTES_AGO))
+                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).build(), String.class);
 
         JSONObject jsonBody = new JSONObject(response.getBody());
 
@@ -72,9 +74,9 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
     @Test
     public void testGetEmptyRevocation() {
-        ResponseEntity<RevocationInfo> response = restTemplate.getForEntity(URI.create(
-                basePath() + "/revocations?from=" + FIVE_MINUTES_AGO), RevocationInfo.class);
-
+        ResponseEntity<RevocationInfo> response = restTemplate.exchange(get(URI.create(basePath() +
+                "/revocations?from=" + FIVE_MINUTES_AGO))
+                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).build(), RevocationInfo.class);
         RevocationInfo responseBody = response.getBody();
 
         assertThat(responseBody.getMeta()).isNull();

@@ -57,6 +57,6 @@ public class SwaggerFromYamlFileService implements SwaggerService {
             throw new YamlParsingException();
         }
 
-        return new JSONObject((Map<String, Object>) yaml.load(stringBuilder.toString())).toString();
+        return new JSONObject(yaml.loadAs(stringBuilder.toString(), Map.class)).toString();
     }
 }

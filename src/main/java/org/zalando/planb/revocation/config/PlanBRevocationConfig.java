@@ -1,13 +1,12 @@
 package org.zalando.planb.revocation.config;
 
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.util.StringUtils;
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
@@ -17,18 +16,15 @@ import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.service.SwaggerService;
 import org.zalando.planb.revocation.service.impl.SwaggerFromYamlFileService;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-
-import lombok.Getter;
+import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties({CassandraProperties.class, ApiGuildProperties.class})
 @Getter
 public class PlanBRevocationConfig {
-    private List<String> cassandraSeedNodes;
-
-    private List<SaltConfig> saltList;
+//    private List<String> cassandraSeedNodes;
+//
+//    private List<SaltConfig> saltList;
 
     @Autowired
     private CassandraProperties cassandraProperties;
@@ -53,6 +49,6 @@ public class PlanBRevocationConfig {
 
     @Bean
     public SwaggerService swaggerService() {
-        return new SwaggerFromYamlFileService(apiGuildProperties.getSwagger());
+        return new SwaggerFromYamlFileService(apiGuildProperties.getSwaggerPath());
     }
 }

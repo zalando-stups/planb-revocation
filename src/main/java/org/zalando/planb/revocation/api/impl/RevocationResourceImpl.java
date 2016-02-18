@@ -58,7 +58,7 @@ public class RevocationResourceImpl implements RevocationResource {
             } else if (data instanceof StoredClaim) {
 
                 // here hash from stored value to hashed value sha-2
-                throw new NotImplementedException();
+                throw new RuntimeException("NOT_IMPLEMENTED_YET");
             } else if (data instanceof StoredToken) {
                 TokenRevocation apiData = new TokenRevocation();
                 apiData.setTokenHash(((StoredToken) data).getTokenHash());
