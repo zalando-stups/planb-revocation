@@ -9,6 +9,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.domain.ClaimRevocation;
@@ -35,7 +36,7 @@ public class RevocationResourceImpl implements RevocationResource {
     RevocationStore storage;
 
     @Override
-    public HttpEntity<RevocationInfo> get(final Long from) {
+    public HttpEntity<RevocationInfo> get(@RequestParam(value = "from", required = true) final Long from) {
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
 
         List<Revocation> apiRevocations = new ArrayList<>(revocations.size());

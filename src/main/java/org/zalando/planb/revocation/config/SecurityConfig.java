@@ -51,7 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Reso
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/health", "/swagger.json");
+        web.ignoring().antMatchers("/health", "/swagger.json").antMatchers(HttpMethod.GET, "/revocations/**");
     }
 
     @Override
@@ -64,10 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Reso
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/revocations")
                     .access(apiSecurityProperties.getOauth2Scopes().get("revokeStandard"))
-                .antMatchers(HttpMethod.GET, "/**")
-                    .access(apiSecurityProperties.getOauth2Scopes().get("readApi"))
-                .antMatchers(HttpMethod.POST, "/**")
-                    .access(apiSecurityProperties.getOauth2Scopes().get("write"))
+                .antMatchers(HttpMethod.GET, "/**").permitAll()
                 .anyRequest().denyAll();
     }
 

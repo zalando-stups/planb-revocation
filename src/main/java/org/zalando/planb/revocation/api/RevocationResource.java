@@ -17,7 +17,7 @@ import org.zalando.planb.revocation.domain.RevocationInfo;
 public interface RevocationResource {
 
     @RequestMapping(method = RequestMethod.GET)
-    HttpEntity<RevocationInfo> get(@RequestParam(value = "from", required = true) Long from);
+    HttpEntity<RevocationInfo> get(Long from);
 
     @RequestMapping(method = RequestMethod.POST)
     HttpEntity<String> post(Revocation revocations);
