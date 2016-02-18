@@ -3,24 +3,23 @@ api:
     swaggerPath: classpath:api/revocation-service-api.yml
   security:
     oauth2-scopes:
-      revokeStandard: "#oauth2.hasScope('uid') && #oauth2.hasScope('token.revoke') && #oauth2.hasRealm('/services')"
-      readApi: "#oauth2.hasScope('uid') && #oauth2.hasRealm('/services')"
-      write: "#oauth2.hasScope('uid') && #oauth2.hasRealm('/services')"
+# Until scope token.revoke is not in YourTurn we cannot use this rule...
+#      revokeStandard: "#oauth2.hasScope('uid') && #oauth2.hasScope('token.revoke') && (#oauth2.hasRealm('/services') || #oauth2.hasRealm('/employees'))"
+      revokeStandard: "#oauth2.hasScope('uid') && (#oauth2.hasRealm('/services') || #oauth2.hasRealm('/employees'))"
 
 cassandra:
   keyspace: revocation
-  contactPoints: ${CASSANDRA_HOSTS}
-  clusterName: Local Cluster
 
 security:
   oauth2:
     resource:
-      tokenInfoUri: ${TOKENINFO_URI}
+      # Get Environment variable
+      tokenInfoUri: ${TOKENINFO_URL}
 
-#management:
-#  port: 7979
-#  security:
-#    enabled: false
+management:
+  port: 7979
+  security:
+    enabled: false
 
 ---
 
@@ -44,9 +43,6 @@ logging:
 
 spring:
   profiles: local
-
-cassandra:
-  contactPoints:
 
 security:
   oauth2:
