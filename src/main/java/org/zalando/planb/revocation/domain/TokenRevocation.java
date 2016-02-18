@@ -1,17 +1,20 @@
 package org.zalando.planb.revocation.domain;
 
-import lombok.Builder;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * TODO: small javadoc
  *
- * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
+ * @author <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
-@Getter
-@Builder
+@Data
+@NoArgsConstructor
 public class TokenRevocation implements RevocationData {
+    @JsonProperty("token_hash")
     private String tokenHash;
 
+    @JsonProperty("revoked_at")
     private Long revokedAt;
 }

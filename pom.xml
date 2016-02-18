@@ -42,11 +42,25 @@
             <artifactId>spring-boot-actuator</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.zalando.stups</groupId>
             <artifactId>stups-spring-oauth2-server</artifactId>
             <version>${stups-spring-oauth2-support.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.zalando.stups</groupId>
+            <artifactId>tokens</artifactId>
+            <version>0.9.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.6</version>
+        </dependency>
         <dependency>
             <groupId>org.zalando.zmon</groupId>
             <artifactId>zmon-actuator</artifactId>
@@ -115,11 +129,6 @@
             <version>1.58</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
 
     <build>
@@ -142,7 +151,6 @@
                                 <portName>cassandra.storagePort</portName>
                                 <portName>cassandra.stopPort</portName>
                                 <portName>cassandra.nativeTransportPort</portName>
-                                <portName>wiremock.port</portName>
                             </portNames>
                         </configuration>
                     </execution>
@@ -161,7 +169,6 @@
                             <systemPropertyVariables>
                                 <cassandra.listenAddress>127.0.0.1</cassandra.listenAddress>
                                 <cassandra.port>${cassandra.nativeTransportPort}</cassandra.port>
-                                <wiremock.tokeninfo.port>${wiremock.port}</wiremock.tokeninfo.port>
                             </systemPropertyVariables>
                         </configuration>
                     </execution>
@@ -196,9 +203,9 @@
                             <cqlVersion>3.0.0</cqlVersion>
                             <script>revocation_schema.cql</script>
                             <!--<cqlScript>src/test/resources/testdata.cql</cqlScript>-->
-			    <systemPropertyVariables>
-                               <jna.nosys>True</jna.nosys>
-			    </systemPropertyVariables>
+                            <systemPropertyVariables>
+                                <jna.nosys>True</jna.nosys>
+                            </systemPropertyVariables>
                         </configuration>
                     </execution>
                     <execution>
@@ -226,43 +233,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <pluginManagement>
-            <plugins>
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            org.codehaus.mojo
-                                        </groupId>
-                                        <artifactId>
-                                            build-helper-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.8,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>
-                                                reserve-network-port
-                                            </goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore></ignore>
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 
     <profiles>

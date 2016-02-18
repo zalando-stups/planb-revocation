@@ -11,13 +11,13 @@ import org.zalando.planb.revocation.domain.RevocationInfo;
 /**
  * TODO: small javadoc
  *
- * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
+ * @author <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
 @RequestMapping(value = "/revocations", produces = MediaType.APPLICATION_JSON_VALUE)
 public interface RevocationResource {
 
     @RequestMapping(method = RequestMethod.GET)
-    HttpEntity<RevocationInfo> get(@RequestParam(value="from", required = true) long from);
+    HttpEntity<RevocationInfo> get(@RequestParam(value = "from", required = true) Long from);
 
     @RequestMapping(method = RequestMethod.POST)
     HttpEntity<String> post(Revocation revocations);

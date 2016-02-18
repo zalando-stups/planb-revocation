@@ -14,10 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by jmussler on 16.02.16.
  */
-public class CassandraStorateTest {
+public class CassandraStorageTest {
 
     @Test
-    public void testSameInteral() throws ParseException {
+    public void testSameInterval() throws ParseException {
         String dateString = "2016-02-16 14:00:00.000+00";
         Date fromDate = LocalTimeFormatter.get().parse(dateString);
 
