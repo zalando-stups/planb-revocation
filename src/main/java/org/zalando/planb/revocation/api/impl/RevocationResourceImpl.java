@@ -5,14 +5,11 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.domain.ClaimRevocation;
 import org.zalando.planb.revocation.domain.GlobalRevocation;
@@ -25,8 +22,6 @@ import org.zalando.planb.revocation.persistence.StoredClaim;
 import org.zalando.planb.revocation.persistence.StoredGlobal;
 import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * TODO: small javadoc
