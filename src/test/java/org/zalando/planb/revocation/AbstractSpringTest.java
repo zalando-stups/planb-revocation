@@ -10,6 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
+import org.zalando.planb.revocation.domain.Revocation;
+import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.TokenRevocationData;
+
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -88,5 +94,26 @@ public abstract class AbstractSpringTest {
                         .withHeader(ContentTypeHeader.KEY, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(TOKENINFO_RESPONSE_INSUFFICIENT_SCOPES)));
 
+    }
+
+    // Some utility methods
+    static Revocation generateRevocation(RevocationType type) {
+
+        Revocation generated = new Revocation();
+
+        RevocationData revocationData = null;
+        switch(type) {
+            case TOKEN:
+                revocationData = new TokenRevocationData();
+                ((TokenRevocationData) revocationData).setTokenHash(UUID.randomUUID().toString());
+                ((TokenRevocationData) revocationData).setRevokedAt(System.currentTimeMillis());
+                break;
+        }
+
+        generated.setType(RevocationType.TOKEN);
+        generated.setRevokedAt(System.currentTimeMillis());
+        generated.setData(revocationData);
+
+        return generated;
     }
 }

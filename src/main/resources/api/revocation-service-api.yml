@@ -116,7 +116,7 @@ definitions:
       properties:
         token_hash:
           type: string
-          description: Token hash
+          description: Token hashAndEncode
         revoked_at:
           type: string
           format: date-time
