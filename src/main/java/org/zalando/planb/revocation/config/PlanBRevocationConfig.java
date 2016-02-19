@@ -21,9 +21,10 @@ import lombok.Getter;
 import org.zalando.planb.revocation.util.MessageHasher;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @Configuration
-@EnableConfigurationProperties({CassandraProperties.class, ApiGuildProperties.class})
+@EnableConfigurationProperties({CassandraProperties.class, ApiGuildProperties.class, MessageDigestProperties.class})
 @Getter
 public class PlanBRevocationConfig {
 //    private List<String> cassandraSeedNodes;
@@ -46,7 +47,11 @@ public class PlanBRevocationConfig {
     }
 
     @Bean
-    public MessageHasher messageHasher() {
+    public MessageHasher messageDigest() throws NoSuchAlgorithmException {
+        if(messageDigestProperties.getAlgorithm() == null) return null;
+
+        // TODO vou aqui
+        MessageDigest messageDigest = MessageDigest.getInstance(messageDigestProperties.getAlgorithm());
         return new MessageHasher(messageDigestProperties.getAlgorithm(), messageDigestProperties.getSaltFile());
     }
 
