@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.config.properties.MessageDigestProperties;
+import org.zalando.planb.revocation.config.properties.HashingProperties;
 import org.zalando.planb.revocation.persistence.CassandraStorage;
 import org.zalando.planb.revocation.persistence.InMemoryStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
@@ -18,13 +18,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import lombok.Getter;
-import org.zalando.planb.revocation.util.MessageHasher;
+import org.zalando.planb.revocation.util.MessageHasherUtil;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @Configuration
-@EnableConfigurationProperties({CassandraProperties.class, ApiGuildProperties.class, MessageDigestProperties.class})
+@EnableConfigurationProperties({CassandraProperties.class, ApiGuildProperties.class, HashingProperties.class})
 @Getter
 public class PlanBRevocationConfig {
 //    private List<String> cassandraSeedNodes;
@@ -35,7 +35,7 @@ public class PlanBRevocationConfig {
     private CassandraProperties cassandraProperties;
 
     @Autowired
-    private MessageDigestProperties messageDigestProperties;
+    private HashingProperties hashingProperties;
 
     @Autowired
     private ApiGuildProperties apiGuildProperties;
@@ -47,12 +47,12 @@ public class PlanBRevocationConfig {
     }
 
     @Bean
-    public MessageHasher messageDigest() throws NoSuchAlgorithmException {
-        if(messageDigestProperties.getAlgorithm() == null) return null;
+    public MessageHasherUtil messageDigest() throws NoSuchAlgorithmException {
+        if(hashingProperties.getAlgorithm() == null) return null;
 
         // TODO vou aqui
-        MessageDigest messageDigest = MessageDigest.getInstance(messageDigestProperties.getAlgorithm());
-        return new MessageHasher(messageDigestProperties.getAlgorithm(), messageDigestProperties.getSaltFile());
+        MessageDigest messageDigest = MessageDigest.getInstance(hashingProperties.getAlgorithm());
+        return new MessageHasherUtil(hashingProperties.getAlgorithm(), hashingProperties.getSaltFile());
     }
 
     @Bean

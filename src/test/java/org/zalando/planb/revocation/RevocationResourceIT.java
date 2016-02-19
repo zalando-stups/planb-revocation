@@ -11,18 +11,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.security.core.token.Token;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 import org.zalando.planb.revocation.domain.Revocation;
-import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.TokenRevocationData;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
-import org.zalando.planb.revocation.util.MessageHasher;
+import org.zalando.planb.revocation.util.MessageHasherUtil;
 
 import java.net.URI;
 
@@ -47,7 +45,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
     private RevocationStore revocationStore;
 
     @Autowired
-    private MessageHasher messageHasher;
+    private MessageHasherUtil messageHasherUtil;
 
     private final RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
@@ -124,7 +122,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
         TokenRevocationData fromService = (TokenRevocationData) response.getBody().getRevocations().get(0).getData();
 
-        String hashedToken = messageHasher.hash(unhashedToken);
+        String hashedToken = messageHasherUtil.hash(unhashedToken);
         assertThat(hashedToken).isEqualTo(fromService.getTokenHash());
     }
 }

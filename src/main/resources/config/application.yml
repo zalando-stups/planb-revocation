@@ -39,9 +39,12 @@ logging:
   level:
     de.zalando.planb.revocation: DEBUG
 
-messageDigest:
-  algorithm: SHA-256
-  saltFile: classpath:salt.txt
+revocation:
+  hashing:
+    algorithm:
+      TOKEN: SHA-256
+      CLAIM: SHA-256
+    salt: seasaltisthebest
 ---
 
 spring:
