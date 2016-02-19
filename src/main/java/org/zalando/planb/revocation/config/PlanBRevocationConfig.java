@@ -1,13 +1,16 @@
 package org.zalando.planb.revocation.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.util.StringUtils;
+
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.config.properties.HashingProperties;
 import org.zalando.planb.revocation.persistence.CassandraStorage;
 import org.zalando.planb.revocation.persistence.InMemoryStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
@@ -18,41 +21,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import lombok.Getter;
-import org.zalando.planb.revocation.util.MessageHasherUtil;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 @Configuration
-@EnableConfigurationProperties({CassandraProperties.class, ApiGuildProperties.class, HashingProperties.class})
+@EnableConfigurationProperties({ CassandraProperties.class, ApiGuildProperties.class })
 @Getter
 public class PlanBRevocationConfig {
-//    private List<String> cassandraSeedNodes;
+// private List<String> cassandraSeedNodes;
 //
-//    private List<MessageDigestConfig> saltList;
+// private List<MessageDigestConfig> saltList;
 
     @Autowired
     private CassandraProperties cassandraProperties;
-
-    @Autowired
-    private HashingProperties hashingProperties;
 
     @Autowired
     private ApiGuildProperties apiGuildProperties;
 
     @Bean
     public ObjectMapper objectMapper() {
-        return new ObjectMapper().setPropertyNamingStrategy(
+        return
+            new ObjectMapper().setPropertyNamingStrategy(
                 PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
-    }
-
-    @Bean
-    public MessageHasherUtil messageDigest() throws NoSuchAlgorithmException {
-        if(hashingProperties.getAlgorithm() == null) return null;
-
-        // TODO vou aqui
-        MessageDigest messageDigest = MessageDigest.getInstance(hashingProperties.getAlgorithm());
-        return new MessageHasherUtil(hashingProperties.getAlgorithm(), hashingProperties.getSaltFile());
     }
 
     @Bean

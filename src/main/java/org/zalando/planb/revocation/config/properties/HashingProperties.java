@@ -1,9 +1,12 @@
 package org.zalando.planb.revocation.config.properties;
 
-import lombok.Data;
+import java.util.EnumMap;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.Map;
+import org.zalando.planb.revocation.domain.RevocationType;
+
+import lombok.Data;
 
 /**
  * Created by rreis on 2/18/16.
@@ -12,7 +15,7 @@ import java.util.Map;
 @Data
 public class HashingProperties {
 
-    Map<String, String> algorithms;
+    EnumMap<RevocationType, String> algorithms;
 
     String salt;
 }

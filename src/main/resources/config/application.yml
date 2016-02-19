@@ -21,6 +21,13 @@ management:
   security:
     enabled: false
 
+revocation:
+  hashing:
+    algorithms:
+      TOKEN: SHA-256
+      CLAIM: SHA-256
+    salt: seasaltisthebest
+
 ---
 
 spring:
@@ -38,13 +45,6 @@ security:
 logging:
   level:
     de.zalando.planb.revocation: DEBUG
-
-revocation:
-  hashing:
-    algorithm:
-      TOKEN: SHA-256
-      CLAIM: SHA-256
-    salt: seasaltisthebest
 ---
 
 spring:
