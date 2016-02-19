@@ -3,8 +3,10 @@ package org.zalando.planb.revocation.util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import java.util.Base64;
 import java.util.EnumMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.zalando.planb.revocation.domain.RevocationType;
 
 import lombok.Value;
@@ -33,14 +35,23 @@ public class MessageHasher {
         }
     }
 
-    public String hash(final RevocationType type, final String message) {
-        String hashed = message;
+    /**
+     * Hashes the specified message using the algorithm specified by the <code>RevocationType</code> parameter. Returns
+     * a Base64 representation of the Hash.
+     *
+     * @param   type     algorithm to use
+     * @param   message  the message to hash.
+     *
+     * @return  a Base64 encoded version of the hash.
+     */
+    public String hashAndEncode(final RevocationType type, final String message) {
+        byte[] hashed = message.getBytes();
 
         if (hashers.containsKey(type)) {
             hashers.get(type).update((salt + message).getBytes());
-            hashed = new String(hashers.get(type).digest());
+            hashed = hashers.get(type).digest();
         }
 
-        return hashed;
+        return Base64.getEncoder().encodeToString(hashed);
     }
 }

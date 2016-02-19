@@ -130,7 +130,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
         TokenRevocationData fromService = (TokenRevocationData) response.getBody().getRevocations().get(0).getData();
 
-        String hashedToken = messageHasher.hash(RevocationType.TOKEN, unhashedToken);
-        assertThat(hashedToken).isEqualTo(fromService.getTokenHash());
+        String hashedToken = messageHasher.hashAndEncode(RevocationType.TOKEN, unhashedToken);
+        assertThat(fromService.getTokenHash()).isEqualTo(hashedToken);
     }
 }

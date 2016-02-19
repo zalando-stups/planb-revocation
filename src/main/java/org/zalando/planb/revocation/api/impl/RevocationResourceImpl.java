@@ -5,17 +5,21 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import org.zalando.planb.revocation.api.RevocationResource;
-import org.zalando.planb.revocation.domain.ClaimRevocation;
+import org.zalando.planb.revocation.domain.ClaimRevocationData;
 import org.zalando.planb.revocation.domain.GlobalRevocation;
 import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationInfo;
+import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.TokenRevocationData;
 import org.zalando.planb.revocation.persistence.RevocationData;
 import org.zalando.planb.revocation.persistence.RevocationStore;
@@ -23,10 +27,10 @@ import org.zalando.planb.revocation.persistence.StoredClaim;
 import org.zalando.planb.revocation.persistence.StoredGlobal;
 import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
+import org.zalando.planb.revocation.util.MessageHasher;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 /**
  * TODO: small javadoc
@@ -42,9 +46,12 @@ public class RevocationResourceImpl implements RevocationResource {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private MessageHasher messageHasher;
+
     @Override
     public HttpEntity<String> get(@RequestParam(value = "from", required = true) final Long from)
-            throws JsonProcessingException {
+        throws JsonProcessingException {
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
 
         List<Revocation> apiRevocations = new ArrayList<>(revocations.size());
@@ -59,19 +66,24 @@ public class RevocationResourceImpl implements RevocationResource {
                 GlobalRevocation apiData = new GlobalRevocation();
                 apiData.setIssuedBefore(((StoredGlobal) data).getIssued_before());
                 newRevocation.setData(apiData);
-            } else if (data instanceof StoredClaim) {
 
-                // here hash from stored value to hashed value sha-2
-                throw new RuntimeException("NOT_IMPLEMENTED_YET");
+            } else if (data instanceof StoredClaim) {
+                ClaimRevocationData apiData = new ClaimRevocationData();
+                apiData.setName(((StoredClaim) data).getClaimName());
+                apiData.setValueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
+                        ((StoredClaim) data).getClaimValue()));
+                apiData.setIssuedBefore(((StoredClaim) data).getIssuedBefore());
+                newRevocation.setData(apiData);
+
             } else if (data instanceof StoredToken) {
                 TokenRevocationData apiData = new TokenRevocationData();
-                apiData.setTokenHash(((StoredToken) data).getTokenHash());
+                apiData.setTokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
+                        ((StoredToken) data).getTokenHash()));
                 newRevocation.setData(apiData);
             }
 
             apiRevocations.add(newRevocation);
         }
-
 
         RevocationInfo responseBody = new RevocationInfo();
         responseBody.setRevocations(apiRevocations);
@@ -83,19 +95,22 @@ public class RevocationResourceImpl implements RevocationResource {
     public HttpEntity<String> post(@RequestBody final Revocation r) {
         RevocationData data = null;
         switch (r.getType()) {
-            case CLAIM :
-                ClaimRevocation cr = (ClaimRevocation) r.getData();
 
-                // hash value is not hashed on the way in
+            case CLAIM :
+
+                ClaimRevocationData cr = (ClaimRevocationData) r.getData();
+
                 data = new StoredClaim(cr.getName(), cr.getValueHash(), cr.getIssuedBefore());
                 break;
 
             case TOKEN :
+
                 TokenRevocationData tr = (TokenRevocationData) r.getData();
                 data = new StoredToken(tr.getTokenHash());
                 break;
 
             case GLOBAL :
+
                 GlobalRevocation gr = (GlobalRevocation) r.getData();
                 data = new StoredGlobal(gr.getIssuedBefore());
                 break;

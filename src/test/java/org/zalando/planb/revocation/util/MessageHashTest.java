@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import java.util.Base64;
+
 import org.junit.Test;
 
 import org.junit.runner.RunWith;
@@ -41,17 +43,17 @@ public class MessageHashTest {
         MessageDigest hasher = MessageDigest.getInstance("SHA-256");
         hasher.update((hashingProperties.getSalt() + message).getBytes());
 
-        String expected = new String(hasher.digest());
+        String expected = Base64.getEncoder().encodeToString(hasher.digest());
+        String base64sha256Hashed = messageHasher.hashAndEncode(RevocationType.TOKEN, message);
 
-        String sha256Hashed = messageHasher.hash(RevocationType.TOKEN, message);
-
-        assertEquals(expected, sha256Hashed);
+        assertEquals(expected, base64sha256Hashed);
     }
 
     @Test
     public void testNullHashing() throws NoSuchAlgorithmException {
         MessageHasher nullHasher = new MessageHasher(null, null);
 
-        assertEquals(message, nullHasher.hash(RevocationType.TOKEN, message));
+        assertEquals(Base64.getEncoder().encodeToString(message.getBytes()),
+            nullHasher.hashAndEncode(RevocationType.TOKEN, message));
     }
 }
