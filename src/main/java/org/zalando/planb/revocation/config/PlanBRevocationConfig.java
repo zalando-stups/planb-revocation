@@ -1,10 +1,14 @@
 package org.zalando.planb.revocation.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.util.StringUtils;
+
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.persistence.CassandraStorage;
@@ -19,12 +23,12 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.Getter;
 
 @Configuration
-@EnableConfigurationProperties({CassandraProperties.class, ApiGuildProperties.class})
+@EnableConfigurationProperties({ CassandraProperties.class, ApiGuildProperties.class })
 @Getter
 public class PlanBRevocationConfig {
-//    private List<String> cassandraSeedNodes;
+// private List<String> cassandraSeedNodes;
 //
-//    private List<SaltConfig> saltList;
+// private List<MessageDigestConfig> saltList;
 
     @Autowired
     private CassandraProperties cassandraProperties;
@@ -34,7 +38,8 @@ public class PlanBRevocationConfig {
 
     @Bean
     public ObjectMapper objectMapper() {
-        return new ObjectMapper().setPropertyNamingStrategy(
+        return
+            new ObjectMapper().setPropertyNamingStrategy(
                 PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     }
 

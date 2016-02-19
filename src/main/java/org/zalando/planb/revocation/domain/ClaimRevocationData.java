@@ -1,6 +1,7 @@
 package org.zalando.planb.revocation.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ClaimRevocation implements RevocationData {
+public class ClaimRevocationData implements RevocationData {
     private String name;
 
     @JsonProperty("value_hash")

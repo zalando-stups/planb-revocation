@@ -1,4 +1,4 @@
-package org.zalando.planb.revocation;
+package org.zalando.planb.revocation.util;
 
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
