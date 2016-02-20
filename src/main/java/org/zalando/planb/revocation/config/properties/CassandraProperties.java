@@ -1,5 +1,6 @@
 package org.zalando.planb.revocation.config.properties;
 
+import static com.datastax.driver.core.ConsistencyLevel.EACH_QUORUM;
 import static com.datastax.driver.core.ConsistencyLevel.ONE;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,7 +19,7 @@ import lombok.Data;
 @Data
 public class CassandraProperties {
 
-    private String keyspace;
+    private String keyspace = "revocation";
 
     private String contactPoints;
 
@@ -26,7 +27,7 @@ public class CassandraProperties {
 
     private Integer port = ProtocolOptions.DEFAULT_PORT;
 
-    private ConsistencyLevel writeConsistencyLevel = ONE;
+    private ConsistencyLevel writeConsistencyLevel = EACH_QUORUM;
 
     private ConsistencyLevel readConsistencyLevel = ONE;
 

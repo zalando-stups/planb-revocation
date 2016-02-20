@@ -7,9 +7,6 @@ api:
 #      revokeStandard: "#oauth2.hasScope('uid') && #oauth2.hasScope('token.revoke') && (#oauth2.hasRealm('/services') || #oauth2.hasRealm('/employees'))"
       revokeStandard: "#oauth2.hasScope('uid') && (#oauth2.hasRealm('/services') || #oauth2.hasRealm('/employees'))"
 
-cassandra:
-  keyspace: revocation
-
 security:
   oauth2:
     resource:
