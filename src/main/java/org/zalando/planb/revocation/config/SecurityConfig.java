@@ -1,12 +1,17 @@
 package org.zalando.planb.revocation.config;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.http.HttpMethod;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -17,14 +22,16 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
+
 import org.zalando.planb.revocation.config.properties.ApiSecurityProperties;
+
 import org.zalando.stups.oauth2.spring.security.expression.ExtendedOAuth2WebSecurityExpressionHandler;
 import org.zalando.stups.oauth2.spring.server.TokenInfoResourceServerTokenServices;
 
-import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author jbellmann
+ * @author  jbellmann
  */
 @Configuration
 @EnableResourceServer
@@ -44,28 +51,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Reso
     }
 
     @Override
-    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+    public void configure(final ResourceServerSecurityConfigurer resources) throws Exception {
+
         // add support for #oauth2.hasRealm() expressions
         resources.resourceId("revocation").expressionHandler(new ExtendedOAuth2WebSecurityExpressionHandler());
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/health", "/swagger.json").antMatchers(HttpMethod.GET, "/revocations/**");
+    public void configure(final WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/swagger.json", "/.well-known/schema-discovery").antMatchers(HttpMethod.GET,
+            "/revocations/**");
     }
 
     @Override
-    public void configure(HttpSecurity http) throws Exception {
+    public void configure(final HttpSecurity http) throws Exception {
 
-        http.headers().defaultsDisabled().httpStrictTransportSecurity()
-                .and().addHeaderWriter(hstsHeaderWriter())
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().httpBasic().disable().anonymous().disable()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/revocations")
-                    .access(apiSecurityProperties.getOauth2Scopes().get("revokeStandard"))
-                .antMatchers(HttpMethod.GET, "/**").permitAll()
-                .anyRequest().denyAll();
+        http.headers().defaultsDisabled().httpStrictTransportSecurity().and().addHeaderWriter(hstsHeaderWriter()).and()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().httpBasic().disable()
+            .anonymous().disable().authorizeRequests().antMatchers(HttpMethod.POST, "/revocations")
+            .access(apiSecurityProperties.getOauth2Scopes().get("revokeStandard")).antMatchers(HttpMethod.GET, "/**")
+            .permitAll().anyRequest().denyAll();
     }
 
     private HstsHeaderWriter hstsHeaderWriter() {

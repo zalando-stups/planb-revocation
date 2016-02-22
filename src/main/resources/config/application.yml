@@ -1,6 +1,4 @@
 api:
-  swagger:
-    swaggerPath: classpath:api/revocation-service-api.yml
   security:
     oauth2-scopes:
 # Until scope token.revoke is not in YourTurn we cannot use this rule...
@@ -29,37 +27,3 @@ revocation:
       TOKEN: SHA-256
       CLAIM: SHA-256
     salt: seasaltisthebest
-
----
-
-spring:
-  profiles: it
-
-cassandra:
-  contactPoints: 127.0.0.1
-  clusterName: Local Cluster
-
-security:
-  oauth2:
-    resource:
-      tokenInfoUri: "http://localhost:${wiremock.port:10080}/tokeninfo"
-
-logging:
-  level:
-    de.zalando.planb.revocation: DEBUG
-    org.apache.http: DEBUG
-    org.apache.http.wire: DEBUG
-
-server:
-  compression:
-    min-response-size: 100
-
----
-
-spring:
-  profiles: local
-
-security:
-  oauth2:
-    resource:
-      tokenInfoUri: "https://auth.zalando.com/z/oauth2/tokeninfo"

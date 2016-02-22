@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.zalando.planb.revocation.api.ApiGuildResource;
+import org.zalando.planb.revocation.service.SchemaDiscoveryService;
 import org.zalando.planb.revocation.service.SwaggerService;
 
 /**
@@ -25,9 +26,21 @@ public class ApiGuildresourceImpl implements ApiGuildResource {
     @Autowired
     private SwaggerService swaggerService;
 
+    @Autowired
+    private SchemaDiscoveryService schemaDiscoveryService;
+
     @Override
     @RequestMapping(method = RequestMethod.GET, value = "/swagger.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public HttpEntity<String> swaggerInfo() {
+    public HttpEntity<String> swagger() {
         return new ResponseEntity<>(swaggerService.swaggerDefinition(), HttpStatus.OK);
+    }
+
+    @Override
+    @RequestMapping(
+        method = RequestMethod.GET, value = "/.well-known/schema-discovery",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public HttpEntity<String> schemaDiscovery() {
+        return new ResponseEntity<>(schemaDiscoveryService.schemaDiscovery(), HttpStatus.OK);
     }
 }

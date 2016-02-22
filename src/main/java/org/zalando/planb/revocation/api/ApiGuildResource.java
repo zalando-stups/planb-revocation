@@ -4,5 +4,7 @@ import org.springframework.http.HttpEntity;
 
 public interface ApiGuildResource {
 
-    HttpEntity<String> swaggerInfo();
+    HttpEntity<String> swagger();
+
+    HttpEntity<String> schemaDiscovery();
 }

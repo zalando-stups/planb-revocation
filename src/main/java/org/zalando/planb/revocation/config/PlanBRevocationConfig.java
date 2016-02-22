@@ -14,7 +14,9 @@ import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.persistence.CassandraStorage;
 import org.zalando.planb.revocation.persistence.InMemoryStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
+import org.zalando.planb.revocation.service.SchemaDiscoveryService;
 import org.zalando.planb.revocation.service.SwaggerService;
+import org.zalando.planb.revocation.service.impl.StaticSchemaDiscoveryService;
 import org.zalando.planb.revocation.service.impl.SwaggerFromYamlFileService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,9 +28,6 @@ import lombok.Getter;
 @EnableConfigurationProperties({ CassandraProperties.class, ApiGuildProperties.class })
 @Getter
 public class PlanBRevocationConfig {
-// private List<String> cassandraSeedNodes;
-//
-// private List<MessageDigestConfig> saltList;
 
     @Autowired
     private CassandraProperties cassandraProperties;
@@ -54,6 +53,11 @@ public class PlanBRevocationConfig {
 
     @Bean
     public SwaggerService swaggerService() {
-        return new SwaggerFromYamlFileService(apiGuildProperties.getSwaggerPath());
+        return new SwaggerFromYamlFileService(apiGuildProperties.getSwaggerFile());
+    }
+
+    @Bean
+    public SchemaDiscoveryService schemaDiscoveryService() {
+        return new StaticSchemaDiscoveryService();
     }
 }

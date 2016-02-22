@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    include: default
+
+security:
+  oauth2:
+    resource:
+      tokenInfoUri: "http://localhost:${wiremock.port:10080}/tokeninfo"
+
+server:
+  compression:
+    min-response-size: 100

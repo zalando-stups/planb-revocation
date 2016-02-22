@@ -1,0 +1,8 @@
+spring:
+  profiles:
+    include: default
+
+security:
+  oauth2:
+    resource:
+      tokenInfoUri: "https://auth.zalando.com/z/oauth2/tokeninfo"
