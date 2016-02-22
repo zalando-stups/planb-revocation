@@ -75,7 +75,6 @@ public class RevocationResourceIT extends AbstractSpringTest {
                     URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), String.class);
 
         long contentLength = response.getHeaders().getContentLength();
-        System.out.println("CONTENT_LENGTH GET JSON : " + contentLength);
 
         JSONObject jsonBody = new JSONObject(response.getBody());
 
