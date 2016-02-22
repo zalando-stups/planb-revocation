@@ -9,7 +9,7 @@ public class YamlParsingException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String MESSAGE = "Error parsing YAML swaggerFile";
+    private static final String MESSAGE = "Error parsing YAML swagger file";
 
     public YamlParsingException() {
         super(MESSAGE);
