@@ -95,7 +95,10 @@ definitions:
           description: The claim of the tokens to revoke
         value_hash:
           type: string
-          description: Value of the claim, hashed
+          description: The revoked claim hashed using hash_algorithm, encoded in Base64 Basic
+        hash_algorithm:
+          type: string
+          description: The algorithm used for hashing the Claim
         issued_before:
           type: string
           format: date-time
@@ -116,8 +119,7 @@ definitions:
       properties:
         token_hash:
           type: string
-          description: Token hashAndEncode
-        revoked_at:
+          description: The revoked token hashed using hash_algorithm, encoded in Base64 Basic
+        hash_algorithm:
           type: string
-          format: date-time
-          description: Timestamp of the revocation
+          description: The algorithm used for hashing the Token

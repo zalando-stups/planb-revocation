@@ -13,4 +13,7 @@ import lombok.Data;
 public class TokenRevocationData implements RevocationData {
     @JsonProperty("token_hash")
     private String tokenHash;
+
+    @JsonProperty("hash_algorithm")
+    private String hashAlgorithm;
 }
