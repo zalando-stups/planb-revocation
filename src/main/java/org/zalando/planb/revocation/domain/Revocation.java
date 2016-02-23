@@ -26,7 +26,7 @@ public class Revocation {
         {
             @JsonSubTypes.Type(value = TokenRevocationData.class, name = "TOKEN"),
             @JsonSubTypes.Type(value = ClaimRevocationData.class, name = "CLAIM"),
-            @JsonSubTypes.Type(value = GlobalRevocation.class, name = "GLOBAL"),
+            @JsonSubTypes.Type(value = GlobalRevocationData.class, name = "GLOBAL"),
         }
     )
     private RevocationData data;

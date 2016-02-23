@@ -12,7 +12,9 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +37,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Created by jmussler on 11.02.16.
  */
+@Slf4j
 public class CassandraStorage implements RevocationStore {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CassandraStorage.class);
     public static final String REVOCATION_TABLE = "revocation";
     private static final RegularStatement SELECT_STATEMENT = QueryBuilder.select().column("revocation_type")
                                                                          .column("revocation_data").column("revoked_by")
@@ -118,7 +120,7 @@ public class CassandraStorage implements RevocationStore {
         List<Bucket> buckets = new ArrayList<>();
 
         final long maxTime = ((currentTime / BUCKET_LENGTH) * BUCKET_LENGTH) + BUCKET_LENGTH;
-        LOG.debug("{} {}", currentTime, maxTime);
+        log.debug("{} {}", currentTime, maxTime);
 
         do {
             String bucket_date = LocalDateFormatter.get().format(new Date(from));
@@ -128,7 +130,7 @@ public class CassandraStorage implements RevocationStore {
 
             from += BUCKET_LENGTH;
 
-            LOG.debug("adding bucket to list: {} {}", bucket_date, bucket_interval);
+            log.debug("adding bucket to list: {} {}", bucket_date, bucket_interval);
 
         } while (from < maxTime);
 
@@ -148,7 +150,7 @@ public class CassandraStorage implements RevocationStore {
 
         for (Bucket b : getBuckets(from, currentTime)) {
 
-            LOG.debug("Selecting bucket: {} {}", b.date, b.interval);
+            log.debug("Selecting bucket: {} {}", b.date, b.interval);
 
             ResultSet rs = session.execute(getFrom.bind(b.date, b.interval, from));
             List<Row> rows = rs.all();
@@ -162,7 +164,7 @@ public class CassandraStorage implements RevocationStore {
                     revocation.setRevokedAt(r.getLong("revoked_at"));
                     revocations.add(revocation);
                 } catch (IOException ex) {
-                    LOG.error("Failed to read revocation", ex);
+                    log.error("Failed to read revocation", ex);
                 }
             }
         }
@@ -182,14 +184,21 @@ public class CassandraStorage implements RevocationStore {
         long interval = getInterval(revocation.getRevokedAt());
         try {
             String data = mapper.writeValueAsString(revocation.getData());
-            LOG.debug("Storing in bucket: {} {} {}", date, interval, data);
+            log.debug("Storing in bucket: {} {} {}", date, interval, data);
+            System.out.println("DATA! " + data);
+
+            try {
+                TimeUnit.SECONDS.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             BoundStatement bs = storeRevocation.bind(date, interval, revocation.getType().name(), data,
                     revocation.getRevokedBy(), revocation.getRevokedAt());
             session.execute(bs);
             return true;
         } catch (JsonProcessingException ex) {
-            LOG.error("Failed to serialize json", ex);
+            log.error("Failed to serialize json", ex);
             return false;
         }
     }

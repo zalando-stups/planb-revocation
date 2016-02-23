@@ -1,40 +1,34 @@
 package org.zalando.planb.revocation;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.springframework.http.RequestEntity.get;
-import static org.springframework.http.RequestEntity.post;
-
-import java.net.URI;
-
 import org.json.JSONObject;
-
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-
 import org.springframework.test.context.ActiveProfiles;
-
 import org.springframework.web.client.RestTemplate;
-
+import org.zalando.planb.revocation.domain.ClaimRevocationData;
 import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.TokenRevocationData;
 import org.zalando.planb.revocation.persistence.RevocationStore;
+import org.zalando.planb.revocation.persistence.StoredClaim;
 import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
 import org.zalando.planb.revocation.util.MessageHasher;
+
+import java.net.URI;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.RequestEntity.get;
+import static org.springframework.http.RequestEntity.post;
 
 /**
  * Created by rreis on 17/02/16.
@@ -72,7 +66,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
         revocationStore.storeRevocation(revocation);
 
         ResponseEntity<String> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), String.class);
+                URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), String.class);
 
         long contentLength = response.getHeaders().getContentLength();
 
@@ -85,7 +79,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
     @Test
     public void testGetEmptyRevocation() {
         ResponseEntity<RevocationInfo> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), RevocationInfo.class);
+                URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), RevocationInfo.class);
         RevocationInfo responseBody = response.getBody();
 
         assertThat(responseBody.getMeta()).isNull();
@@ -97,22 +91,22 @@ public class RevocationResourceIT extends AbstractSpringTest {
     @Test
     public void testBadRequestWhenEmptyParamsOnGet() {
         ResponseEntity<RevocationInfo> response = restTemplate.exchange(get(URI.create(basePath() + "/revocations"))
-                    .build(), RevocationInfo.class);
+                .build(), RevocationInfo.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
     public void testInsertRevocation() {
-        Revocation requestBody = generateRevocation(RevocationType.TOKEN);
+        Revocation requestBody = generateRevocation(RevocationType.GLOBAL);
 
         ResponseEntity<Revocation> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
-                    .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), Revocation.class);
+                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), Revocation.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    public void testSHA256Hashing() {
+    public void testSHA256TokenHashing() {
         Revocation tokenRevocation = generateRevocation(RevocationType.TOKEN);
         TokenRevocationData revocationData = (TokenRevocationData) tokenRevocation.getData();
         String unhashedToken = revocationData.getTokenHash();
@@ -125,11 +119,34 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
         // Get revocations. We should get the one we stored
         ResponseEntity<RevocationInfo> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), RevocationInfo.class);
+                URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), RevocationInfo.class);
 
         TokenRevocationData fromService = (TokenRevocationData) response.getBody().getRevocations().get(0).getData();
 
         String hashedToken = messageHasher.hashAndEncode(RevocationType.TOKEN, unhashedToken);
         assertThat(fromService.getTokenHash()).isEqualTo(hashedToken);
+    }
+
+    @Test
+    public void testSHA256ClaimHashing() {
+        Revocation claimRevocation = generateRevocation(RevocationType.CLAIM);
+        ClaimRevocationData revocationData = (ClaimRevocationData) claimRevocation.getData();
+        String unhashedValue = revocationData.getValueHash();
+
+        // Store in backend
+        StoredRevocation storedRevocation = new StoredRevocation(new StoredClaim(revocationData.getName(),
+                revocationData.getValueHash(), revocationData.getIssuedBefore()),
+                claimRevocation.getType(), "int-test");
+        storedRevocation.setRevokedAt(claimRevocation.getRevokedAt());
+        revocationStore.storeRevocation(storedRevocation);
+
+        // Get revocations. We should get the one we stored
+        ResponseEntity<RevocationInfo> response = restTemplate.exchange(get(
+                URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), RevocationInfo.class);
+
+        ClaimRevocationData fromService = (ClaimRevocationData) response.getBody().getRevocations().get(0).getData();
+
+        String hashedValue = messageHasher.hashAndEncode(RevocationType.CLAIM, unhashedValue);
+        assertThat(fromService.getValueHash()).isEqualTo(hashedValue);
     }
 }
