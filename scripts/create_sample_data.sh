@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # A dumb (but useful) script to generate revocation rows for our Cassandra Cluster
 #
@@ -26,7 +26,7 @@ NOW=`date +%s`
 AN_HOUR=`expr 60 \* 60`
 A_DAY=`expr ${AN_HOUR} \* 24`
 
-echo ${HEADER}
+echo -e ${HEADER}
 for i in `seq ${NROWS}`
 do
     seed=${RANDOM}
@@ -34,7 +34,12 @@ do
     unix_timestamp=`expr ${NOW} - ${now_offset}`
     unix_timestamp_hours=`expr ${unix_timestamp} / ${AN_HOUR}`
 
-    bucket_date=`date -r ${unix_timestamp} "+%Y-%m-%d"`
+    if [ "`uname`" = "Darwin" ]; then
+        bucket_date=`date -r ${unix_timestamp} "+%Y-%m-%d"`
+    else
+        bucket_date=`date -d @${unix_timestamp} "+%Y-%m-%d"`
+    fi
+
     revoked_at=`expr ${unix_timestamp} \* 1000`
     bucket_interval=`expr \( ${unix_timestamp_hours} % 24 \) / 8`
 
@@ -58,9 +63,9 @@ do
         ;;
     esac
 
-    echo "INSERT INTO revocation"
-    echo "\t(bucket_date, bucket_interval, revoked_at, revocation_data, revocation_type, revoked_by)"
-    echo "VALUES"
-    echo "\t('${bucket_date}', ${bucket_interval}, ${revoked_at}, '${data}', '${type}', '${revoked_by}');"
+    echo -e "INSERT INTO revocation"
+    echo -e "\t(bucket_date, bucket_interval, revoked_at, revocation_data, revocation_type, revoked_by)"
+    echo -e "VALUES"
+    echo -e "\t('${bucket_date}', ${bucket_interval}, ${revoked_at}, '${data}', '${type}', '${revoked_by}');"
     echo
 done
