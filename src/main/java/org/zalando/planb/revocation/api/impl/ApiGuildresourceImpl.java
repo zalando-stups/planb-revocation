@@ -21,7 +21,7 @@ import org.zalando.planb.revocation.service.SwaggerService;
  * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
 @RestController
-public class ApiGuildresourceImpl implements ApiGuildResource {
+public class ApiGuildResourceImpl implements ApiGuildResource {
 
     @Autowired
     private SwaggerService swaggerService;

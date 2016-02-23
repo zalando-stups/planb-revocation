@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.domain.ClaimRevocationData;
-import org.zalando.planb.revocation.domain.GlobalRevocation;
+import org.zalando.planb.revocation.domain.GlobalRevocationData;
 import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
@@ -63,7 +63,7 @@ public class RevocationResourceImpl implements RevocationResource {
             newRevocation.setType(stored.getType());
 
             if (data instanceof StoredGlobal) {
-                GlobalRevocation apiData = new GlobalRevocation();
+                GlobalRevocationData apiData = new GlobalRevocationData();
                 apiData.setIssuedBefore(((StoredGlobal) data).getIssued_before());
                 newRevocation.setData(apiData);
 
@@ -111,7 +111,7 @@ public class RevocationResourceImpl implements RevocationResource {
 
             case GLOBAL :
 
-                GlobalRevocation gr = (GlobalRevocation) r.getData();
+                GlobalRevocationData gr = (GlobalRevocationData) r.getData();
                 data = new StoredGlobal(gr.getIssuedBefore());
                 break;
         }
