@@ -185,13 +185,6 @@ public class CassandraStorage implements RevocationStore {
         try {
             String data = mapper.writeValueAsString(revocation.getData());
             log.debug("Storing in bucket: {} {} {}", date, interval, data);
-            System.out.println("DATA! " + data);
-
-            try {
-                TimeUnit.SECONDS.sleep(20);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
 
             BoundStatement bs = storeRevocation.bind(date, interval, revocation.getType().name(), data,
                     revocation.getRevokedBy(), revocation.getRevokedAt());
