@@ -2,6 +2,10 @@ spring:
   profiles:
     include: default
 
+cassandra:
+  contactPoints: 127.0.0.1
+  clusterName: Local Cluster
+
 security:
   oauth2:
     resource:
