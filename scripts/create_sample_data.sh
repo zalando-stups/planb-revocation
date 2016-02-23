@@ -34,7 +34,7 @@ do
     unix_timestamp=`expr ${NOW} - ${now_offset}`
     unix_timestamp_hours=`expr ${unix_timestamp} / ${AN_HOUR}`
 
-    if [ "`uname`" = "Darwin" ]; then
+    if [[ "`uname`" == Darwin* ]]; then
         bucket_date=`date -r ${unix_timestamp} "+%Y-%m-%d"`
     else
         bucket_date=`date -d @${unix_timestamp} "+%Y-%m-%d"`
