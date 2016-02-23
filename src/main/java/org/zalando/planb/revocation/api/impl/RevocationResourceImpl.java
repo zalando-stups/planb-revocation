@@ -72,6 +72,7 @@ public class RevocationResourceImpl implements RevocationResource {
                 apiData.setName(((StoredClaim) data).getClaimName());
                 apiData.setValueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
                         ((StoredClaim) data).getClaimValue()));
+                apiData.setHashAlgorithm(messageHasher.getHashers().get(RevocationType.CLAIM).getAlgorithm());
                 apiData.setIssuedBefore(((StoredClaim) data).getIssuedBefore());
                 newRevocation.setData(apiData);
 
@@ -79,6 +80,7 @@ public class RevocationResourceImpl implements RevocationResource {
                 TokenRevocationData apiData = new TokenRevocationData();
                 apiData.setTokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
                         ((StoredToken) data).getTokenHash()));
+                apiData.setHashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm());
                 newRevocation.setData(apiData);
             }
 

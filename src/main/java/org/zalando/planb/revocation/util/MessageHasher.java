@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.EnumMap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.zalando.planb.revocation.domain.RevocationType;
 
 import lombok.Value;
@@ -37,7 +36,7 @@ public class MessageHasher {
 
     /**
      * Hashes the specified message using the algorithm specified by the <code>RevocationType</code> parameter. Returns
-     * a Base64 representation of the Hash.
+     * a Basic Base64 representation of the Hash.
      *
      * @param   type     algorithm to use
      * @param   message  the message to hash.
