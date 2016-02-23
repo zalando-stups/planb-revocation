@@ -1,4 +1,4 @@
-package org.zalando.planb.revocation;
+package org.zalando.planb.revocation.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,6 +27,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import org.springframework.web.client.RestTemplate;
 
+import org.zalando.planb.revocation.AbstractSpringTest;
+import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.domain.ClaimRevocationData;
 import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationInfo;
