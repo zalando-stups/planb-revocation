@@ -4,7 +4,7 @@
 #
 
 # Constants
-HEADER="USE revocation;\n\n"
+HEADER="USE revocation;\n"
 TYPES=("TOKEN" "CLAIM" "GLOBAL")
 REVOKERS=("rreis" "hjacobs" "lmineiro" "order-service" "iam")
 
