@@ -30,7 +30,7 @@ import org.zalando.planb.revocation.domain.RevocationType;
 @SpringApplicationConfiguration(classes = HashingConfig.class)
 public class MessageHashTest {
 
-    private static final String message = "aVerySecretMessage";
+    private static final String message = "A very secret Message";
 
     @Autowired
     MessageHasher messageHasher;
@@ -38,17 +38,28 @@ public class MessageHashTest {
     @Autowired
     HashingProperties hashingProperties;
 
+    /**
+     * Asserts that a {@link MessageHasher} properly hashes and encodes a message.
+     *
+     * @throws  NoSuchAlgorithmException
+     */
     @Test
-    public void testSHA256Hashing() throws NoSuchAlgorithmException {
-        MessageDigest hasher = MessageDigest.getInstance("SHA-256");
+    public void testMessageHashing() throws NoSuchAlgorithmException {
+        MessageDigest hasher = MessageDigest.getInstance(hashingProperties.getAlgorithms().get(RevocationType.TOKEN));
         hasher.update((hashingProperties.getSalt() + message).getBytes());
 
-        String expected = Base64.getEncoder().encodeToString(hasher.digest());
+        String expected = Base64.getUrlEncoder().encodeToString(hasher.digest());
         String base64sha256Hashed = messageHasher.hashAndEncode(RevocationType.TOKEN, message);
 
         assertEquals(expected, base64sha256Hashed);
     }
 
+    /**
+     * Asserts that, when no encryption algorithm is set for a {@link MessageHasher}, only the Base64 encding is
+     * performed.
+     *
+     * @throws  NoSuchAlgorithmException
+     */
     @Test
     public void testNullHashing() throws NoSuchAlgorithmException {
         MessageHasher nullHasher = new MessageHasher(null, null);
