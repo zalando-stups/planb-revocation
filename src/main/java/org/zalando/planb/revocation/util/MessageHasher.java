@@ -36,12 +36,12 @@ public class MessageHasher {
 
     /**
      * Hashes the specified message using the algorithm specified by the <code>RevocationType</code> parameter. Returns
-     * a Basic Base64 representation of the Hash.
+     * a Base64 URL encoding of the Hash.
      *
      * @param   type     algorithm to use
      * @param   message  the message to hash.
      *
-     * @return  a Base64 encoded version of the hash.
+     * @return  a Base64 URL encoded version of the hash.
      */
     public String hashAndEncode(final RevocationType type, final String message) {
         byte[] hashed = message.getBytes();
@@ -51,6 +51,6 @@ public class MessageHasher {
             hashed = hashers.get(type).digest();
         }
 
-        return Base64.getEncoder().encodeToString(hashed);
+        return Base64.getUrlEncoder().encodeToString(hashed);
     }
 }
