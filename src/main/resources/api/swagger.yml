@@ -119,7 +119,7 @@ definitions:
       properties:
         token_hash:
           type: string
-          description: The revoked token hashed using hash_algorithm, encoded in Base64 Basic
+          description: The revoked token hashed - using hash_algorithm -, encoded in URL Base64
         hash_algorithm:
           type: string
           description: The algorithm used for hashing the Token
