@@ -32,8 +32,6 @@ import org.zalando.planb.revocation.util.ApiGuildCompliance;
 @ActiveProfiles("test")
 public class RevocationResourceTest extends AbstractSpringTest {
 
-    private static final long FIVE_MINUTES_AGO = System.currentTimeMillis() - 3000;
-
     @Autowired
     private WebApplicationContext context;
 

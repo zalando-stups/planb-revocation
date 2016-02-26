@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 
 import org.springframework.util.StringUtils;
 
-import org.zalando.planb.revocation.api.ExceptionsResource;
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.persistence.CassandraStorage;
@@ -41,11 +40,6 @@ public class PlanBRevocationConfig {
         return
             new ObjectMapper().setPropertyNamingStrategy(
                 PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
-    }
-
-    @Bean
-    public ExceptionsResource exceptionsResource() {
-        return new ExceptionsResource();
     }
 
     @Bean

@@ -6,6 +6,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import org.zalando.planb.revocation.domain.ProblemResponse;
@@ -21,6 +22,7 @@ public class ExceptionsResource {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
     public ProblemResponse missingParameters(final MissingServletRequestParameterException e) {
         return ProblemResponse.fromExceptionWithStatus(e, HttpStatus.BAD_REQUEST);
     }

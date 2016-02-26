@@ -8,10 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.zalando.planb.revocation.api.RevocationResource;
@@ -38,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
 @RestController
+@RequestMapping(value = "/revocations", produces = MediaType.APPLICATION_JSON_VALUE)
 public class RevocationResourceImpl implements RevocationResource {
 
     @Autowired
@@ -50,8 +56,10 @@ public class RevocationResourceImpl implements RevocationResource {
     private MessageHasher messageHasher;
 
     @Override
-    public HttpEntity<String> get(@RequestParam(value = "from", required = true) final Long from)
-        throws JsonProcessingException {
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String get(@RequestParam final Long from) throws JsonProcessingException {
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
 
         List<Revocation> apiRevocations = new ArrayList<>(revocations.size());
@@ -90,10 +98,12 @@ public class RevocationResourceImpl implements RevocationResource {
         RevocationInfo responseBody = new RevocationInfo();
         responseBody.setRevocations(apiRevocations);
 
-        return new ResponseEntity<>(objectMapper.writeValueAsString(responseBody), HttpStatus.OK);
+        return objectMapper.writeValueAsString(responseBody);
     }
 
     @Override
+    @RequestMapping(method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
     public HttpEntity<String> post(@RequestBody final Revocation r) {
         RevocationData data = null;
         switch (r.getType()) {
