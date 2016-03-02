@@ -3,8 +3,7 @@ package org.zalando.planb.revocation.api;
 import org.springframework.http.HttpEntity;
 
 import org.zalando.planb.revocation.domain.Revocation;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.zalando.planb.revocation.domain.RevocationInfo;
 
 /**
  * TODO: small javadoc
@@ -13,7 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  */
 public interface RevocationResource {
 
-    String get(Long from) throws JsonProcessingException;
+    RevocationInfo get(Long from);
 
     HttpEntity<String> post(Revocation revocations);
 }

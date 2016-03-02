@@ -34,13 +34,12 @@ import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
 import org.zalando.planb.revocation.util.MessageHasher;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * TODO: small javadoc
  *
- * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
+ * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @RestController
 @RequestMapping(value = "/revocations", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -56,21 +55,21 @@ public class RevocationResourceImpl implements RevocationResource {
     private MessageHasher messageHasher;
 
     /**
-     * Returns a list of all revocations, since the specified timestamp.
+     * Returns a list of all revocations since the specified timestamp.
      *
-     * @param   from
+     * @param   from  UNIX timestamp (UTC) in milliseconds.
      *
-     * @return
-     *
-     * @throws  JsonProcessingException
+     * @return  a {@link RevocationInfo} with all revocations since the specified timestamp.
      */
     @Override
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String get(@RequestParam final Long from) throws JsonProcessingException {
+    public RevocationInfo get(@RequestParam final Long from) {
 
-        // When path is /revocations?from= throws a 500 with NullPointerException
+        /*
+         * When path is /revocations?from= (null value) throws an IllegalArgumentException
+         */
         if (from == null) {
             throw new IllegalArgumentException("Parameter 'from' must not be null");
         }
@@ -113,7 +112,7 @@ public class RevocationResourceImpl implements RevocationResource {
         RevocationInfo responseBody = new RevocationInfo();
         responseBody.setRevocations(apiRevocations);
 
-        return objectMapper.writeValueAsString(responseBody);
+        return responseBody;
     }
 
     @Override
