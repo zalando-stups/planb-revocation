@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import org.zalando.planb.revocation.domain.ProblemResponse;
+import org.zalando.planb.revocation.domain.Problem;
 
 /**
  * TODO: small javadoc
@@ -23,7 +23,7 @@ public class ExceptionsResource {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ProblemResponse missingParameters(final MissingServletRequestParameterException e) {
-        return ProblemResponse.fromExceptionWithStatus(e, HttpStatus.BAD_REQUEST);
+    public Problem missingParameters(final MissingServletRequestParameterException e) {
+        return Problem.fromExceptionWithStatus(e, HttpStatus.BAD_REQUEST);
     }
 }

@@ -11,7 +11,9 @@ import org.zalando.planb.revocation.domain.RevocationType;
 import lombok.Value;
 
 /**
- * Created by rreis on 2/18/16.
+ * Utility methods to assert compliance of Zalando's API Guild directives.
+ *
+ * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @Value
 public class MessageHasher {
@@ -36,12 +38,12 @@ public class MessageHasher {
 
     /**
      * Hashes the specified message using the algorithm specified by the <code>RevocationType</code> parameter. Returns
-     * a Basic Base64 representation of the Hash.
+     * a URL Base64 representation of the Hash.
      *
      * @param   type     algorithm to use
      * @param   message  the message to hash.
      *
-     * @return  a Base64 encoded version of the hash.
+     * @return  a URL Base64 encoded version of the hash.
      */
     public String hashAndEncode(final RevocationType type, final String message) {
         byte[] hashed = message.getBytes();

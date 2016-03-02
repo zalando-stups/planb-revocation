@@ -22,10 +22,13 @@ import org.springframework.web.context.WebApplicationContext;
 
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
+import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
 
 /**
- * Created by rreis on 17/02/16.
+ * Utility methods to assert compliance of Zalando's API Guild directives.
+ *
+ * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
@@ -42,6 +45,11 @@ public class RevocationResourceTest extends AbstractSpringTest {
         mvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
+    /**
+     * Tests that when <code>GET</code>ing revocations without parameters, an HTTP <code>BAD_REQUEST</code> is returned.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.
+     */
     @Test
     public void testBadRequestWhenEmptyParamsOnGet() throws Exception {
         ResultActions result = mvc.perform(MockMvcRequestBuilders.get("/revocations").accept(
