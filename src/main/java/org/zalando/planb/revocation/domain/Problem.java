@@ -56,7 +56,20 @@ public class Problem {
      *
      * @return  an immutable {@code Problem} built from the specified parameters
      */
-    public static Problem fromExceptionWithStatus(final Exception e, final HttpStatus status) {
-        return Problem.builder().status(status).title(status.getReasonPhrase()).detail(e.getMessage()).build();
+    public static Problem fromException(final Exception e, final HttpStatus status) {
+        return fromMessage(e.getMessage(), status);
     }
+
+    /**
+     * Returns a {@code Problem} instance built with the provided {@code message} and {@link HttpStatus}.
+     *
+     * @param   message  a textual description of the problem
+     * @param   status   the {@link HttpStatus} related to the problem
+     *
+     * @return  an immutable {@code Problem} built from the specified parameters
+     */
+    public static Problem fromMessage(final String message, final HttpStatus status) {
+        return Problem.builder().status(status).title(status.getReasonPhrase()).detail(message).build();
+    }
+
 }

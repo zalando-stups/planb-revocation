@@ -55,11 +55,26 @@ public class RevocationResourceImpl implements RevocationResource {
     @Autowired
     private MessageHasher messageHasher;
 
+    /**
+     * Returns a list of all revocations, since the specified timestamp.
+     *
+     * @param   from
+     *
+     * @return
+     *
+     * @throws  JsonProcessingException
+     */
     @Override
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String get(@RequestParam final Long from) throws JsonProcessingException {
+
+        // When path is /revocations?from= throws a 500 with NullPointerException
+        if (from == null) {
+            throw new IllegalArgumentException("Parameter 'from' must not be null");
+        }
+
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
 
         List<Revocation> apiRevocations = new ArrayList<>(revocations.size());
@@ -128,7 +143,7 @@ public class RevocationResourceImpl implements RevocationResource {
                 break;
         }
 
-        if (null == data) {
+        if (data == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 

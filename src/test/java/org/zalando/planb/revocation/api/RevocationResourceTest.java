@@ -26,7 +26,7 @@ import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
 
 /**
- * Utility methods to assert compliance of Zalando's API Guild directives.
+ * Unit tests for endpoint {@code /revocations}.
  *
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
@@ -46,13 +46,45 @@ public class RevocationResourceTest extends AbstractSpringTest {
     }
 
     /**
-     * Tests that when <code>GET</code>ing revocations without parameters, an HTTP <code>BAD_REQUEST</code> is returned.
+     * Tests that when {@code GET}ing revocations without parameters, an HTTP {@code BAD_REQUEST} is returned.
      *
-     * <p>Furthermore asserts that a standard {@link Problem} is returned.
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
     @Test
     public void testBadRequestWhenEmptyParamsOnGet() throws Exception {
         ResultActions result = mvc.perform(MockMvcRequestBuilders.get("/revocations").accept(
+                    MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isBadRequest());
+
+        ApiGuildCompliance.isStandardProblemResponse(result);
+    }
+
+    /**
+     * Tests that when {@code GET}ing revocations with parameters other tham {@code from}, an HTTP {@code BAD_REQUEST}
+     * is returned.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
+     */
+    @Test
+    public void testBadRequestWhenOtherParamsOnGet() throws Exception {
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.get("/revocations?to=").accept(
+                    MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isBadRequest());
+
+        ApiGuildCompliance.isStandardProblemResponse(result);
+    }
+
+    /**
+     * Tests that when {@code GET}ing revocations with a <code>null</code> parameter, an HTTP {@code BAD_REQUEST} is
+     * returned.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
+     */
+    @Test
+    public void testBadRequestWhenNullParamOnGet() throws Exception {
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.get("/revocations?from=").accept(
                     MediaType.APPLICATION_JSON));
 
         result.andExpect(status().isBadRequest());
