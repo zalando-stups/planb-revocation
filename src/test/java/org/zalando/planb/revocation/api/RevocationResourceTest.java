@@ -61,7 +61,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
     }
 
     /**
-     * Tests that when {@code GET}ing revocations with parameters other tham {@code from}, an HTTP {@code BAD_REQUEST}
+     * Tests that when {@code GET}ing revocations with parameters other than {@code from}, an HTTP {@code BAD_REQUEST}
      * is returned.
      *
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
@@ -69,6 +69,22 @@ public class RevocationResourceTest extends AbstractSpringTest {
     @Test
     public void testBadRequestWhenOtherParamsOnGet() throws Exception {
         ResultActions result = mvc.perform(MockMvcRequestBuilders.get("/revocations?to=").accept(
+                    MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isBadRequest());
+
+        ApiGuildCompliance.isStandardProblemResponse(result);
+    }
+
+    /**
+     * Tests that when {@code GET}ing revocations with a parameter value with a different type, an HTTP
+     * {@code BAD_REQUEST} is returned.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
+     */
+    @Test
+    public void testBadRequestWhenTypeMismatchOnGet() throws Exception {
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.get("/revocations?from=ilwhefouweh").accept(
                     MediaType.APPLICATION_JSON));
 
         result.andExpect(status().isBadRequest());
