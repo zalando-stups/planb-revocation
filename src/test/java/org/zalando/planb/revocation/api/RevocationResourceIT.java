@@ -9,7 +9,6 @@ import java.net.URI;
 
 import org.json.JSONObject;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,9 @@ import org.springframework.web.client.RestTemplate;
 
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
+import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.ClaimRevocationData;
+import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
@@ -41,7 +42,9 @@ import org.zalando.planb.revocation.persistence.StoredToken;
 import org.zalando.planb.revocation.util.MessageHasher;
 
 /**
- * Created by rreis on 17/02/16.
+ * TODO: small javadoc
+ *
+ * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
@@ -55,6 +58,9 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
     @Autowired
     private RevocationStore revocationStore;
+
+    @Autowired
+    private CassandraProperties cassandraProperties;
 
     @Autowired
     private MessageHasher messageHasher;
@@ -94,16 +100,6 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
         assertThat(responseBody.getMeta()).isNull();
         assertThat(responseBody.getRevocations().isEmpty()).isTrue();
-    }
-
-    // TODO General exception router
-    @Ignore
-    @Test
-    public void testBadRequestWhenEmptyParamsOnGet() {
-        ResponseEntity<RevocationInfo> response = restTemplate.exchange(get(URI.create(basePath() + "/revocations"))
-                    .build(), RevocationInfo.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -188,4 +184,22 @@ public class RevocationResourceIT extends AbstractSpringTest {
         String hashedValue = messageHasher.hashAndEncode(RevocationType.CLAIM, unhashedValue);
         assertThat(fromService.getValueHash()).isEqualTo(hashedValue);
     }
+
+    /**
+     * Tests that when {@code GET}ing revocations with a timestamp too old - according to a Cassandra Property, returns
+     * an error.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
+     */
+    @Test
+    public void testTimestampTooOldOnGet() throws Exception {
+
+        long tooOldTimeStamp = System.currentTimeMillis() - cassandraProperties.getMaxTimeDelta() - 1000;
+
+        ResponseEntity<String> response = restTemplate.exchange(get(
+                    URI.create(basePath() + "/revocations?from=" + tooOldTimeStamp)).build(), String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
 }
