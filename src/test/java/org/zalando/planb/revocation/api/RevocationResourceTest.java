@@ -3,6 +3,7 @@ package org.zalando.planb.revocation.api;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,5 +107,14 @@ public class RevocationResourceTest extends AbstractSpringTest {
         result.andExpect(status().isBadRequest());
 
         ApiGuildCompliance.isStandardProblem(result);
+    }
+
+    @Ignore
+    @Test
+    public void testBadRequestWhenBadJsonBodyOnPost() throws Exception {
+
+        // TODO implement!
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
+                    MediaType.APPLICATION_JSON));
     }
 }
