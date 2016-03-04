@@ -24,6 +24,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 import org.springframework.test.context.ActiveProfiles;
 
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import org.zalando.planb.revocation.AbstractSpringTest;
@@ -76,15 +77,13 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
         long currentTime = System.currentTimeMillis();
 
-        // A Stored revocation always have a revokedAd field set to current time
+        // A Stored revocation always have a revokedAt field set to current time
         StoredRevocation revocation = new StoredRevocation(new StoredToken("abcdef"), RevocationType.TOKEN, "int-test");
         revocation.setRevokedAt(currentTime);
         revocationStore.storeRevocation(revocation);
 
         ResponseEntity<String> response = restTemplate.exchange(get(
                     URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), String.class);
-
-        long contentLength = response.getHeaders().getContentLength();
 
         JSONObject jsonBody = new JSONObject(response.getBody());
 
@@ -196,10 +195,14 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
         long tooOldTimeStamp = System.currentTimeMillis() - cassandraProperties.getMaxTimeDelta() - 1000;
 
-        ResponseEntity<String> response = restTemplate.exchange(get(
+        ResponseEntity<String> response = null;
+        try {
+            response = restTemplate.exchange(get(
                     URI.create(basePath() + "/revocations?from=" + tooOldTimeStamp)).build(), String.class);
+        } catch(HttpClientErrorException e) {
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
 }
