@@ -148,7 +148,9 @@ public class RevocationResourceImpl implements RevocationResource {
 
         StoredRevocation storedRevocation = new StoredRevocation(data, r.getType(), "<!--add revoked by-->");
         if (storage.storeRevocation(storedRevocation)) {
-            return new ResponseEntity<>(HttpStatus.OK);
+
+            // TODO Refactor
+            return new ResponseEntity<>(HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

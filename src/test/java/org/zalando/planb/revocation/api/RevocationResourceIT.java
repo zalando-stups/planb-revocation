@@ -40,10 +40,11 @@ import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.persistence.StoredClaim;
 import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
+import org.zalando.planb.revocation.util.ApiGuildCompliance;
 import org.zalando.planb.revocation.util.MessageHasher;
 
 /**
- * TODO: small javadoc
+ * Integration tests for the {@code /revocations} endpoint.
  *
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
@@ -107,7 +108,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
         ResponseEntity<Revocation> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
                     .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), Revocation.class);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
 
     /**
@@ -185,8 +186,8 @@ public class RevocationResourceIT extends AbstractSpringTest {
     }
 
     /**
-     * Tests that when {@code GET}ing revocations with a timestamp too old - according to a Cassandra Property, returns
-     * an error.
+     * Tests that when {@code GET}ing revocations with a timestamp too old - according to {@link CassandraProperties} -,
+     * returns an error.
      *
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
@@ -195,14 +196,27 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
         long tooOldTimeStamp = System.currentTimeMillis() - cassandraProperties.getMaxTimeDelta() - 1000;
 
-        ResponseEntity<String> response = null;
         try {
-            response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + tooOldTimeStamp)).build(), String.class);
-        } catch(HttpClientErrorException e) {
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            restTemplate.exchange(get(URI.create(basePath() + "/revocations?from=" + tooOldTimeStamp)).build(),
+                String.class);
+        } catch (HttpClientErrorException e) {
+            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(ApiGuildCompliance.isStandardProblem(e.getResponseBodyAsString())).isTrue();
         }
-
     }
 
+    /**
+     * Tests that when {@code GET}ing revocations with a timestamp almost close to the maximum Time Delta - according to
+     * {@link CassandraProperties}, returns an valid response.
+     */
+    @Test
+    public void testTimestampNotTooOldOnGet() throws Exception {
+
+        long notTooOldTimeStamp = System.currentTimeMillis() - cassandraProperties.getMaxTimeDelta() + 1000;
+
+        ResponseEntity<String> response = restTemplate.exchange(get(
+                    URI.create(basePath() + "/revocations?from=" + notTooOldTimeStamp)).build(), String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 }

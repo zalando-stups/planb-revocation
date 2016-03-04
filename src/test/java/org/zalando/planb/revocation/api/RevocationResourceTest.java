@@ -57,7 +57,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
 
         result.andExpect(status().isBadRequest());
 
-        ApiGuildCompliance.isStandardProblemResponse(result);
+        ApiGuildCompliance.isStandardProblem(result);
     }
 
     /**
@@ -73,7 +73,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
 
         result.andExpect(status().isBadRequest());
 
-        ApiGuildCompliance.isStandardProblemResponse(result);
+        ApiGuildCompliance.isStandardProblem(result);
     }
 
     /**
@@ -89,7 +89,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
 
         result.andExpect(status().isBadRequest());
 
-        ApiGuildCompliance.isStandardProblemResponse(result);
+        ApiGuildCompliance.isStandardProblem(result);
     }
 
     /**
@@ -105,6 +105,6 @@ public class RevocationResourceTest extends AbstractSpringTest {
 
         result.andExpect(status().isBadRequest());
 
-        ApiGuildCompliance.isStandardProblemResponse(result);
+        ApiGuildCompliance.isStandardProblem(result);
     }
 }
