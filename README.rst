@@ -7,6 +7,10 @@ Plan B Revocation Service
 
 .. image:: https://codecov.io/github/zalando/planb-revocation/coverage.svg?branch=master
     :target: https://codecov.io/github/zalando/planb-revocation?branch=master
+    
+.. image:: https://readthedocs.org/projects/planb/badge/?version=latest
+   :target: https://readthedocs.org/projects/planb/?badge=latest
+   :alt: Documentation Status
 
 Revocation service for JWT tokens issued by the `Plan B OpenID Connect Provider`_.
 
