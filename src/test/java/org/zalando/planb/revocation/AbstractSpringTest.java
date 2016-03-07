@@ -34,7 +34,8 @@ public abstract class AbstractSpringTest {
 
     public static final String VALID_ACCESS_TOKEN = "Bearer 123456789";
     public static final String INVALID_ACCESS_TOKEN = "Bearer 987654321";
-    public static final String INSUFFICIENT_SCOPES_ACCESS_TOKEN = "Bearer 987654321";
+    public static final String INSUFFICIENT_SCOPES_ACCESS_TOKEN = "Bearer 123456";
+    public static final String SERVER_ERROR_ACCESS_TOKEN = "Bearer 500";
 
     public static final String TOKENINFO_RESPONSE = "{\n" + "    \"uid\": \"testapp\",\n" + "    \"scope\": [\n"
             + "        \"uid\",\n" + "        \"token.revoke\"\n" + "    ],\n" + "    \"hello\": \"World\",\n"
@@ -78,6 +79,9 @@ public abstract class AbstractSpringTest {
                 aResponse().withStatus(HttpStatus.OK.value()).withHeader(ContentTypeHeader.KEY,
                     MediaType.APPLICATION_JSON_VALUE).withBody(TOKENINFO_RESPONSE_INSUFFICIENT_SCOPES)));
 
+        stubFor(get(urlEqualTo("/tokeninfo")).withHeader(HttpHeaders.AUTHORIZATION,
+                equalTo(SERVER_ERROR_ACCESS_TOKEN)).willReturn(
+                aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
     }
 
     // Some utility methods

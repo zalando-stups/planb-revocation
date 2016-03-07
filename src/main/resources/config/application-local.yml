@@ -9,4 +9,4 @@ cassandra:
 security:
   oauth2:
     resource:
-      tokenInfoUri: "https://auth.zalando.com/z/oauth2/tokeninfo"
+      tokenInfoUri: "https://info.services.auth.zalando.com/oauth2/tokeninfo"

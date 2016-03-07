@@ -3,7 +3,6 @@ package org.zalando.planb.revocation.api;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import org.springframework.test.context.ActiveProfiles;
@@ -47,7 +47,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
     }
 
     /**
-     * Tests that when {@code GET}ing revocations without parameters, an HTTP {@code BAD_REQUEST} is returned.
+     * Tests that when {@code GET}ing revocations without parameters, a HTTP {@code BAD_REQUEST} is returned.
      *
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
@@ -62,8 +62,8 @@ public class RevocationResourceTest extends AbstractSpringTest {
     }
 
     /**
-     * Tests that when {@code GET}ing revocations with parameters other than {@code from}, an HTTP {@code BAD_REQUEST}
-     * is returned.
+     * Tests that when {@code GET}ing revocations with parameters other than {@code from}, a HTTP {@code BAD_REQUEST} is
+     * returned.
      *
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
@@ -78,7 +78,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
     }
 
     /**
-     * Tests that when {@code GET}ing revocations with a parameter value with a different type, an HTTP
+     * Tests that when {@code GET}ing revocations with a parameter value with a different type, a HTTP
      * {@code BAD_REQUEST} is returned.
      *
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
@@ -94,7 +94,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
     }
 
     /**
-     * Tests that when {@code GET}ing revocations with a <code>null</code> parameter, an HTTP {@code BAD_REQUEST} is
+     * Tests that when {@code GET}ing revocations with a <code>null</code> parameter, a HTTP {@code BAD_REQUEST} is
      * returned.
      *
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
@@ -109,12 +109,36 @@ public class RevocationResourceTest extends AbstractSpringTest {
         ApiGuildCompliance.isStandardProblem(result);
     }
 
-    @Ignore
+    /**
+     * Tests that when {@code POST}ing revocations with a non-JSON body, a HTTP {@code BAD_REQUEST} is returned.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
+     */
     @Test
-    public void testBadRequestWhenBadJsonBodyOnPost() throws Exception {
-
-        // TODO implement!
+    public void testBadRequestWhenNoJsonBodyInPost() throws Exception {
         ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
-                    MediaType.APPLICATION_JSON));
+                    MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
+                    "<json>Sure I am!</json>"));
+
+        result.andExpect(status().isBadRequest());
+
+        ApiGuildCompliance.isStandardProblem(result);
+    }
+
+    /**
+     * Tests that when {@code POST}ing revocations with an unexpected JSON body, a HTTP {@code BAD_REQUEST} is returned.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
+     */
+    @Test
+    public void testBadRequestWhenUnexpectedJsonBodyInPost() throws Exception {
+        String jsonObject = "{ space: [ { odyssey: [ \"2001\" ] } ] }";
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
+                    MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
+                    jsonObject));
+
+        result.andExpect(status().isBadRequest());
+
+        ApiGuildCompliance.isStandardProblem(result);
     }
 }

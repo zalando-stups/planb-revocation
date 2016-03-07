@@ -1,6 +1,7 @@
 package org.zalando.planb.revocation.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.StrictAssertions.failBecauseExceptionWasNotThrown;
 
 import static org.springframework.http.RequestEntity.get;
 import static org.springframework.http.RequestEntity.post;
@@ -25,6 +26,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.ActiveProfiles;
 
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import org.zalando.planb.revocation.AbstractSpringTest;
@@ -112,6 +114,61 @@ public class RevocationResourceIT extends AbstractSpringTest {
     }
 
     /**
+     * Tests that when inserting revocations with no access token, a HTTP {@code UNAUTHORIZED} is returned.
+     */
+    @Test
+    public void testUnauthorizedWhenNoTokenInInsert() {
+
+        // TODO finish, need to catch Exception
+        Revocation requestBody = generateRevocation(RevocationType.GLOBAL);
+
+        try {
+            ResponseEntity<Revocation> responseEntity = restTemplate.exchange(post(
+                        URI.create(basePath() + "/revocations")).body(requestBody), Revocation.class);
+            failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
+        } catch (HttpClientErrorException e) {
+            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+            assertThat(ApiGuildCompliance.isStandardProblem(e.getResponseBodyAsString())).isTrue();
+        }
+    }
+
+    /**
+     * Tests that when inserting revocations with no access token, a HTTP {@code UNAUTHORIZED} is returned.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
+     */
+    @Test
+    public void testUnauthorizedWhenInvalidTokenInInsert() {
+
+        // TODO finish, need to catch Exception
+        Revocation requestBody = generateRevocation(RevocationType.GLOBAL);
+
+        try {
+            restTemplate.exchange(post(URI.create(basePath() + "/revocations")).header(HttpHeaders.AUTHORIZATION,
+                    INVALID_ACCESS_TOKEN).body(requestBody), Revocation.class);
+            failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
+        } catch (HttpClientErrorException e) {
+            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+            assertThat(ApiGuildCompliance.isStandardProblem(e.getResponseBodyAsString())).isTrue();
+        }
+    }
+
+    @Test
+    public void testServerErrorOnTokenInfo() {
+        Revocation requestBody = generateRevocation(RevocationType.GLOBAL);
+
+        try {
+            restTemplate.exchange(post(URI.create(basePath() + "/revocations")).header(HttpHeaders.AUTHORIZATION,
+                    SERVER_ERROR_ACCESS_TOKEN).body(requestBody), Revocation.class);
+            failBecauseExceptionWasNotThrown(HttpServerErrorException.class);
+        } catch (HttpServerErrorException e) {
+            System.out.println(e.getResponseBodyAsString());
+            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            assertThat(ApiGuildCompliance.isStandardProblem(e.getResponseBodyAsString())).isTrue();
+        }
+    }
+
+    /**
      * Tests that when <code>GET</code>ing revocations, a <code>TOKEN</code> revocation is returned properly encoded and
      * encrypted. After inserting a known <code>TOKEN</code> revocation, performs a <code>GET</code> in the endpoint and
      * verifies that the response contains the same revocation information, containing the following:
@@ -192,13 +249,14 @@ public class RevocationResourceIT extends AbstractSpringTest {
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
     @Test
-    public void testTimestampTooOldOnGet() throws Exception {
+    public void testTimestampTooOldOnGet() {
 
         long tooOldTimeStamp = System.currentTimeMillis() - cassandraProperties.getMaxTimeDelta() - 1000;
 
         try {
             restTemplate.exchange(get(URI.create(basePath() + "/revocations?from=" + tooOldTimeStamp)).build(),
                 String.class);
+            failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
         } catch (HttpClientErrorException e) {
             assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(ApiGuildCompliance.isStandardProblem(e.getResponseBodyAsString())).isTrue();
@@ -210,7 +268,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
      * {@link CassandraProperties}, returns an valid response.
      */
     @Test
-    public void testTimestampNotTooOldOnGet() throws Exception {
+    public void testTimestampNotTooOldOnGet() {
 
         long notTooOldTimeStamp = System.currentTimeMillis() - cassandraProperties.getMaxTimeDelta() + 1000;
 
