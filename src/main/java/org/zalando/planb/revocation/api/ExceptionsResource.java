@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import org.springframework.web.client.HttpServerErrorException;
 import org.zalando.planb.revocation.domain.Problem;
 
 import lombok.extern.slf4j.Slf4j;
@@ -83,26 +82,6 @@ public class ExceptionsResource {
     @ResponseBody
     public Problem messageNotReadable(final HttpMessageNotReadableException e) {
         return Problem.fromMessage("Invalid JSON, or invalid JSON structure.", HttpStatus.BAD_REQUEST);
-    }
-
-    /**
-     * Handles all remaining exceptions not covered by the other handlers.
-     *
-     * <p>When an exception that is not covered by this {@link ControllerAdvice}, returns an HTTP 500 Internal Server
-     * Error with a generic {@link Problem} informing the unexpected error.</p>
-     *
-     * @param   e  the exception triggering the error
-     *
-     * @return  a {@link Problem} with the unexpected error information.
-     */
-    @ExceptionHandler(HttpServerErrorException.class)
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody
-    public Problem handleTokeInfoException(final HttpServerErrorException e) {
-        log.error("An unexpected error occurred: {}", e.getMessage() != null ? e.getMessage() : e.getClass().getName());
-        log.debug("Error details: ", e);
-
-        return Problem.fromMessage("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**

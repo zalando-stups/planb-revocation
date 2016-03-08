@@ -1,5 +1,7 @@
 package org.zalando.planb.revocation.config;
 
+import java.util.EnumMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -11,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
+import org.zalando.planb.revocation.domain.RevocationFlag;
 import org.zalando.planb.revocation.persistence.CassandraStorage;
 import org.zalando.planb.revocation.persistence.InMemoryStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
@@ -42,12 +45,35 @@ public class PlanBRevocationConfig {
                 PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     }
 
+    /**
+     * Meta information included when a client get revocations.
+     *
+     * @return  an {@link EnumMap} indexed by {@link RevocationFlag}
+     */
     @Bean
-    public RevocationStore revocationStore() {
+    public EnumMap<RevocationFlag, Object> metaInformation() {
+        return new EnumMap<>(RevocationFlag.class);
+    }
+
+    /**
+     * Storage used for revocations.
+     *
+     * <p>If no {@link CassandraProperties} are defined, defaults to in-memory storage.</p>
+     *
+     * @param   metaInformation  if the store is a Cassandra cluster, adds the {@code cassandra.maxTimeDelta} as in the
+     *                           meta information.
+     *
+     * @return  the resulting {@code RevocationStore}
+     *
+     * @see     CassandraProperties
+     */
+    @Bean
+    public RevocationStore revocationStore(final EnumMap<RevocationFlag, Object> metaInformation) {
         if (StringUtils.isEmpty(cassandraProperties.getContactPoints())) {
             return new InMemoryStore();
         }
 
+        metaInformation.put(RevocationFlag.MAX_TIME_DELTA, cassandraProperties.getMaxTimeDelta());
         return new CassandraStorage(cassandraProperties);
     }
 

@@ -35,6 +35,7 @@ import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.ClaimRevocationData;
 import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.domain.Revocation;
+import org.zalando.planb.revocation.domain.RevocationFlag;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.TokenRevocationData;
@@ -94,13 +95,25 @@ public class RevocationResourceIT extends AbstractSpringTest {
         assertThat(jsonBody.getJSONArray("revocations").getJSONObject(0).get("revoked_at")).isNotNull();
     }
 
+    /**
+     * Tests {@code GET}ting revocations with an empty storage. Asserts that no revocations are returned, and that the
+     * meta section contains information about the maximum time delta allowed.
+     */
     @Test
     public void testGetEmptyRevocation() {
         ResponseEntity<RevocationInfo> response = restTemplate.exchange(get(
                     URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), RevocationInfo.class);
         RevocationInfo responseBody = response.getBody();
 
-        assertThat(responseBody.getMeta()).isNull();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        /*
+         * Jackson probably unmarshalls this value to the a Number with the lowest resolution possible. That's why I'm
+         * using a toString here.
+         */
+        Long maxTimeDelta = Long.valueOf(responseBody.getMeta().get(RevocationFlag.MAX_TIME_DELTA).toString());
+        assertThat(maxTimeDelta).isEqualTo(cassandraProperties.getMaxTimeDelta());
+
         assertThat(responseBody.getRevocations().isEmpty()).isTrue();
     }
 
@@ -152,8 +165,8 @@ public class RevocationResourceIT extends AbstractSpringTest {
     }
 
     /**
-     * Tests that when there's a Server Error returned from the Token Info Endpoint, a HTTP {@code INTERNAL SERVER
-     * ERROR} is returned.
+     * Tests that when there's a Server Error returned from the Token Info Endpoint, a HTTP
+     * {@code INTERNAL SERVER ERROR} is returned.
      *
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */

@@ -50,5 +50,6 @@ public class CassandraProperties {
 
     private ConsistencyLevel readConsistencyLevel = ONE;
 
-    private Long maxTimeDelta = 172800000L;
+    private Long maxTimeDelta = 172800000L; // Maybe this maxTimeDelta should be derived from the bucket size in
+                                            // Cassandra...
 }

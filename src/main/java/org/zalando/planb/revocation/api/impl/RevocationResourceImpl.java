@@ -2,6 +2,7 @@ package org.zalando.planb.revocation.api.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.domain.ClaimRevocationData;
 import org.zalando.planb.revocation.domain.GlobalRevocationData;
 import org.zalando.planb.revocation.domain.Revocation;
+import org.zalando.planb.revocation.domain.RevocationFlag;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.TokenRevocationData;
@@ -34,8 +36,6 @@ import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
 import org.zalando.planb.revocation.util.MessageHasher;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * TODO: small javadoc
  *
@@ -46,10 +46,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RevocationResourceImpl implements RevocationResource {
 
     @Autowired
-    RevocationStore storage;
+    private RevocationStore storage;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private EnumMap<RevocationFlag, Object> metaInformation;
 
     @Autowired
     private MessageHasher messageHasher;
@@ -110,6 +110,7 @@ public class RevocationResourceImpl implements RevocationResource {
         }
 
         RevocationInfo responseBody = new RevocationInfo();
+        responseBody.setMeta(metaInformation);
         responseBody.setRevocations(apiRevocations);
 
         return responseBody;
