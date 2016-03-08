@@ -118,4 +118,19 @@ public abstract class AbstractSpringTest {
 
         return generated;
     }
+
+    /**
+     * Utility method to store refresh information.
+     *
+     * @param   utcTimestamp  a UTC UNIX timestamp
+     *
+     * @return  a UTC UNIX timestamp representing when the refresh was stored (also inserted in storage).
+     */
+    public static Long insertRefreshFrom(final Long utcTimestamp) {
+        Long when = System.currentTimeMillis() / 1000L;
+
+        // TODO implement utility
+
+        return when;
+    }
 }

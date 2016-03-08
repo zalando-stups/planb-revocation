@@ -7,6 +7,6 @@ package org.zalando.planb.revocation.domain;
  */
 public enum RevocationFlag {
     MAX_TIME_DELTA,
-    FORCE_REFRESH_FROM,
-    FORCED_AT
+    REFRESH_FROM,
+    REFRESH_TIMESTAMP
 }
