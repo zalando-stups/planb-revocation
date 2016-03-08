@@ -32,24 +32,25 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
  */
 public abstract class AbstractSpringTest {
 
-    static final String VALID_ACCESS_TOKEN = "Bearer 123456789";
-    static final String INVALID_ACCESS_TOKEN = "Bearer 987654321";
-    static final String INSUFFICIENT_SCOPES_ACCESS_TOKEN = "Bearer 987654321";
+    public static final String VALID_ACCESS_TOKEN = "Bearer 123456789";
+    public static final String INVALID_ACCESS_TOKEN = "Bearer 987654321";
+    public static final String INSUFFICIENT_SCOPES_ACCESS_TOKEN = "Bearer 123456";
+    public static final String SERVER_ERROR_ACCESS_TOKEN = "Bearer 500";
 
-    private static final String TOKENINFO_RESPONSE = "{\n" + "    \"uid\": \"testapp\",\n" + "    \"scope\": [\n"
+    public static final String TOKENINFO_RESPONSE = "{\n" + "    \"uid\": \"testapp\",\n" + "    \"scope\": [\n"
             + "        \"uid\",\n" + "        \"token.revoke\"\n" + "    ],\n" + "    \"hello\": \"World\",\n"
             + "    \"expires_in\": 99999,\n" + "    \"token_type\": \"Bearer\",\n"
             + "    \"access_token\": \"987654321\",\n" + "    \"realm\": \"/services\"\n" + "}";
 
-    private static final String TOKENINFO_RESPONSE_INSUFFICIENT_SCOPES = "{\n" + "    \"uid\": \"testapp\",\n"
+    public static final String TOKENINFO_RESPONSE_INSUFFICIENT_SCOPES = "{\n" + "    \"uid\": \"testapp\",\n"
             + "    \"scope\": [\n" + "        \"uid\"\n" + "    ],\n" + "    \"expires_in\": 99999,\n"
             + "    \"token_type\": \"Bearer\",\n" + "    \"access_token\": \"987654321\",\n"
             + "    \"realm\": \"/services\"\n" + "}";
 
-    private static final String EXPIRED_ACCESS_TOKEN_RESPONSE = "{\n" + "    \"error\": \"invalid_request\",\n"
+    public static final String EXPIRED_ACCESS_TOKEN_RESPONSE = "{\n" + "    \"error\": \"invalid_request\",\n"
             + "    \"error_description\": \"Access Token not valid\"\n" + "}";
 
-    static final String SAMPLE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+    public static final String SAMPLE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
             + ".eyJzdWIiOiIxIiwibmFtZSI6InJyZWlzIiwiYWRtaW4iOnRydWV9.UlZhyvrY9e7tRU88l8sfRb37oWGiL2t4insnO9Nsn1c";
 
     @Rule
@@ -78,10 +79,13 @@ public abstract class AbstractSpringTest {
                 aResponse().withStatus(HttpStatus.OK.value()).withHeader(ContentTypeHeader.KEY,
                     MediaType.APPLICATION_JSON_VALUE).withBody(TOKENINFO_RESPONSE_INSUFFICIENT_SCOPES)));
 
+        stubFor(get(urlEqualTo("/tokeninfo")).withHeader(HttpHeaders.AUTHORIZATION,
+                equalTo(SERVER_ERROR_ACCESS_TOKEN)).willReturn(
+                aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
     }
 
     // Some utility methods
-    static Revocation generateRevocation(final RevocationType type) {
+    public static Revocation generateRevocation(final RevocationType type) {
 
         Revocation generated = new Revocation();
 

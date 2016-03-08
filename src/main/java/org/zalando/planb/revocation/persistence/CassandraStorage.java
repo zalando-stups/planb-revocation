@@ -12,15 +12,10 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.zalando.planb.revocation.util.LocalDateFormatter;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.util.LocalDateFormatter;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
@@ -34,8 +29,12 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * Created by jmussler on 11.02.16.
+ * TODO: small javadoc
+ *
+ * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @Slf4j
 public class CassandraStorage implements RevocationStore {
@@ -58,6 +57,8 @@ public class CassandraStorage implements RevocationStore {
 
     private final Session session;
 
+    private final Long maxTimeDelta;
+
     private final PreparedStatement getFrom;
 
     private final PreparedStatement storeRevocation;
@@ -67,24 +68,21 @@ public class CassandraStorage implements RevocationStore {
     private static class GlobalMapper implements RevocationDataMapper {
         @Override
         public RevocationData get(final String data) throws IOException {
-            StoredGlobal r = mapper.readValue(data, StoredGlobal.class);
-            return r;
+            return mapper.readValue(data, StoredGlobal.class);
         }
     }
 
     private static class ClaimMapper implements RevocationDataMapper {
         @Override
         public RevocationData get(final String data) throws IOException {
-            StoredClaim r = mapper.readValue(data, StoredClaim.class);
-            return r;
+            return mapper.readValue(data, StoredClaim.class);
         }
     }
 
     private static class TokenMapper implements RevocationDataMapper {
         @Override
         public RevocationData get(final String data) throws IOException {
-            StoredToken r = mapper.readValue(data, StoredToken.class);
-            return r;
+            return mapper.readValue(data, StoredToken.class);
         }
     }
 
@@ -94,6 +92,7 @@ public class CassandraStorage implements RevocationStore {
                                  .withPort(cassandraProperties.getPort()).build();
 
         session = cluster.connect(cassandraProperties.getKeyspace());
+        maxTimeDelta = cassandraProperties.getMaxTimeDelta();
         dataMappers.put(RevocationType.TOKEN, new TokenMapper());
         dataMappers.put(RevocationType.GLOBAL, new GlobalMapper());
         dataMappers.put(RevocationType.CLAIM, new ClaimMapper());
@@ -143,7 +142,7 @@ public class CassandraStorage implements RevocationStore {
         Collection<StoredRevocation> revocations = new ArrayList<>();
 
         long currentTime = System.currentTimeMillis();
-        if ((currentTime - from) > (2 * 24 * 60 * 60 * 1000)) {
+        if ((currentTime - from) > maxTimeDelta) {
             throw new IllegalArgumentException("From Timestamp is too old!"); // avoid erroneous query of too many
                                                                               // buckets
         }
@@ -174,8 +173,7 @@ public class CassandraStorage implements RevocationStore {
 
     protected static long getInterval(final long timestamp) {
         long hours = timestamp / 1000 / 60 / 60;
-        long segment = (hours % 24) / 8;
-        return segment;
+        return (hours % 24) / 8;
     }
 
     @Override

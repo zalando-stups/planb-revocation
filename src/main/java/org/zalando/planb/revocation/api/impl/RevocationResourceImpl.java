@@ -8,10 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.zalando.planb.revocation.api.RevocationResource;
@@ -29,15 +34,15 @@ import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
 import org.zalando.planb.revocation.util.MessageHasher;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * TODO: small javadoc
  *
- * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
+ * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @RestController
+@RequestMapping(value = "/revocations", produces = MediaType.APPLICATION_JSON_VALUE)
 public class RevocationResourceImpl implements RevocationResource {
 
     @Autowired
@@ -49,9 +54,26 @@ public class RevocationResourceImpl implements RevocationResource {
     @Autowired
     private MessageHasher messageHasher;
 
+    /**
+     * Returns a list of all revocations since the specified timestamp.
+     *
+     * @param   from  UNIX timestamp (UTC) in milliseconds.
+     *
+     * @return  a {@link RevocationInfo} with all revocations since the specified timestamp.
+     */
     @Override
-    public HttpEntity<String> get(@RequestParam(value = "from", required = true) final Long from)
-        throws JsonProcessingException {
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public RevocationInfo get(@RequestParam final Long from) {
+
+        /*
+         * When path is /revocations?from= (null value) throws an IllegalArgumentException
+         */
+        if (from == null) {
+            throw new IllegalArgumentException("Parameter 'from' must not be null");
+        }
+
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
 
         List<Revocation> apiRevocations = new ArrayList<>(revocations.size());
@@ -90,10 +112,12 @@ public class RevocationResourceImpl implements RevocationResource {
         RevocationInfo responseBody = new RevocationInfo();
         responseBody.setRevocations(apiRevocations);
 
-        return new ResponseEntity<>(objectMapper.writeValueAsString(responseBody), HttpStatus.OK);
+        return responseBody;
     }
 
     @Override
+    @RequestMapping(method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
     public HttpEntity<String> post(@RequestBody final Revocation r) {
         RevocationData data = null;
         switch (r.getType()) {
@@ -118,13 +142,15 @@ public class RevocationResourceImpl implements RevocationResource {
                 break;
         }
 
-        if (null == data) {
+        if (data == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         StoredRevocation storedRevocation = new StoredRevocation(data, r.getType(), "<!--add revoked by-->");
         if (storage.storeRevocation(storedRevocation)) {
-            return new ResponseEntity<>(HttpStatus.OK);
+
+            // TODO Refactor
+            return new ResponseEntity<>(HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
