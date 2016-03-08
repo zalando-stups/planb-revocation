@@ -11,7 +11,7 @@ HEADER="USE revocation;\n"
 TYPES=("TOKEN" "CLAIM" "GLOBAL")
 
 # Revokers are also used as the value for CLAIMs
-REVOKERS=("rreis" "hjacobs" "lmineiro" "order-service" "iam")
+REVOKERS=("3035729288" "0123456710" "011011100" "0123456789" "9876543210")
 
 TOKENS=("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6InJyZWlzIiwiYWRtaW4iOnRydWV9.UlZhyvrY9e7tRU88l8sfRb37oWGiL2t4insnO9Nsn1c" \
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6ImhqYWNvYnMiLCJhZG1pbiI6dHJ1ZX0.juP59kVFwPKyUCDNYZA6r_9wrWkLu7zJPsIRrrIYpls" \
