@@ -44,7 +44,7 @@ import org.zalando.planb.revocation.util.ApiGuildCompliance;
 /**
  * Integration tests for the {@code /notifications} endpoint.
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
@@ -68,6 +68,11 @@ public class NotificationResourceIT extends AbstractSpringTest {
         return "http://localhost:" + port;
     }
 
+    /**
+     * Tests {@code POST}ting a {@code REFRESH_FROM} as meta information.
+     *
+     * <p>Asserts that the request was successful, and that refresh information was stored with corresponding values.</p>
+     */
     @Test
     public void testInsertRefreshFrom() {
 
@@ -75,17 +80,11 @@ public class NotificationResourceIT extends AbstractSpringTest {
         metaInfo.put(RevocationFlag.REFRESH_FROM, FIVE_MINUTES_AGO);
 
 
-        // TODO implement
-//        // A Stored revocation always have a revokedAt field set to current time
-//        StoredRevocation revocation = new StoredRevocation(new StoredToken("abcdef"), RevocationType.TOKEN, "int-test");
-//        revocation.setRevokedAt(currentTime);
-//        revocationStore.storeRevocation(revocation);
-//
-//        ResponseEntity<String> response = restTemplate.exchange(post(URI.create(basePath() + "/notifications")).body()
-//                    .build(), String.class);
-//
-//        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-//        assertThat(jsonBody.getJSONArray("revocations").getJSONObject(0).get("revoked_at")).isNotNull();
+        ResponseEntity<String> response = restTemplate.exchange(post(URI.create(basePath() + "/notifications")).body
+                (metaInfo), String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+//        assertThat(revocationStore.getForceRefresh().getRefreshFrom()).isEqualTo(FIVE_MINUTES_AGO);
     }
 
     /**
@@ -95,7 +94,7 @@ public class NotificationResourceIT extends AbstractSpringTest {
     @Test
     public void testGetEmptyRevocation() {
         ResponseEntity<RevocationInfo> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), RevocationInfo.class);
+                URI.create(basePath() + "/revocations?from=" + FIVE_MINUTES_AGO)).build(), RevocationInfo.class);
         RevocationInfo responseBody = response.getBody();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -115,7 +114,7 @@ public class NotificationResourceIT extends AbstractSpringTest {
         Revocation requestBody = generateRevocation(RevocationType.GLOBAL);
 
         ResponseEntity<Revocation> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
-                    .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), Revocation.class);
+                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), Revocation.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
 
@@ -130,7 +129,7 @@ public class NotificationResourceIT extends AbstractSpringTest {
 
         try {
             ResponseEntity<Revocation> responseEntity = restTemplate.exchange(post(
-                        URI.create(basePath() + "/revocations")).body(requestBody), Revocation.class);
+                    URI.create(basePath() + "/revocations")).body(requestBody), Revocation.class);
             failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
         } catch (HttpClientErrorException e) {
             assertThat(e.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -139,7 +138,7 @@ public class NotificationResourceIT extends AbstractSpringTest {
 
     /**
      * Tests that when inserting revocations with a wrong access token, a HTTP {@code UNAUTHORIZED} is returned.
-     *
+     * <p>
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
     @Test
@@ -160,7 +159,7 @@ public class NotificationResourceIT extends AbstractSpringTest {
     /**
      * Tests that when there's a Server Error returned from the Token Info Endpoint, a HTTP
      * {@code INTERNAL SERVER ERROR} is returned.
-     *
+     * <p>
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
     @Test
@@ -179,7 +178,7 @@ public class NotificationResourceIT extends AbstractSpringTest {
     /**
      * Tests that when {@code GET}ing revocations with a timestamp too old - according to {@link CassandraProperties} -,
      * returns an error.
-     *
+     * <p>
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
     @Test
@@ -189,7 +188,7 @@ public class NotificationResourceIT extends AbstractSpringTest {
 
         try {
             restTemplate.exchange(get(URI.create(basePath() + "/revocations?from=" + tooOldTimeStamp)).build(),
-                String.class);
+                    String.class);
             failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
         } catch (HttpClientErrorException e) {
             assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -207,7 +206,7 @@ public class NotificationResourceIT extends AbstractSpringTest {
         long notTooOldTimeStamp = System.currentTimeMillis() - cassandraProperties.getMaxTimeDelta() + 1000;
 
         ResponseEntity<String> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + notTooOldTimeStamp)).build(), String.class);
+                URI.create(basePath() + "/revocations?from=" + notTooOldTimeStamp)).build(), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

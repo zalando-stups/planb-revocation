@@ -159,7 +159,6 @@ public class RevocationResourceIT extends AbstractSpringTest {
     @Test
     public void testUnauthorizedWhenNoTokenInInsert() {
 
-        // TODO finish, need to catch Exception
         Revocation requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
@@ -168,6 +167,10 @@ public class RevocationResourceIT extends AbstractSpringTest {
             failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
         } catch (HttpClientErrorException e) {
             assertThat(e.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+            /*
+             * Still need to return a Problem, but the ControllerAdvice isn't being called. Maybe this can help:
+             * https://stackoverflow.com/questions/30335157/make-simple-servlet-filter-work-with-controlleradvice
+             */
         }
     }
 
@@ -179,7 +182,6 @@ public class RevocationResourceIT extends AbstractSpringTest {
     @Test
     public void testUnauthorizedWhenInvalidTokenInInsert() {
 
-        // TODO finish, need to catch Exception
         Revocation requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
@@ -188,6 +190,10 @@ public class RevocationResourceIT extends AbstractSpringTest {
             failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
         } catch (HttpClientErrorException e) {
             assertThat(e.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+            /*
+             * Still need to return a Problem, but the ControllerAdvice isn't being called. Maybe this can help:
+             * https://stackoverflow.com/questions/30335157/make-simple-servlet-filter-work-with-controlleradvice
+             */
         }
     }
 
@@ -207,6 +213,10 @@ public class RevocationResourceIT extends AbstractSpringTest {
             failBecauseExceptionWasNotThrown(HttpServerErrorException.class);
         } catch (HttpServerErrorException e) {
             assertThat(e.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            /*
+             * Still need to return a Problem, but the ControllerAdvice isn't being called. Maybe this can help:
+             * https://stackoverflow.com/questions/30335157/make-simple-servlet-filter-work-with-controlleradvice
+             */
         }
     }
 
