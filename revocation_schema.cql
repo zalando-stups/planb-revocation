@@ -12,11 +12,11 @@ CREATE TABLE revocation.revocation (
 )
 WITH CLUSTERING ORDER BY (revoked_at DESC);
 
-CREATE TABLE revocation.force_refresh (
-    forced_year int, -- only bucket we need
-    forced_ts timestamp,
-    forced_at timestamp,
-    forced_by TEXT,
-    PRIMARY KEY(forced_year, forced_at)
+CREATE TABLE revocation.refresh (
+    refresh_year INT,    -- only bucket we need
+    refresh_ts BIGINT,   -- seconds since epoch
+    refresh_from BIGINT, -- from when to refresh revocations. Seconds since epoch
+    created_by TEXT,     -- name of the user who created this entry
+    PRIMARY KEY(refresh_year, refresh_ts)
 )
-WITH CLUSTERING ORDER BY (forced_at DESC);
+WITH CLUSTERING ORDER BY (refresh_ts DESC);

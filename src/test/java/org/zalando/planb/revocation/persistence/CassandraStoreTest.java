@@ -1,20 +1,22 @@
 package org.zalando.planb.revocation.persistence;
 
-import org.junit.Test;
-import org.zalando.planb.revocation.util.LocalTimeFormatter;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.text.ParseException;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import org.zalando.planb.revocation.util.LocalTimeFormatter;
 
 /**
  * Created by jmussler on 16.02.16.
  */
-public class CassandraStorageTest {
+public class CassandraStoreTest {
 
     @Test
     public void testSameInterval() throws ParseException {
@@ -24,7 +26,7 @@ public class CassandraStorageTest {
         String current = "2016-02-16 14:30:00.000+00";
         Date currentDate = LocalTimeFormatter.get().parse(current);
 
-        List<CassandraStorage.Bucket> buckets =CassandraStorage.getBuckets(fromDate.getTime(), currentDate.getTime());
+        List<CassandraStore.Bucket> buckets = CassandraStore.getBuckets(fromDate.getTime(), currentDate.getTime());
         assertThat(buckets.size()).isEqualTo(1);
         assertThat(buckets.get(0).date).isEqualTo("2016-02-16");
         assertThat(buckets.get(0).interval).isEqualTo(1);
@@ -38,11 +40,10 @@ public class CassandraStorageTest {
         String current = "2016-02-16 16:00:00.000+00";
         Date currentDate = LocalTimeFormatter.get().parse(current);
 
-        List<CassandraStorage.Bucket> buckets =CassandraStorage.getBuckets(fromDate.getTime(), currentDate.getTime());
+        List<CassandraStore.Bucket> buckets = CassandraStore.getBuckets(fromDate.getTime(), currentDate.getTime());
         assertThat(buckets.size()).isEqualTo(2);
         assertThat(buckets.get(0).date).isEqualTo("2016-02-16");
         assertThat(buckets.get(0).interval).isEqualTo(1);
-
 
         assertThat(buckets.get(1).date).isEqualTo("2016-02-16");
         assertThat(buckets.get(1).interval).isEqualTo(2);
@@ -56,7 +57,7 @@ public class CassandraStorageTest {
         String current = "2016-02-17 01:00:00.000+00";
         Date currentDate = LocalTimeFormatter.get().parse(current);
 
-        List<CassandraStorage.Bucket> buckets =CassandraStorage.getBuckets(fromDate.getTime(), currentDate.getTime());
+        List<CassandraStore.Bucket> buckets = CassandraStore.getBuckets(fromDate.getTime(), currentDate.getTime());
         assertThat(buckets.size()).isEqualTo(2);
         assertThat(buckets.get(0).date).isEqualTo("2016-02-16");
         assertThat(buckets.get(0).interval).isEqualTo(2);
@@ -73,7 +74,7 @@ public class CassandraStorageTest {
         String current = "2016-02-17 01:00:00.000+00";
         Date currentDate = LocalTimeFormatter.get().parse(current);
 
-        List<CassandraStorage.Bucket> buckets =CassandraStorage.getBuckets(fromDate.getTime(), currentDate.getTime());
+        List<CassandraStore.Bucket> buckets = CassandraStore.getBuckets(fromDate.getTime(), currentDate.getTime());
         assertThat(buckets.size()).isEqualTo(4);
     }
 
@@ -88,8 +89,9 @@ public class CassandraStorageTest {
         data.put("2016-02-16 16:00:00.000+00", 2);
         data.put("2016-02-16 23:59:59.999+00", 2);
 
-        for(Map.Entry<String, Integer> e : data.entrySet()) {
-            assertThat(CassandraStorage.getInterval(LocalTimeFormatter.get().parse(e.getKey()).getTime())).isEqualTo((long)e.getValue());
+        for (Map.Entry<String, Integer> e : data.entrySet()) {
+            assertThat(CassandraStore.getInterval(LocalTimeFormatter.get().parse(e.getKey()).getTime())).isEqualTo(
+                (long) e.getValue());
         }
     }
 }

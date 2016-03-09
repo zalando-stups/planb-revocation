@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.RevocationFlag;
-import org.zalando.planb.revocation.persistence.CassandraStorage;
+import org.zalando.planb.revocation.persistence.CassandraStore;
 import org.zalando.planb.revocation.persistence.InMemoryStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.service.SchemaDiscoveryService;
@@ -74,7 +74,7 @@ public class PlanBRevocationConfig {
         }
 
         metaInformation.put(RevocationFlag.MAX_TIME_DELTA, cassandraProperties.getMaxTimeDelta());
-        return new CassandraStorage(cassandraProperties);
+        return new CassandraStore(cassandraProperties);
     }
 
     @Bean
