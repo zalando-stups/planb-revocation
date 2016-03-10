@@ -1,31 +1,28 @@
 package org.zalando.planb.revocation;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-
+import com.github.tomakehurst.wiremock.http.ContentTypeHeader;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-
 import org.zalando.planb.revocation.domain.ClaimRevocationData;
 import org.zalando.planb.revocation.domain.GlobalRevocationData;
 import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.TokenRevocationData;
+import org.zalando.planb.revocation.util.InstantTimestamp;
 
-import com.github.tomakehurst.wiremock.http.ContentTypeHeader;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 /**
  * @author  jbellmann
@@ -103,34 +100,19 @@ public abstract class AbstractSpringTest {
                 revocationData = new ClaimRevocationData();
                 ((ClaimRevocationData) revocationData).setName("uid");
                 ((ClaimRevocationData) revocationData).setValueHash("rreis");
-                ((ClaimRevocationData) revocationData).setIssuedBefore(System.currentTimeMillis());
+                ((ClaimRevocationData) revocationData).setIssuedBefore(InstantTimestamp.NOW.seconds());
                 break;
 
             case GLOBAL :
                 generated.setType(RevocationType.GLOBAL);
                 revocationData = new GlobalRevocationData();
-                ((GlobalRevocationData) revocationData).setIssuedBefore(System.currentTimeMillis());
+                ((GlobalRevocationData) revocationData).setIssuedBefore(InstantTimestamp.NOW.seconds());
                 break;
         }
 
-        generated.setRevokedAt(System.currentTimeMillis());
+        generated.setRevokedAt(InstantTimestamp.NOW.seconds());
         generated.setData(revocationData);
 
         return generated;
-    }
-
-    /**
-     * Utility method to store refresh information.
-     *
-     * @param   utcTimestamp  a UTC UNIX timestamp
-     *
-     * @return  a UTC UNIX timestamp representing when the refresh was stored (also inserted in storage).
-     */
-    public static Long insertRefreshFrom(final Long utcTimestamp) {
-        Long when = System.currentTimeMillis() / 1000L;
-
-        // TODO implement utility
-
-        return when;
     }
 }

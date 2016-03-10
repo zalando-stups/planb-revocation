@@ -68,9 +68,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Reso
 
         http.headers().defaultsDisabled().httpStrictTransportSecurity().and().addHeaderWriter(hstsHeaderWriter()).and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().httpBasic().disable()
-            .anonymous().disable().authorizeRequests().antMatchers(HttpMethod.POST, "/revocations")
-            .access(apiSecurityProperties.getOauth2Scopes().get("revokeStandard")).antMatchers(HttpMethod.GET, "/**")
-            .permitAll().anyRequest().denyAll();
+            .anonymous().disable().authorizeRequests()
+                .antMatchers(HttpMethod.POST, "/revocations")
+                    .access(apiSecurityProperties.getOauth2Scopes().get("revokeStandard"))
+                .antMatchers(HttpMethod.GET, "/revocations").permitAll()
+                .antMatchers(HttpMethod.POST, "/notifications/**")
+                    .access(apiSecurityProperties.getOauth2Scopes().get("revokeStandard"))
+                .anyRequest().denyAll();
     }
 
     private HstsHeaderWriter hstsHeaderWriter() {

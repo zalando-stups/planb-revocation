@@ -4,6 +4,9 @@ import org.zalando.planb.revocation.domain.RevocationType;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 /**
  * Created by jmussler on 11.02.16.
  */
@@ -18,6 +21,6 @@ public class StoredRevocation {
         this.data = data;
         this.type = type;
         this.revokedBy = revokedBy;
-        this.revokedAt = System.currentTimeMillis();
+        this.revokedAt = LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli() / 1000;
     }
 }

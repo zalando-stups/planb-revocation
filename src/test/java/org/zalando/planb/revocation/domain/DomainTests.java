@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 /**
  * Unit tests for domain objects.
  *
@@ -11,13 +14,28 @@ import org.junit.Test;
  */
 public class DomainTests {
 
+    private static final long ONE_HOUR_BEFORE = 1457565076;
+
+    private static final long ONE_MINUTE_BEFORE = 1457568706;
+
     /**
-     * Tests that when instantiating a {@link Refresh}, all default values are not {@code null}.
+     * Tests that when instantiating a {@link Refresh} all values are set, including defaults.
      */
     @Test
-    public void testRefresh() {
-        Refresh r = Refresh.builder().build();
+    public void testDefaultRefresh() {
 
-        assertThat(r.getRefreshTimestamp()).isNotNull();
+        Refresh r = Refresh.builder().refreshFrom(ONE_HOUR_BEFORE).build();
+        assertThat(r.refreshFrom()).isEqualTo(ONE_HOUR_BEFORE);
+        assertThat(r.refreshTimestamp()).isNotNull();
+    }
+
+    /**
+     * Tests assigning a timestamp to a {@link Refresh} object.
+     */
+    @Test
+    public void testRefreshWithTimestamp() {
+
+        Refresh r = Refresh.builder().refreshFrom(ONE_HOUR_BEFORE).refreshTimestamp(ONE_MINUTE_BEFORE).build();
+        assertThat(r.refreshTimestamp()).isEqualTo(ONE_MINUTE_BEFORE);
     }
 }

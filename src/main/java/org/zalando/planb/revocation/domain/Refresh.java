@@ -1,29 +1,48 @@
 package org.zalando.planb.revocation.domain;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Value;
+import com.google.auto.value.AutoValue;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 /**
  * Represents a notification to refresh all revocations since a point in time.
  *
- * <ul>
- *   <li>{@code refreshFrom} - the instant from when to refresh notifications, in UTC UNIX timestamp;</li>
- *   <li>{@code refreshTimestamp} - the instant that this refresh notification was created, in UTC UNIX Timestamp.</li>
- * </ul>
- *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Getter
-public class Refresh {
+@AutoValue
+public abstract class Refresh {
 
-    private final Long refreshFrom;
+    Refresh() {}    // Avoid subclassing
 
-    private Long refreshTimestamp = Long.valueOf(System.currentTimeMillis() / 1000);
+    /**
+     * Returns a builder for this class.
+     * <p>
+     * <p>By default {@link Refresh#refreshFrom()} is set to the present instant.</p>
+     *
+     * @return a builder for this class.
+     */
+    public static Builder builder() {
+        return new AutoValue_Refresh.Builder().refreshTimestamp(LocalDateTime.now(ZoneOffset.UTC)
+                .toInstant(ZoneOffset.UTC).toEpochMilli() / 1000);
+    }
 
-    @Builder
-    private Refresh(Long refreshFrom, Long refreshTimestamp) {
-        this.refreshFrom = refreshFrom;
-        this.refreshTimestamp = refreshTimestamp;
+    /**
+     * The instant from when to refresh notifications, in UTC UNIX timestamp.
+     */
+    public abstract Long refreshFrom();
+
+    /**
+     * The instant that this refresh notification was created, in UTC UNIX Timestamp.
+     */
+    public abstract Long refreshTimestamp();
+
+    @AutoValue.Builder
+    public abstract static class Builder {
+        public abstract Builder refreshFrom(Long l);
+
+        public abstract Builder refreshTimestamp(Long l);
+
+        public abstract Refresh build();
     }
 }

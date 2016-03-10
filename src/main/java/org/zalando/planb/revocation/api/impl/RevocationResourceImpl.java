@@ -21,13 +21,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.zalando.planb.revocation.api.RevocationResource;
+import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.ClaimRevocationData;
 import org.zalando.planb.revocation.domain.GlobalRevocationData;
+import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.Revocation;
-import org.zalando.planb.revocation.domain.RevocationFlag;
+import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.TokenRevocationData;
+import org.zalando.planb.revocation.persistence.CassandraStore;
 import org.zalando.planb.revocation.persistence.RevocationData;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.persistence.StoredClaim;
@@ -49,18 +52,11 @@ public class RevocationResourceImpl implements RevocationResource {
     private RevocationStore storage;
 
     @Autowired
-    private EnumMap<RevocationFlag, Object> metaInformation;
-
-    @Autowired
     private MessageHasher messageHasher;
 
-    /**
-     * Returns a list of all revocations since the specified timestamp.
-     *
-     * @param   from  UNIX timestamp (UTC) in milliseconds.
-     *
-     * @return  a {@link RevocationInfo} with all revocations since the specified timestamp.
-     */
+    @Autowired
+    private CassandraProperties cassandraProperties;
+
     @Override
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
@@ -71,7 +67,7 @@ public class RevocationResourceImpl implements RevocationResource {
          * When path is /revocations?from= (null value) throws an IllegalArgumentException
          */
         if (from == null) {
-            throw new IllegalArgumentException("Parameter 'from' must not be null");
+            throw new IllegalArgumentException("Parameter 'from' can't be null");
         }
 
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
@@ -110,7 +106,7 @@ public class RevocationResourceImpl implements RevocationResource {
         }
 
         RevocationInfo responseBody = new RevocationInfo();
-        responseBody.setMeta(metaInformation);
+        responseBody.setMeta(metaInformation());
         responseBody.setRevocations(apiRevocations);
 
         return responseBody;
@@ -119,26 +115,26 @@ public class RevocationResourceImpl implements RevocationResource {
     @Override
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpEntity<String> post(@RequestBody final Revocation r) {
+    public HttpEntity<String> post(@RequestBody final Revocation revocation) {
         RevocationData data = null;
-        switch (r.getType()) {
+        switch (revocation.getType()) {
 
             case CLAIM :
 
-                ClaimRevocationData cr = (ClaimRevocationData) r.getData();
+                ClaimRevocationData cr = (ClaimRevocationData) revocation.getData();
 
                 data = new StoredClaim(cr.getName(), cr.getValueHash(), cr.getIssuedBefore());
                 break;
 
             case TOKEN :
 
-                TokenRevocationData tr = (TokenRevocationData) r.getData();
+                TokenRevocationData tr = (TokenRevocationData) revocation.getData();
                 data = new StoredToken(tr.getTokenHash());
                 break;
 
             case GLOBAL :
 
-                GlobalRevocationData gr = (GlobalRevocationData) r.getData();
+                GlobalRevocationData gr = (GlobalRevocationData) revocation.getData();
                 data = new StoredGlobal(gr.getIssuedBefore());
                 break;
         }
@@ -147,7 +143,7 @@ public class RevocationResourceImpl implements RevocationResource {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        StoredRevocation storedRevocation = new StoredRevocation(data, r.getType(), "<!--add revoked by-->");
+        StoredRevocation storedRevocation = new StoredRevocation(data, revocation.getType(), "<!--add revoked by-->");
         if (storage.storeRevocation(storedRevocation)) {
 
             // TODO Refactor
@@ -155,5 +151,22 @@ public class RevocationResourceImpl implements RevocationResource {
         } else {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private EnumMap<NotificationType, Object> metaInformation() {
+        EnumMap<NotificationType, Object> metaInfo = new EnumMap<>(NotificationType.class);
+
+        if(storage instanceof CassandraStore) {
+            metaInfo.put(NotificationType.MAX_TIME_DELTA, cassandraProperties.getMaxTimeDelta());
+        }
+
+        Refresh refresh = storage.getRefresh();
+
+        if(refresh != null) {
+            metaInfo.put(NotificationType.REFRESH_FROM, refresh.refreshFrom());
+            metaInfo.put(NotificationType.REFRESH_TIMESTAMP, refresh.refreshTimestamp());
+        }
+
+        return metaInfo;
     }
 }

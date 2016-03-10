@@ -8,4 +8,4 @@ import org.springframework.test.context.ActiveProfiles;
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @ActiveProfiles("test")
-public class InMemoryTest extends AbstractStoreTests { }
+public class InMemoryStoreTest extends AbstractStoreTests { }

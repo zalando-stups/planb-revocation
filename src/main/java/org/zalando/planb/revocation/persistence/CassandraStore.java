@@ -40,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Interface to Cassandra cluster.
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @Slf4j
 public class CassandraStore implements RevocationStore {
@@ -54,32 +54,32 @@ public class CassandraStore implements RevocationStore {
     private static final String REFRESH_TABLE = "refresh";
 
     private static final RegularStatement SELECT_REVOCATION = QueryBuilder.select().column("revocation_type")
-                                                                          .column("revocation_data")
-                                                                          .column("revoked_by").column("revoked_at")
-                                                                          .from(REVOCATION_TABLE)
-                                                                          .where(eq("bucket_date", bindMarker()))
-                                                                          .and(eq("bucket_interval", bindMarker())).and(
-                                                                              gt("revoked_at", bindMarker()));
+            .column("revocation_data")
+            .column("revoked_by").column("revoked_at")
+            .from(REVOCATION_TABLE)
+            .where(eq("bucket_date", bindMarker()))
+            .and(eq("bucket_interval", bindMarker())).and(
+                    gt("revoked_at", bindMarker()));
 
     private static final RegularStatement INSERT_REVOCATION = QueryBuilder.insertInto(REVOCATION_TABLE)
-                                                                          .value("bucket_date", bindMarker())
-                                                                          .value("bucket_interval", bindMarker())
-                                                                          .value("revocation_type", bindMarker())
-                                                                          .value("revocation_data", bindMarker())
-                                                                          .value("revoked_by", bindMarker()).value(
-                                                                              "revoked_at", bindMarker());
+            .value("bucket_date", bindMarker())
+            .value("bucket_interval", bindMarker())
+            .value("revocation_type", bindMarker())
+            .value("revocation_data", bindMarker())
+            .value("revoked_by", bindMarker()).value(
+                    "revoked_at", bindMarker());
 
     private static final RegularStatement INSERT_REFRESH = QueryBuilder.insertInto(REFRESH_TABLE)
-                                                                       .value("refresh_year", bindMarker())
-                                                                       .value("refresh_ts", bindMarker())
-                                                                       .value("refresh_from", bindMarker()).value(
-                                                                           "created_by", bindMarker());
+            .value("refresh_year", bindMarker())
+            .value("refresh_ts", bindMarker())
+            .value("refresh_from", bindMarker()).value(
+                    "created_by", bindMarker());
 
     private static final RegularStatement SELECT_REFRESH = QueryBuilder.select().column("refresh_from")
-                                                                       .column("refresh_ts").column("created_by")
-                                                                       .column("refresh_year").from(REFRESH_TABLE)
-                                                                       .where(eq("refresh_year", bindMarker())).limit(
-                                                                           1);
+            .column("refresh_ts").column("created_by")
+            .column("refresh_year").from(REFRESH_TABLE)
+            .where(eq("refresh_year", bindMarker())).limit(
+                    1);
 
     private final Session session;
 
@@ -118,8 +118,8 @@ public class CassandraStore implements RevocationStore {
 
     public CassandraStore(final CassandraProperties cassandraProperties) {
         Cluster cluster = Cluster.builder().addContactPoints(cassandraProperties.getContactPoints().split(","))
-                                 .withClusterName(cassandraProperties.getClusterName())
-                                 .withPort(cassandraProperties.getPort()).build();
+                .withClusterName(cassandraProperties.getClusterName())
+                .withPort(cassandraProperties.getPort()).build();
 
         session = cluster.connect(cassandraProperties.getKeyspace());
         maxTimeDelta = cassandraProperties.getMaxTimeDelta();
@@ -145,7 +145,7 @@ public class CassandraStore implements RevocationStore {
         }
     }
 
-    private static final long BUCKET_LENGTH = 8 * 60 * 60 * 1000; // 8 Hours per bucket/row
+    private static final long BUCKET_LENGTH = 8 * 60 * 60; // 8 Hours per bucket/row
 
     protected static List<Bucket> getBuckets(long from, final long currentTime) {
         List<Bucket> buckets = new ArrayList<>();
@@ -154,7 +154,7 @@ public class CassandraStore implements RevocationStore {
         log.debug("{} {}", currentTime, maxTime);
 
         do {
-            String bucketDate = LocalDateFormatter.get().format(new Date(from));
+            String bucketDate = LocalDateFormatter.get().format(new Date(from * 1000));
             long bucketInterval = getInterval(from);
 
             buckets.add(new Bucket(bucketDate, bucketInterval));
@@ -173,10 +173,10 @@ public class CassandraStore implements RevocationStore {
 
         Collection<StoredRevocation> revocations = new ArrayList<>();
 
-        long currentTime = System.currentTimeMillis();
+        long currentTime = LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli() / 1000;
         if ((currentTime - from) > maxTimeDelta) {
             throw new IllegalArgumentException("From Timestamp is too old!"); // avoid erroneous query of too many
-                                                                              // buckets
+            // buckets
         }
 
         for (Bucket b : getBuckets(from, currentTime)) {
@@ -204,7 +204,7 @@ public class CassandraStore implements RevocationStore {
     }
 
     protected static long getInterval(final long timestamp) {
-        long hours = timestamp / 1000 / 60 / 60;
+        long hours = timestamp / 60 / 60;
         return (hours % 24) / 8;
     }
 
@@ -241,9 +241,8 @@ public class CassandraStore implements RevocationStore {
         // Only the first, although the result set should be 1 already.
         Row first = rs.one();
 
-        // TODO Include the case when refresh_from is earlier than maxTimeDelta (all must be in seconds)
         return Refresh.builder().refreshFrom(first.getLong("refresh_from"))
-                      .refreshTimestamp(first.getLong("refresh_ts")).build();
+                .refreshTimestamp(first.getLong("refresh_ts")).build();
     }
 
     @Override

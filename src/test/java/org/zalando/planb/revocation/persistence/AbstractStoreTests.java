@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.domain.Refresh;
+import org.zalando.planb.revocation.util.InstantTimestamp;
 
 /**
  * Abstract implementation of tests to be executed by multiple Spring Profiles.
@@ -44,17 +45,14 @@ public abstract class AbstractStoreTests extends AbstractSpringTest {
     @Test
     public void testInsertRefresh() {
 
-        // 1 hour before
-        long oneHourBefore = (LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli() / 1000) - 3600;
-
         // Insert refresh
-        revocationStore.storeRefresh(oneHourBefore);
+        revocationStore.storeRefresh(InstantTimestamp.ONE_HOUR_AGO.seconds());
 
         // Get from store
         Refresh fromStore = revocationStore.getRefresh();
 
         // verify it's the same
-        assertThat(fromStore.getRefreshFrom()).isEqualTo(oneHourBefore);
-        assertThat(fromStore.getRefreshTimestamp()).isGreaterThan(oneHourBefore);
+        assertThat(fromStore.refreshFrom()).isEqualTo(InstantTimestamp.ONE_HOUR_AGO.seconds());
+        assertThat(fromStore.refreshTimestamp()).isGreaterThan(InstantTimestamp.ONE_HOUR_AGO.seconds());
     }
 }

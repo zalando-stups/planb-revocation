@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RevocationInfo {
 
-    private EnumMap<RevocationFlag, Object> meta;
+    private EnumMap<NotificationType, Object> meta;
 
     private List<Revocation> revocations;
 }
