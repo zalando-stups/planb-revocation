@@ -3,7 +3,8 @@ package org.zalando.planb.revocation.domain;
 import java.util.EnumMap;
 import java.util.List;
 
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * TODO: small javadoc
@@ -14,7 +15,7 @@ import lombok.*;
 @NoArgsConstructor
 public class RevocationInfo {
 
-    private EnumMap<RevocationFlags, String> meta;
+    private EnumMap<NotificationType, Object> meta;
 
     private List<Revocation> revocations;
 }

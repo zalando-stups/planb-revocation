@@ -1,5 +1,7 @@
 package org.zalando.planb.revocation.config;
 
+import java.util.EnumMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -11,7 +13,8 @@ import org.springframework.util.StringUtils;
 
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.persistence.CassandraStorage;
+import org.zalando.planb.revocation.domain.NotificationType;
+import org.zalando.planb.revocation.persistence.CassandraStore;
 import org.zalando.planb.revocation.persistence.InMemoryStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.service.SchemaDiscoveryService;
@@ -42,13 +45,22 @@ public class PlanBRevocationConfig {
                 PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     }
 
+    /**
+     * Storage used for revocations.
+     *
+     * <p>If no {@link CassandraProperties} are defined, defaults to in-memory storage.</p>
+     *
+     * @return  the resulting {@code RevocationStore}
+     *
+     * @see     CassandraProperties
+     */
     @Bean
     public RevocationStore revocationStore() {
         if (StringUtils.isEmpty(cassandraProperties.getContactPoints())) {
             return new InMemoryStore();
         }
 
-        return new CassandraStorage(cassandraProperties);
+        return new CassandraStore(cassandraProperties);
     }
 
     @Bean
