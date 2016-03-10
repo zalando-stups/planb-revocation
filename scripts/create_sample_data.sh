@@ -53,8 +53,7 @@ do
         bucket_date=`date -d @${unix_timestamp} "+%Y-%m-%d"`
     fi
 
-    # We store UNIX timestamp in milliseconds, but 'date' returns seconds
-    revoked_at=`expr ${unix_timestamp} \* 1000`
+    revoked_at=${unix_timestamp}
     bucket_interval=`expr \( ${unix_timestamp_hours} % 24 \) / 8`
 
     # Types are round-robbin
