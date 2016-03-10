@@ -249,6 +249,13 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Version 3.3 of the Maven compiler plugin has a bug that causes an exception in the compiler when -->
+            <!-- running spring-boot:run                                                                          -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>

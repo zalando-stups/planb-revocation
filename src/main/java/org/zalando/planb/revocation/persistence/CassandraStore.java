@@ -161,8 +161,6 @@ public class CassandraStore implements RevocationStore {
 
             from += BUCKET_LENGTH;
 
-            log.debug("adding bucket to list: {} {}", bucketDate, bucketInterval);
-
         } while (from < maxTime);
 
         return buckets;
@@ -180,8 +178,6 @@ public class CassandraStore implements RevocationStore {
         }
 
         for (Bucket b : getBuckets(from, currentTime)) {
-
-            log.debug("Selecting bucket: {} {}", b.date, b.interval);
 
             ResultSet rs = session.execute(getFrom.bind(b.date, b.interval, from));
             List<Row> rows = rs.all();
@@ -210,7 +206,9 @@ public class CassandraStore implements RevocationStore {
 
     @Override
     public boolean storeRevocation(final StoredRevocation revocation) {
-        String date = LocalDateFormatter.get().format(new Date(revocation.getRevokedAt()));
+        String date = LocalDateFormatter.get().format(new Date(revocation.getRevokedAt() * 1000));
+
+
         long interval = getInterval(revocation.getRevokedAt());
         try {
             String data = MAPPER.writeValueAsString(revocation.getData());
