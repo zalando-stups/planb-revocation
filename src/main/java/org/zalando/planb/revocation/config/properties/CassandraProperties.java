@@ -10,6 +10,8 @@ import com.datastax.driver.core.ProtocolOptions;
 
 import lombok.Data;
 
+import java.util.Optional;
+
 /**
  * Properties used to configure a Cassandra cluster data source.
  *
@@ -28,6 +30,8 @@ import lombok.Data;
  *   </li>
  *   <li>{@code cassandra.readConsistencyLevel} - Consistency level for read operations. Default value is
  *     {@code EACH_QUORUM};</li>
+ *   <li>{@code cassandra.username} - User account to access the Cassandra cluster. Default value is empty;</li>
+ *   <li>{@code cassandra.password} - User password to access the Cassandra cluster. Default value is empty;</li>
  *   <li>{@code cassandra.maxTimeDelta} - The maximum time span limit to get revocations, in ms. Default value is
  *     {@code 172800000}, meaning that a client can get revocations from since 2 days maximum.</li>
  * </ul>
@@ -49,6 +53,10 @@ public class CassandraProperties {
     private ConsistencyLevel writeConsistencyLevel = EACH_QUORUM;
 
     private ConsistencyLevel readConsistencyLevel = ONE;
+
+    private Optional<String> username = Optional.empty();
+
+    private Optional<String> password = Optional.empty();
 
     private Long maxTimeDelta = 172800L; // Maybe this maxTimeDelta should be derived from the bucket size in
                                          // Cassandra...

@@ -117,11 +117,20 @@ public class CassandraStore implements RevocationStore {
     }
 
     public CassandraStore(final CassandraProperties cassandraProperties) {
-        Cluster cluster = Cluster.builder().addContactPoints(cassandraProperties.getContactPoints().split(","))
-                .withClusterName(cassandraProperties.getClusterName())
-                .withPort(cassandraProperties.getPort()).build();
+        // Build session. Should be injected.
+        final Cluster.Builder builder = Cluster.builder();
 
-        session = cluster.connect(cassandraProperties.getKeyspace());
+        builder.addContactPoints(cassandraProperties.getContactPoints().split(","));
+        builder.withClusterName(cassandraProperties.getClusterName());
+        builder.withPort(cassandraProperties.getPort());
+
+        // Only set credentials if they exist
+        if(cassandraProperties.getUsername().isPresent() && cassandraProperties.getPassword().isPresent()) {
+            builder.withCredentials(cassandraProperties.getUsername().get(), cassandraProperties.getPassword().get());
+        }
+
+        session = builder.build().connect(cassandraProperties.getKeyspace());
+
         maxTimeDelta = cassandraProperties.getMaxTimeDelta();
         dataMappers.put(RevocationType.TOKEN, new TokenMapper());
         dataMappers.put(RevocationType.GLOBAL, new GlobalMapper());
