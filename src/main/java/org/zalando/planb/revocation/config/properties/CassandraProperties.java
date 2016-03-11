@@ -3,6 +3,8 @@ package org.zalando.planb.revocation.config.properties;
 import static com.datastax.driver.core.ConsistencyLevel.EACH_QUORUM;
 import static com.datastax.driver.core.ConsistencyLevel.ONE;
 
+import java.util.Optional;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.datastax.driver.core.ConsistencyLevel;
@@ -28,8 +30,10 @@ import lombok.Data;
  *   </li>
  *   <li>{@code cassandra.readConsistencyLevel} - Consistency level for read operations. Default value is
  *     {@code EACH_QUORUM};</li>
- *   <li>{@code cassandra.maxTimeDelta} - The maximum time span limit to get revocations, in ms. Default value is
- *     {@code 172800000}, meaning that a client can get revocations from since 2 days maximum.</li>
+ *   <li>{@code cassandra.username} - User account to access the Cassandra cluster. Default value is empty;</li>
+ *   <li>{@code cassandra.password} - User password to access the Cassandra cluster. Default value is empty;</li>
+ *   <li>{@code cassandra.maxTimeDelta} - The maximum time span limit to get revocations, in seconds. Default value is
+ *     {@code 172800}, meaning that a client can get revocations from since 2 days maximum.</li>
  * </ul>
  *
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
@@ -49,6 +53,10 @@ public class CassandraProperties {
     private ConsistencyLevel writeConsistencyLevel = EACH_QUORUM;
 
     private ConsistencyLevel readConsistencyLevel = ONE;
+
+    private Optional<String> username = Optional.empty();
+
+    private Optional<String> password = Optional.empty();
 
     private Long maxTimeDelta = 172800L; // Maybe this maxTimeDelta should be derived from the bucket size in
                                          // Cassandra...

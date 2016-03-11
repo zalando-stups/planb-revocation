@@ -2,6 +2,7 @@ package org.zalando.planb.revocation.config;
 
 import java.util.EnumMap;
 
+import com.datastax.driver.core.Cluster;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -56,11 +57,23 @@ public class PlanBRevocationConfig {
      */
     @Bean
     public RevocationStore revocationStore() {
+        // Defaults to in-memory, when CassandraProperties are absent;
         if (StringUtils.isEmpty(cassandraProperties.getContactPoints())) {
             return new InMemoryStore();
         }
 
-        return new CassandraStore(cassandraProperties);
+        // Build Cluster
+        final Cluster.Builder builder = Cluster.builder();
+        builder.addContactPoints(cassandraProperties.getContactPoints().split(","));
+        builder.withClusterName(cassandraProperties.getClusterName());
+        builder.withPort(cassandraProperties.getPort());
+
+        // Only set credentials if they exist
+        if(cassandraProperties.getUsername().isPresent() && cassandraProperties.getPassword().isPresent()) {
+            builder.withCredentials(cassandraProperties.getUsername().get(), cassandraProperties.getPassword().get());
+        }
+
+        return new CassandraStore(builder.build().connect(cassandraProperties.getKeyspace()), cassandraProperties.getMaxTimeDelta());
     }
 
     @Bean
