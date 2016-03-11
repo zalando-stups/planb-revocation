@@ -1,8 +1,5 @@
 package org.zalando.planb.revocation.config;
 
-import java.util.EnumMap;
-
-import com.datastax.driver.core.Cluster;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -14,7 +11,6 @@ import org.springframework.util.StringUtils;
 
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.persistence.CassandraStore;
 import org.zalando.planb.revocation.persistence.InMemoryStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
@@ -22,6 +18,8 @@ import org.zalando.planb.revocation.service.SchemaDiscoveryService;
 import org.zalando.planb.revocation.service.SwaggerService;
 import org.zalando.planb.revocation.service.impl.StaticSchemaDiscoveryService;
 import org.zalando.planb.revocation.service.impl.SwaggerFromYamlFileService;
+
+import com.datastax.driver.core.Cluster;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -57,6 +55,7 @@ public class PlanBRevocationConfig {
      */
     @Bean
     public RevocationStore revocationStore() {
+
         // Defaults to in-memory, when CassandraProperties are absent;
         if (StringUtils.isEmpty(cassandraProperties.getContactPoints())) {
             return new InMemoryStore();
@@ -69,11 +68,13 @@ public class PlanBRevocationConfig {
         builder.withPort(cassandraProperties.getPort());
 
         // Only set credentials if they exist
-        if(cassandraProperties.getUsername().isPresent() && cassandraProperties.getPassword().isPresent()) {
+        if (cassandraProperties.getUsername().isPresent() && cassandraProperties.getPassword().isPresent()) {
             builder.withCredentials(cassandraProperties.getUsername().get(), cassandraProperties.getPassword().get());
         }
 
-        return new CassandraStore(builder.build().connect(cassandraProperties.getKeyspace()), cassandraProperties.getMaxTimeDelta());
+        return new CassandraStore(builder.build().connect(cassandraProperties.getKeyspace()),
+                cassandraProperties.getReadConsistencyLevel(), cassandraProperties.getWriteConsistencyLevel(),
+                cassandraProperties.getMaxTimeDelta());
     }
 
     @Bean
