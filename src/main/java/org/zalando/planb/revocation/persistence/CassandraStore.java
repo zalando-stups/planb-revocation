@@ -116,22 +116,16 @@ public class CassandraStore implements RevocationStore {
         }
     }
 
-    public CassandraStore(final CassandraProperties cassandraProperties) {
-        // Build session. Should be injected.
-        final Cluster.Builder builder = Cluster.builder();
+    /**
+     * Constructs a new instance configured with the provided {@code session} and {@code maxTimeDelta}.
+     *
+     * @param session       session configured to a Cassandra cluster
+     * @param maxTimeDelta  maximum time span limit to get revocations, in seconds
+     */
+    public CassandraStore(final Session session, final Long maxTimeDelta) {
+        this.session = session;
+        this.maxTimeDelta = maxTimeDelta;
 
-        builder.addContactPoints(cassandraProperties.getContactPoints().split(","));
-        builder.withClusterName(cassandraProperties.getClusterName());
-        builder.withPort(cassandraProperties.getPort());
-
-        // Only set credentials if they exist
-        if(cassandraProperties.getUsername().isPresent() && cassandraProperties.getPassword().isPresent()) {
-            builder.withCredentials(cassandraProperties.getUsername().get(), cassandraProperties.getPassword().get());
-        }
-
-        session = builder.build().connect(cassandraProperties.getKeyspace());
-
-        maxTimeDelta = cassandraProperties.getMaxTimeDelta();
         dataMappers.put(RevocationType.TOKEN, new TokenMapper());
         dataMappers.put(RevocationType.GLOBAL, new GlobalMapper());
         dataMappers.put(RevocationType.CLAIM, new ClaimMapper());
