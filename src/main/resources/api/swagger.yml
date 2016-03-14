@@ -42,21 +42,22 @@ paths:
           schema:
             $ref: '#/definitions/Problem'
     post:
-      summary: Revocate a token
+      summary: Posts the specified revocation to be stored.
       description: |
-        Revokes tokens, making them invalid
+        Revokes tokens associated with the specified revocation type.
       tags:
         - Revocation
       parameters:
-        - name: revocations
-          description: a revocation object
+        - name: revocation
+          description: |
+            the revocation associated with the tokens to revoke
           in: body
           schema:
             $ref: '#/definitions/Revocation'
       responses:
         # Response code
-        200:
-          description: Revocation info stored
+        201:
+          description: Revocation was successfully stored
 
 definitions:
   Revocations:
