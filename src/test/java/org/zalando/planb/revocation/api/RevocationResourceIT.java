@@ -164,6 +164,22 @@ public class RevocationResourceIT extends AbstractSpringTest {
         // TODO Check storage
     }
 
+    @Test
+    public void testInsertClaimRevocation() {
+        Revocation requestBody = generateRevocation(RevocationType.CLAIM);
+
+        ResponseEntity<Revocation> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
+                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), Revocation.class);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        Collection<StoredRevocation> storedRevocations = revocationStore.getRevocations(
+                InstantTimestamp.FIVE_MINUTES_AGO.seconds());
+
+        assertThat(storedRevocations).isNotEmpty();
+        assertThat(storedRevocations.stream().filter(r -> r.getType() == RevocationType.CLAIM).count()).isGreaterThan(0);
+        // TODO Check storage
+    }
+
     /**
      * Tests that when inserting revocations with no access token, a HTTP {@code UNAUTHORIZED} is returned.
      */
