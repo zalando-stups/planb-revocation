@@ -37,6 +37,10 @@ paths:
           description: Successful response
           schema:
             $ref: '#/definitions/Revocations'
+        400:
+          description: Type mismatch. When the parameter 'from' is not present or not an integer
+          schema:
+            $ref: '#/definitions/Problem'
     post:
       summary: Revocate a token
       description: |
@@ -122,3 +126,24 @@ definitions:
         hash_algorithm:
           type: string
           description: The algorithm used for hashing the Token
+  Problem:
+    type: object
+    description: |
+      Represents a problem as specified by the IETF Problem Details draft (03). Used to complement HTTP Status codes with additional contextual information.
+    properties:
+      type:
+        type: string
+        description: |
+          URI set to "about:blank"
+      title:
+        type: string
+        description: |
+          reason for the specified status
+      status:
+        type: string
+        description: |
+          HTTP status code
+      detail:
+        type: string
+        description: |
+          additional detail of the problem
