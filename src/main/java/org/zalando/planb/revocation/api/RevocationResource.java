@@ -17,7 +17,7 @@ public interface RevocationResource {
      *
      * <p>Also returns meta information which may be of importance to the client, like a refresh notification.</p>
      *
-     * @param from instant from when they were revoked, in UTC UNIX timestamp
+     * @param from instant from when tokens were revoked, in UTC UNIX timestamp
      * @return all the revocations since the specified timestamp
      */
     RevocationInfo get(int from);

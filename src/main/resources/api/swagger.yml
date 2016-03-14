@@ -20,18 +20,17 @@ security:
 paths:
   /revocations:
     get:
-      summary: Get revocated tokens
+      summary: Returns all the revocations since the specified timestamp.
       description: |
-        Gets all revocated tokens
+        Returns all revoked tokens from a specified timestamp. Also returns meta information which may be of importance to the client, like a refresh notification.
       tags:
         - Revocation
       parameters:
         - name: from
-          description: lower time limit for the revocation timestamp
+          description: instant from when tokens were revoked, in UTC UNIX timestamp
           in: query
-          type: string
-          format: date-time
-          required: false
+          type: integer
+          required: true
       responses:
         # Response code
         200:
