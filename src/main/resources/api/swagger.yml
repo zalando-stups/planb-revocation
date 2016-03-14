@@ -18,7 +18,7 @@ security:
     - uid
 
 paths:
-  /api/revocations:
+  /revocations:
     get:
       summary: Get revocated tokens
       description: |
