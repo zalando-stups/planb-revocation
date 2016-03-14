@@ -14,9 +14,9 @@ import java.time.ZoneOffset;
  */
 public class DomainTests {
 
-    private static final long ONE_HOUR_BEFORE = 1457565076;
+    private static final int ONE_HOUR_BEFORE = 1457565076;
 
-    private static final long ONE_MINUTE_BEFORE = 1457568706;
+    private static final int ONE_MINUTE_BEFORE = 1457568706;
 
     /**
      * Tests that when instantiating a {@link Refresh} all values are set, including defaults.

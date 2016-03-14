@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StoredGlobal extends RevocationData {
-    long issued_before;
+    int issued_before;
 }

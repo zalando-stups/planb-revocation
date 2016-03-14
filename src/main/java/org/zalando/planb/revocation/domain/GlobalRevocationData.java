@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 public class GlobalRevocationData implements RevocationData {
 
     @JsonProperty("issued_before")
-    private Long issuedBefore;
+    private Integer issuedBefore;
 }

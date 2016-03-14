@@ -16,5 +16,5 @@ public class StoredClaim extends RevocationData {
 
     private String claimValue;
 
-    private long issuedBefore;
+    private int issuedBefore;
 }

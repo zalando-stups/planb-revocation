@@ -3,6 +3,7 @@ package org.zalando.planb.revocation.config.properties;
 import static com.datastax.driver.core.ConsistencyLevel.EACH_QUORUM;
 import static com.datastax.driver.core.ConsistencyLevel.ONE;
 
+import java.time.Duration;
 import java.util.Optional;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -48,7 +49,7 @@ public class CassandraProperties {
 
     private String clusterName = "Cassandra";
 
-    private Integer port = ProtocolOptions.DEFAULT_PORT;
+    private int port = ProtocolOptions.DEFAULT_PORT;
 
     private ConsistencyLevel writeConsistencyLevel = EACH_QUORUM;
 
@@ -58,6 +59,6 @@ public class CassandraProperties {
 
     private Optional<String> password = Optional.empty();
 
-    private Long maxTimeDelta = 172800L; // Maybe this maxTimeDelta should be derived from the bucket size in
+    private int maxTimeDelta = (int) Duration.ofDays(2).getSeconds(); // Maybe this maxTimeDelta should be derived from the bucket size in
                                          // Cassandra...
 }

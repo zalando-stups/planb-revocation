@@ -1,6 +1,7 @@
 package org.zalando.planb.revocation.domain;
 
 import com.google.auto.value.AutoValue;
+import org.zalando.planb.revocation.util.UnixTimestamp;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -23,25 +24,24 @@ public abstract class Refresh {
      * @return a builder for this class.
      */
     public static Builder builder() {
-        return new AutoValue_Refresh.Builder().refreshTimestamp(LocalDateTime.now(ZoneOffset.UTC)
-                .toInstant(ZoneOffset.UTC).toEpochMilli() / 1000);
+        return new AutoValue_Refresh.Builder().refreshTimestamp(UnixTimestamp.now());
     }
 
     /**
      * The instant from when to refresh notifications, in UTC UNIX timestamp.
      */
-    public abstract Long refreshFrom();
+    public abstract Integer refreshFrom();
 
     /**
      * The instant that this refresh notification was created, in UTC UNIX Timestamp.
      */
-    public abstract Long refreshTimestamp();
+    public abstract Integer refreshTimestamp();
 
     @AutoValue.Builder
     public abstract static class Builder {
-        public abstract Builder refreshFrom(Long l);
+        public abstract Builder refreshFrom(Integer l);
 
-        public abstract Builder refreshTimestamp(Long l);
+        public abstract Builder refreshTimestamp(Integer l);
 
         public abstract Refresh build();
     }

@@ -39,9 +39,9 @@ public class NotificationResourceImpl implements NotificationResource {
 
         switch (type) {
             case REFRESH_FROM:
-                Long from = null;
+                Integer from = null;
                 try {
-                    from = Long.parseLong(value.toString());
+                    from = Integer.parseInt(value.toString());
                 } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("Invalid format. " + type + " must be a valid UTC UNIX " +
                             "timestamp.");

@@ -35,6 +35,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
+import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
  * Interface to Cassandra cluster.
@@ -82,7 +83,7 @@ public class CassandraStore implements RevocationStore {
 
     private final Session session;
 
-    private final Long maxTimeDelta;
+    private final int maxTimeDelta;
 
     private final PreparedStatement getFrom;
 
@@ -124,7 +125,7 @@ public class CassandraStore implements RevocationStore {
      * @param  maxTimeDelta  maximum time span limit to get revocations, in seconds
      */
     public CassandraStore(final Session session, final ConsistencyLevel read, final ConsistencyLevel write,
-            final Long maxTimeDelta) {
+            final int maxTimeDelta) {
         this.session = session;
         this.maxTimeDelta = maxTimeDelta;
 
@@ -142,25 +143,25 @@ public class CassandraStore implements RevocationStore {
 
     static class Bucket {
         public String date;
-        public long interval;
+        public int interval;
 
-        Bucket(final String d, final long i) {
+        Bucket(final String d, final int i) {
             date = d;
             interval = i;
         }
     }
 
-    private static final long BUCKET_LENGTH = 8 * 60 * 60; // 8 Hours per bucket/row
+    private static final int BUCKET_LENGTH = 8 * 60 * 60; // 8 Hours per bucket/row
 
-    protected static List<Bucket> getBuckets(long from, final long currentTime) {
+    protected static List<Bucket> getBuckets(int from, final int currentTime) {
         List<Bucket> buckets = new ArrayList<>();
 
-        final long maxTime = ((currentTime / BUCKET_LENGTH) * BUCKET_LENGTH) + BUCKET_LENGTH;
+        final int maxTime = ((currentTime / BUCKET_LENGTH) * BUCKET_LENGTH) + BUCKET_LENGTH;
         log.debug("{} {}", currentTime, maxTime);
 
         do {
-            String bucketDate = LocalDateFormatter.get().format(new Date(from * 1000));
-            long bucketInterval = getInterval(from);
+            String bucketDate = LocalDateFormatter.get().format(new Date(((long) from) * 1000));
+            int bucketInterval = getInterval(from);
 
             buckets.add(new Bucket(bucketDate, bucketInterval));
 
@@ -172,11 +173,11 @@ public class CassandraStore implements RevocationStore {
     }
 
     @Override
-    public Collection<StoredRevocation> getRevocations(final long from) {
+    public Collection<StoredRevocation> getRevocations(final int from) {
 
         Collection<StoredRevocation> revocations = new ArrayList<>();
 
-        long currentTime = LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli() / 1000;
+        int currentTime = UnixTimestamp.now();
         if ((currentTime - from) > maxTimeDelta) {
             throw new IllegalArgumentException("From Timestamp is too old!"); // avoid erroneous query of too many
 
@@ -194,7 +195,7 @@ public class CassandraStore implements RevocationStore {
                     String unmappedData = r.getString("revocation_data");
                     RevocationData data = dataMappers.get(type).get(unmappedData);
                     StoredRevocation revocation = new StoredRevocation(data, type, r.getString("revoked_by"));
-                    revocation.setRevokedAt(r.getLong("revoked_at"));
+                    revocation.setRevokedAt(r.getInt("revoked_at"));
                     revocations.add(revocation);
                 } catch (IOException ex) {
                     log.error("Failed to read revocation", ex);
@@ -205,16 +206,16 @@ public class CassandraStore implements RevocationStore {
         return revocations;
     }
 
-    protected static long getInterval(final long timestamp) {
-        long hours = timestamp / 60 / 60;
+    protected static int getInterval(final int timestamp) {
+        int hours = timestamp / (60 * 60);
         return (hours % 24) / 8;
     }
 
     @Override
     public boolean storeRevocation(final StoredRevocation revocation) {
-        String date = LocalDateFormatter.get().format(new Date(revocation.getRevokedAt() * 1000));
+        String date = LocalDateFormatter.get().format(new Date(((long) revocation.getRevokedAt()) * 1000));
 
-        long interval = getInterval(revocation.getRevokedAt());
+        int interval = getInterval(revocation.getRevokedAt());
         try {
             String data = MAPPER.writeValueAsString(revocation.getData());
             log.debug("Storing in bucket: {} {} {}", date, interval, data);
@@ -244,17 +245,15 @@ public class CassandraStore implements RevocationStore {
         // Only the first, although the result set should be 1 already.
         Row first = rs.one();
 
-        return Refresh.builder().refreshFrom(first.getLong("refresh_from"))
-                      .refreshTimestamp(first.getLong("refresh_ts")).build();
+        return Refresh.builder().refreshFrom(first.getInt("refresh_from"))
+                      .refreshTimestamp(first.getInt("refresh_ts")).build();
     }
 
     @Override
-    public boolean storeRefresh(final long from) {
-        LocalDateTime utcDate = LocalDateTime.now(ZoneOffset.UTC);
-
+    public boolean storeRefresh(final int from) {
         // TODO Include refresh_by
-        BoundStatement statement = storeRefresh.bind(utcDate.getYear(),
-                utcDate.toInstant(ZoneOffset.UTC).toEpochMilli() / 1000, from, "");
+        int yearBucket = LocalDate.now(ZoneId.of("UTC")).getYear();
+        BoundStatement statement = storeRefresh.bind(yearBucket, UnixTimestamp.now(), from, "");
         session.execute(statement);
 
         return true;

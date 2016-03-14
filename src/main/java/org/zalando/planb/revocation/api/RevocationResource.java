@@ -20,7 +20,7 @@ public interface RevocationResource {
      * @param from instant from when they were revoked, in UTC UNIX timestamp
      * @return all the revocations since the specified timestamp
      */
-    RevocationInfo get(Long from);
+    RevocationInfo get(int from);
 
     /**
      * Posts the specified revocation to be stored.

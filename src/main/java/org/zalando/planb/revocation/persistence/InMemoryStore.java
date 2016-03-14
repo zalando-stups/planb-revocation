@@ -18,7 +18,7 @@ public class InMemoryStore implements RevocationStore {
     private final LinkedList<Refresh> refreshNotifications = new LinkedList<>();
 
     @Override
-    public Collection<StoredRevocation> getRevocations(final long from) {
+    public Collection<StoredRevocation> getRevocations(final int from) {
         return revocations.stream().filter(x -> x.getRevokedAt() > from).collect(Collectors.toList());
     }
 
@@ -33,7 +33,7 @@ public class InMemoryStore implements RevocationStore {
     }
 
     @Override
-    public boolean storeRefresh(final long from) {
+    public boolean storeRefresh(final int from) {
         return refreshNotifications.offer(Refresh.builder().refreshFrom(from).build());
     }
 }

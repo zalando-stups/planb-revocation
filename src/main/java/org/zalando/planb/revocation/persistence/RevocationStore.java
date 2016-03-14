@@ -9,7 +9,7 @@ import org.zalando.planb.revocation.domain.Refresh;
  */
 public interface RevocationStore {
 
-    Collection<StoredRevocation> getRevocations(long from);
+    Collection<StoredRevocation> getRevocations(int from);
 
     boolean storeRevocation(StoredRevocation revocation);
 
@@ -29,5 +29,5 @@ public interface RevocationStore {
      *
      * @return  {@code true} if the operation was successful, {@code false} otherwise.
      */
-    boolean storeRefresh(long from);
+    boolean storeRefresh(int from);
 }

@@ -114,7 +114,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
          * Jackson probably unmarshalls this value to the a Number with the lowest resolution possible. That's why I'm
          * using a toString here.
          */
-        Long maxTimeDelta = Long.valueOf(responseBody.getMeta().get(NotificationType.MAX_TIME_DELTA).toString());
+        int maxTimeDelta = Integer.valueOf(responseBody.getMeta().get(NotificationType.MAX_TIME_DELTA).toString());
         assertThat(maxTimeDelta).isEqualTo(cassandraProperties.getMaxTimeDelta());
 
         assertThat(responseBody.getRevocations().isEmpty()).isTrue();
@@ -141,9 +141,9 @@ public class RevocationResourceIT extends AbstractSpringTest {
          * Jackson probably unmarshalls this value to the a Number with the lowest resolution possible. That's why I'm
          * using a toString here.
          */
-        Long refreshTimestampRetrieved = Long.valueOf(responseBody.getMeta().get(NotificationType.REFRESH_TIMESTAMP)
+        int refreshTimestampRetrieved = Integer.valueOf(responseBody.getMeta().get(NotificationType.REFRESH_TIMESTAMP)
                     .toString());
-        Long refreshFromRetrieved = Long.valueOf(responseBody.getMeta().get(NotificationType.REFRESH_FROM).toString());
+        int refreshFromRetrieved = Integer.valueOf(responseBody.getMeta().get(NotificationType.REFRESH_FROM).toString());
 
         assertThat(refreshTimestampRetrieved).isNotNull();
         assertThat(refreshFromRetrieved).isEqualTo(InstantTimestamp.FIVE_MINUTES_AGO.seconds());
@@ -325,7 +325,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
     @Test
     public void testTimestampTooOldOnGet() {
 
-        long tooOldTimeStamp = InstantTimestamp.FIVE_MINUTES_AGO.seconds() - cassandraProperties.getMaxTimeDelta();
+        int tooOldTimeStamp = InstantTimestamp.FIVE_MINUTES_AGO.seconds() - cassandraProperties.getMaxTimeDelta();
 
         try {
             restTemplate.exchange(get(URI.create(basePath() + "/revocations?from=" + tooOldTimeStamp)).build(),
@@ -344,7 +344,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
     @Test
     public void testTimestampNotTooOldOnGet() {
 
-        long notTooOldTimeStamp = InstantTimestamp.NOW.seconds() - cassandraProperties.getMaxTimeDelta() + 60;
+        int notTooOldTimeStamp = InstantTimestamp.NOW.seconds() - cassandraProperties.getMaxTimeDelta() + 60;
 
         ResponseEntity<String> response = restTemplate.exchange(get(
                     URI.create(basePath() + "/revocations?from=" + notTooOldTimeStamp)).build(), String.class);

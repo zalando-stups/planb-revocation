@@ -19,7 +19,7 @@ public class Revocation {
     private RevocationType type;
 
     @JsonProperty("revoked_at")
-    private Long revokedAt;
+    private Integer revokedAt;
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes(

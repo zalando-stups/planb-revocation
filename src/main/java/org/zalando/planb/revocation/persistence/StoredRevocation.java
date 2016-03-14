@@ -14,13 +14,13 @@ import java.time.ZoneOffset;
 public class StoredRevocation {
     RevocationType type;
     RevocationData data;
-    Long revokedAt;
+    Integer revokedAt;
     String revokedBy;
 
     public StoredRevocation(final RevocationData data, final RevocationType type, final String revokedBy) {
         this.data = data;
         this.type = type;
         this.revokedBy = revokedBy;
-        this.revokedAt = LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli() / 1000;
+        this.revokedAt = (int) (LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli() / 1000);
     }
 }

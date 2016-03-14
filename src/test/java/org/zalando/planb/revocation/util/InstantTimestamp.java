@@ -8,15 +8,16 @@ import java.time.ZoneOffset;
  */
 public enum InstantTimestamp {
 
-    NOW(LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli() / 1000),
-    FIVE_MINUTES_AGO((LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli() / 1000) - 300),
-    ONE_HOUR_AGO((LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli() / 1000) - 3600);
+    // only use in tests!
+    NOW(UnixTimestamp.now()),
+    FIVE_MINUTES_AGO(UnixTimestamp.now() - 300),
+    ONE_HOUR_AGO(UnixTimestamp.now() - 3600);
 
-    private final long unixTimestamp;
+    private final int unixTimestamp;
 
-    InstantTimestamp(Long unixTimestamp) {
+    InstantTimestamp(int unixTimestamp) {
         this.unixTimestamp = unixTimestamp;
     }
 
-    public long seconds() { return unixTimestamp; };
+    public int seconds() { return unixTimestamp; };
 }

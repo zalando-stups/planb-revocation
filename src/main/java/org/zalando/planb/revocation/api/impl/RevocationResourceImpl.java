@@ -1,9 +1,6 @@
 package org.zalando.planb.revocation.api.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -38,6 +35,7 @@ import org.zalando.planb.revocation.persistence.StoredGlobal;
 import org.zalando.planb.revocation.persistence.StoredRevocation;
 import org.zalando.planb.revocation.persistence.StoredToken;
 import org.zalando.planb.revocation.util.MessageHasher;
+import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
  * TODO: small javadoc
@@ -61,15 +59,7 @@ public class RevocationResourceImpl implements RevocationResource {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public RevocationInfo get(@RequestParam final Long from) {
-
-        /*
-         * When path is /revocations?from= (null value) throws an IllegalArgumentException
-         */
-        if (from == null) {
-            throw new IllegalArgumentException("Parameter 'from' can't be null");
-        }
-
+    public RevocationInfo get(@RequestParam(required = true) final int from) {
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
 
         List<Revocation> apiRevocations = new ArrayList<>(revocations.size());
@@ -123,7 +113,7 @@ public class RevocationResourceImpl implements RevocationResource {
 
                 ClaimRevocationData cr = (ClaimRevocationData) revocation.getData();
 
-                data = new StoredClaim(cr.getName(), cr.getValueHash(), cr.getIssuedBefore());
+                data = new StoredClaim(cr.getName(), cr.getValueHash(), Optional.ofNullable(cr.getIssuedBefore()).orElse(UnixTimestamp.now()));
                 break;
 
             case TOKEN :

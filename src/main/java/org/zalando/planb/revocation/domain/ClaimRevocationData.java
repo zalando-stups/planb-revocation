@@ -22,5 +22,5 @@ public class ClaimRevocationData implements RevocationData {
     private String hashAlgorithm;
 
     @JsonProperty("issued_before")
-    private Long issuedBefore;
+    private Integer issuedBefore;
 }
