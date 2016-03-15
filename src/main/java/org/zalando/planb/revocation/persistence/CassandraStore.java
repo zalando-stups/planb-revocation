@@ -179,9 +179,8 @@ public class CassandraStore implements RevocationStore {
 
         int currentTime = UnixTimestamp.now();
         if ((currentTime - from) > maxTimeDelta) {
-            throw new IllegalArgumentException("From Timestamp is too old!"); // avoid erroneous query of too many
-
-            // buckets
+            // avoid erroneous query of too many buckets
+            throw new IllegalArgumentException("'from' timestamp is too old!");
         }
 
         for (Bucket b : getBuckets(from, currentTime)) {

@@ -20,52 +20,103 @@ security:
 paths:
   /revocations:
     get:
-      summary: Get revocated tokens
+      summary: Returns all the revocations since the specified timestamp.
       description: |
-        Gets all revocated tokens
+        Returns all revoked tokens from a specified timestamp. Also returns meta information which may be of importance to the client, like a refresh notification.
       tags:
         - Revocation
       parameters:
         - name: from
-          description: lower time limit for the revocation timestamp
+          description: instant from when tokens were revoked, in UTC UNIX timestamp
           in: query
-          type: string
-          format: date-time
-          required: false
+          type: integer
+          required: true
       responses:
         # Response code
         200:
           description: Successful response
           schema:
-            $ref: '#/definitions/Revocations'
+            $ref: '#/definitions/RevocationInfo'
+        400:
+          description: Type mismatch. When the parameter 'from' is missing or not an integer
+          schema:
+            $ref: '#/definitions/Problem'
     post:
-      summary: Revocate a token
+      summary: Posts the specified revocation to be stored.
       description: |
-        Revokes tokens, making them invalid
+        Revokes tokens associated with the specified revocation type.
       tags:
         - Revocation
       parameters:
-        - name: revocations
-          description: a revocation object
+        - name: revocation
+          description: |
+            the revocation associated with the tokens to revoke
           in: body
           schema:
             $ref: '#/definitions/Revocation'
       responses:
         # Response code
-        200:
-          description: Revocation info stored
+        201:
+          description: Revocation was successfully stored
+        400:
+          description: body is not readable because it is not valid JSON, or have an invalid JSON structure
+          schema:
+            $ref: '#/definitions/Problem'
+        500:
+          description: an internal error occurred, such as a failure to contact the revocation store.
+          schema:
+            $ref: '#/definitions/Problem'
+
+  /notifications/{type}:
+    post:
+      summary: Posts the specified notification to be stored.
+      description: |
+        Resource to post notification information, like a revocation refresh.
+      tags:
+        - Notification
+      parameters:
+        - name: type
+          in: path
+          description: |
+            the type of notification
+          required: true
+          type: string
+          enum: [ "REFRESH_FROM" ]
+        - name: value
+          in: query
+          description: |
+            the value of the notification to be stored
+          required: true
+          type: string
+      responses:
+        # Response code
+        201:
+          description: Notification was successfully stored
+        400:
+          description: type mismatch in parameter 'value'
+          schema:
+            $ref: '#/definitions/Problem'
+        500:
+          description: an internal error occurred, such as a failure to contact the revocation store.
+          schema:
+            $ref: '#/definitions/Problem'
 
 definitions:
-  Revocations:
+  RevocationInfo:
     type: object
     properties:
       meta:
         type: object
         properties:
-          force_refresh_from:
-            type: string
-            format: date-time
-            description: Informs the caller to get the tokens that were revoked revoked from the specified timestamp
+          MAX_TIME_DELTA:
+            type: integer
+            description: Used to inform clients of the maximum time in seconds since when it is possible to get revocations.
+          REFRESH_FROM:
+            type: integer
+            description: UNIX Timestamp (UTC) informing clients that a refresh of revocations needs to be done, starting from a specified instant.
+          REFRESH_TIMESTAMP:
+            type: integer
+            description: UNIX Timestamp (UTC) informing clients when REFRESH_FROM was set.
       revocations:
         type: array
         items:
@@ -77,12 +128,11 @@ definitions:
         type: string
         enum: [ "TOKEN", "CLAIM", "GLOBAL" ]
       revoked_at:
-        type: string
-        format: date-time
+        type: integer
       data:
+        description: |
         type: object
         format: '#/definitions/Data'
-
   Data:
     type: object
   Claim:
@@ -95,23 +145,21 @@ definitions:
           description: The claim of the tokens to revoke
         value_hash:
           type: string
-          description: The revoked claim hashed using hash_algorithm, encoded in Base64 Basic
+          description: The revoked claim hashed using hash_algorithm, in URL Base64 encoding
         hash_algorithm:
           type: string
           description: The algorithm used for hashing the Claim
         issued_before:
-          type: string
-          format: date-time
-          description: Upper time bound for tokens
+          type: integer
+          description: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked. If this property is not set when posting a Claim Revocation, it will default to the current UNIX timestamp (UTC).
   Global:
     allOf:
     - $ref: '#/definitions/Data'
     - type: object
       properties:
         issued_before:
-          type: string
-          format: date-time
-          description: Upper time bound for tokens
+          type: integer
+          description: a UNIX Timestamp (UTC) indication that tokens issued before it are revoked.
   Token:
     allOf:
     - $ref: '#/definitions/Data'
@@ -119,7 +167,28 @@ definitions:
       properties:
         token_hash:
           type: string
-          description: The revoked token hashed - using hash_algorithm -, encoded in URL Base64
+          description: The revoked token hashed using hash_algorithm, in URL Base64 encoding
         hash_algorithm:
           type: string
           description: The algorithm used for hashing the Token
+  Problem:
+    type: object
+    description: |
+      Represents a problem as specified by the IETF Problem Details draft (03). Used to complement HTTP Status codes with additional contextual information.
+    properties:
+      type:
+        type: string
+        description: |
+          URI set to "about:blank"
+      title:
+        type: string
+        description: |
+          reason for the specified status
+      status:
+        type: string
+        description: |
+          HTTP status code
+      detail:
+        type: string
+        description: |
+          additional detail of the problem

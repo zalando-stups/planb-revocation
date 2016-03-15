@@ -113,7 +113,9 @@ public class RevocationResourceImpl implements RevocationResource {
 
                 ClaimRevocationData cr = (ClaimRevocationData) revocation.getData();
 
-                data = new StoredClaim(cr.getName(), cr.getValueHash(), Optional.ofNullable(cr.getIssuedBefore()).orElse(UnixTimestamp.now()));
+                // If issued_before is not set, defaults to the current timestamp
+                data = new StoredClaim(cr.getName(), cr.getValueHash(), Optional.ofNullable(cr.getIssuedBefore())
+                        .orElse(UnixTimestamp.now()));
                 break;
 
             case TOKEN :
@@ -127,10 +129,6 @@ public class RevocationResourceImpl implements RevocationResource {
                 GlobalRevocationData gr = (GlobalRevocationData) revocation.getData();
                 data = new StoredGlobal(gr.getIssuedBefore());
                 break;
-        }
-
-        if (data == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         StoredRevocation storedRevocation = new StoredRevocation(data, revocation.getType(), "<!--add revoked by-->");

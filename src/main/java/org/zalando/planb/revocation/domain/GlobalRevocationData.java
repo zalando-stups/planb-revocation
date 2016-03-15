@@ -5,9 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * TODO: small javadoc
+ * <ul>
+ *     <li>{@code issuedBefore}: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked.</li>
+ * </ul>
  *
- * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
+ * @author  <a href="mailto:rodrigo.reis@zalando.de">Team Greendale</a>
  */
 @Data
 @NoArgsConstructor

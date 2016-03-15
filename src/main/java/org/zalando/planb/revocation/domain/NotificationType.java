@@ -9,15 +9,16 @@ import org.zalando.planb.revocation.api.RevocationResource;
  */
 public enum NotificationType {
     /**
-     * Used to inform clients of the maximum time since when it is possible to get revocations.
+     * Used to inform clients of the maximum time in seconds since when it is possible to get revocations.
      */
     MAX_TIME_DELTA(false),
     /**
-     * Informs clients that a refresh of revocations needs to be done, starting from a specified instant.
+     * UNIX Timestamp (UTC) informing clients that a refresh of revocations needs to be done, starting from a specified
+     * instant.
      */
     REFRESH_FROM(true),
     /**
-     * Informs clients when {@link NotificationType#REFRESH_FROM} was set.
+     * UNIX Timestamp (UTC) informing clients when {@link NotificationType#REFRESH_FROM} was set.
      */
     REFRESH_TIMESTAMP(false);
 

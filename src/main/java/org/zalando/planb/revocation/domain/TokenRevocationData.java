@@ -5,9 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
- * TODO: small javadoc
+ * <ul>
+ *     <li>{@code tokenHash}: The revoked token hashed using hash_algorithm, in URL Base64 encoding;</li>
+ *     <li>{@code hashAlgorithm}: The algorithm used for hashing the Token.</li>
+ * </ul>
  *
- * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
+ * @author  <a href="mailto:rodrigo.reis@zalando.de">Team Greendale</a>
  */
 @Data
 public class TokenRevocationData implements RevocationData {
