@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * <ul>
- *     <li>{@code issuedBefore}: a UNIX Timestamp (UTC) indication that tokens issued before it are revoked.</li>
+ *     <li>{@code issuedBefore}: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked.</li>
  * </ul>
  *
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Team Greendale</a>
