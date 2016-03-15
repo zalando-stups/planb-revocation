@@ -4,13 +4,14 @@ CREATE SCHEMA revocation
 CREATE TABLE revocation.revocation (
     bucket_date TEXT,
     bucket_interval INT,    -- 0: 0-8 1: 8-16 2:16-24
+    bucket_uuid TIMEUUID,
     revocation_type TEXT,
     revocation_data TEXT,
     revoked_at INT,
     revoked_by TEXT,
-    PRIMARY KEY ((bucket_date, bucket_interval), revoked_at)
+    PRIMARY KEY ((bucket_date, bucket_interval), bucket_uuid)
 )
-WITH CLUSTERING ORDER BY (revoked_at DESC);
+WITH CLUSTERING ORDER BY (bucket_uuid DESC);
 
 CREATE TABLE revocation.refresh (
     refresh_year INT,    -- only bucket we need
