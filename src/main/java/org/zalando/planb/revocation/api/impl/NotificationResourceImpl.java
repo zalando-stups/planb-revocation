@@ -43,8 +43,7 @@ public class NotificationResourceImpl implements NotificationResource {
                 try {
                     from = Integer.parseInt(value.toString());
                 } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("Invalid format. " + type + " must be a valid UTC UNIX " +
-                            "timestamp.");
+                    throw new IllegalArgumentException("Type mismatch. 'value' must be a valid UTC UNIX timestamp.");
                 }
 
                 if (!storage.storeRefresh(from)) {

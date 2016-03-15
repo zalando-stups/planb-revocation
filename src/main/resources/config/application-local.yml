@@ -1,12 +1,7 @@
 spring:
   profiles:
-    include: default
+    include: inmem
 
 cassandra:
   contactPoints: 127.0.0.1
   clusterName: Local Cluster
-
-security:
-  oauth2:
-    resource:
-      tokenInfoUri: "https://info.services.auth.zalando.com/oauth2/tokeninfo"

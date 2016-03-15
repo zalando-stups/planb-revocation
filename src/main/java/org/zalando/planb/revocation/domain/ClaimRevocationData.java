@@ -6,9 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * TODO: small javadoc
+ * <ul>
+ *     <li>{@code name}: The claim of the tokens to revoke;</li>
+ *     <li>{@code valueHash}: The revoked claim hashed using hash_algorithm, in URL Base64 encoding;</li>
+ *     <li>{@code hashAlgorithm}: The algorithm used for hashing the Claim;</li>
+ *     <li>{@code issuedBefore}: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked.</li>
+ * </ul>
  *
- * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
+ * <p>When posting a Claim Revocation, if {@code issuedBefore} is not set, it will default to the current UNIX
+ * timestamp (UTC).</p>
+ *
+ * @author  <a href="mailto:rodrigo.reis@zalando.de">Team Greendale</a>
  */
 @Data
 @NoArgsConstructor

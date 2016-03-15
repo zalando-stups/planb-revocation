@@ -36,9 +36,9 @@ paths:
         200:
           description: Successful response
           schema:
-            $ref: '#/definitions/Revocations'
+            $ref: '#/definitions/RevocationInfo'
         400:
-          description: Type mismatch. When the parameter 'from' is not present or not an integer
+          description: Type mismatch. When the parameter 'from' is missing or not an integer
           schema:
             $ref: '#/definitions/Problem'
     post:
@@ -58,18 +58,65 @@ paths:
         # Response code
         201:
           description: Revocation was successfully stored
+        400:
+          description: body is not readable because it is not valid JSON, or have an invalid JSON structure
+          schema:
+            $ref: '#/definitions/Problem'
+        500:
+          description: an internal error occurred, such as a failure to contact the revocation store.
+          schema:
+            $ref: '#/definitions/Problem'
+
+  /notifications/{type}:
+    post:
+      summary: Posts the specified notification to be stored.
+      description: |
+        Resource to post notification information, like a revocation refresh.
+      tags:
+        - Notification
+      parameters:
+        - name: type
+          in: path
+          description: |
+            the type of notification
+          required: true
+          type: string
+          enum: [ "REFRESH_FROM" ]
+        - name: value
+          in: query
+          description: |
+            the value of the notification to be stored
+          required: true
+          type: string
+      responses:
+        # Response code
+        201:
+          description: Notification was successfully stored
+        400:
+          description: type mismatch in parameter 'value'
+          schema:
+            $ref: '#/definitions/Problem'
+        500:
+          description: an internal error occurred, such as a failure to contact the revocation store.
+          schema:
+            $ref: '#/definitions/Problem'
 
 definitions:
-  Revocations:
+  RevocationInfo:
     type: object
     properties:
       meta:
         type: object
         properties:
-          force_refresh_from:
-            type: string
-            format: date-time
-            description: Informs the caller to get the tokens that were revoked revoked from the specified timestamp
+          MAX_TIME_DELTA:
+            type: integer
+            description: Used to inform clients of the maximum time in seconds since when it is possible to get revocations.
+          REFRESH_FROM:
+            type: integer
+            description: UNIX Timestamp (UTC) informing clients that a refresh of revocations needs to be done, starting from a specified instant.
+          REFRESH_TIMESTAMP:
+            type: integer
+            description: UNIX Timestamp (UTC) informing clients when REFRESH_FROM was set.
       revocations:
         type: array
         items:
@@ -81,12 +128,11 @@ definitions:
         type: string
         enum: [ "TOKEN", "CLAIM", "GLOBAL" ]
       revoked_at:
-        type: string
-        format: date-time
+        type: integer
       data:
+        description: |
         type: object
         format: '#/definitions/Data'
-
   Data:
     type: object
   Claim:
@@ -99,23 +145,21 @@ definitions:
           description: The claim of the tokens to revoke
         value_hash:
           type: string
-          description: The revoked claim hashed using hash_algorithm, encoded in Base64 Basic
+          description: The revoked claim hashed using hash_algorithm, in URL Base64 encoding
         hash_algorithm:
           type: string
           description: The algorithm used for hashing the Claim
         issued_before:
-          type: string
-          format: date-time
-          description: Upper time bound for tokens
+          type: integer
+          description: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked. If this property is not set when posting a Claim Revocation, it will default to the current UNIX timestamp (UTC).
   Global:
     allOf:
     - $ref: '#/definitions/Data'
     - type: object
       properties:
         issued_before:
-          type: string
-          format: date-time
-          description: Upper time bound for tokens
+          type: integer
+          description: a UNIX Timestamp (UTC) indication that tokens issued before it are revoked.
   Token:
     allOf:
     - $ref: '#/definitions/Data'
@@ -123,7 +167,7 @@ definitions:
       properties:
         token_hash:
           type: string
-          description: The revoked token hashed - using hash_algorithm -, encoded in URL Base64
+          description: The revoked token hashed using hash_algorithm, in URL Base64 encoding
         hash_algorithm:
           type: string
           description: The algorithm used for hashing the Token
