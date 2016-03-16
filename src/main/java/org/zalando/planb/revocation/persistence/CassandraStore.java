@@ -55,7 +55,7 @@ public class CassandraStore implements RevocationStore {
     private static final RegularStatement SELECT_REVOCATION = QueryBuilder.select().column("revocation_type")
                                                                           .column("revocation_data")
                                                                           .column("revoked_by").column("revoked_at")
-                                                                          .from(REVOCATION_TABLE)
+                                                                          .column("bucket_uuid").from(REVOCATION_TABLE)
                                                                           .where(eq("bucket_date", bindMarker()))
                                                                           .and(eq("bucket_interval", bindMarker())).and(
                                                                               gt("revoked_at", bindMarker()));
@@ -67,7 +67,7 @@ public class CassandraStore implements RevocationStore {
                                                                           .value("revocation_data", bindMarker())
                                                                           .value("revoked_by", bindMarker())
                                                                           .value("revoked_at", bindMarker()).value(
-                                                                              "bucket_uuid", bindMarker());
+                                                                              "bucket_uuid", now());
 
     private static final RegularStatement INSERT_REFRESH = QueryBuilder.insertInto(REFRESH_TABLE)
                                                                        .value("refresh_year", bindMarker())
@@ -221,7 +221,8 @@ public class CassandraStore implements RevocationStore {
             log.debug("Storing in bucket: {} {} {}", date, interval, data);
 
             BoundStatement bs = insertRevocation.bind(date, interval, revocation.getType().name(), data,
-                    revocation.getRevokedBy(), revocation.getRevokedAt(), now());
+                    revocation.getRevokedBy(), revocation.getRevokedAt());
+
             session.execute(bs);
             return true;
         } catch (JsonProcessingException ex) {

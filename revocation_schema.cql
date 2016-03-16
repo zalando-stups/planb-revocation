@@ -9,9 +9,9 @@ CREATE TABLE revocation.revocation (
     revocation_data TEXT,
     revoked_at INT,
     revoked_by TEXT,
-    PRIMARY KEY ((bucket_date, bucket_interval), bucket_uuid)
+    PRIMARY KEY ((bucket_date, bucket_interval), revoked_at, bucket_uuid)
 )
-WITH CLUSTERING ORDER BY (bucket_uuid DESC);
+WITH CLUSTERING ORDER BY (revoked_at DESC);
 
 CREATE TABLE revocation.refresh (
     refresh_year INT,    -- only bucket we need
