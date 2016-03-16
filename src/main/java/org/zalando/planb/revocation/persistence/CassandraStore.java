@@ -3,13 +3,12 @@ package org.zalando.planb.revocation.persistence;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.now;
 
 import java.io.IOException;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +20,7 @@ import java.util.Map;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.util.LocalDateFormatter;
+import org.zalando.planb.revocation.util.UnixTimestamp;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.ConsistencyLevel;
@@ -35,7 +35,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
-import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
  * Interface to Cassandra cluster.
@@ -56,7 +55,7 @@ public class CassandraStore implements RevocationStore {
     private static final RegularStatement SELECT_REVOCATION = QueryBuilder.select().column("revocation_type")
                                                                           .column("revocation_data")
                                                                           .column("revoked_by").column("revoked_at")
-                                                                          .from(REVOCATION_TABLE)
+                                                                          .column("bucket_uuid").from(REVOCATION_TABLE)
                                                                           .where(eq("bucket_date", bindMarker()))
                                                                           .and(eq("bucket_interval", bindMarker())).and(
                                                                               gt("revoked_at", bindMarker()));
@@ -66,8 +65,9 @@ public class CassandraStore implements RevocationStore {
                                                                           .value("bucket_interval", bindMarker())
                                                                           .value("revocation_type", bindMarker())
                                                                           .value("revocation_data", bindMarker())
-                                                                          .value("revoked_by", bindMarker()).value(
-                                                                              "revoked_at", bindMarker());
+                                                                          .value("revoked_by", bindMarker())
+                                                                          .value("revoked_at", bindMarker()).value(
+                                                                              "bucket_uuid", now());
 
     private static final RegularStatement INSERT_REFRESH = QueryBuilder.insertInto(REFRESH_TABLE)
                                                                        .value("refresh_year", bindMarker())
@@ -179,6 +179,7 @@ public class CassandraStore implements RevocationStore {
 
         int currentTime = UnixTimestamp.now();
         if ((currentTime - from) > maxTimeDelta) {
+
             // avoid erroneous query of too many buckets
             throw new IllegalArgumentException("'from' timestamp is too old!");
         }
@@ -221,6 +222,7 @@ public class CassandraStore implements RevocationStore {
 
             BoundStatement bs = insertRevocation.bind(date, interval, revocation.getType().name(), data,
                     revocation.getRevokedBy(), revocation.getRevokedAt());
+
             session.execute(bs);
             return true;
         } catch (JsonProcessingException ex) {
@@ -244,12 +246,13 @@ public class CassandraStore implements RevocationStore {
         // Only the first, although the result set should be 1 already.
         Row first = rs.one();
 
-        return Refresh.builder().refreshFrom(first.getInt("refresh_from"))
-                      .refreshTimestamp(first.getInt("refresh_ts")).build();
+        return Refresh.builder().refreshFrom(first.getInt("refresh_from")).refreshTimestamp(first.getInt("refresh_ts"))
+                      .build();
     }
 
     @Override
     public boolean storeRefresh(final int from) {
+
         // TODO Include refresh_by
         int yearBucket = LocalDate.now(ZoneId.of("UTC")).getYear();
         BoundStatement statement = storeRefresh.bind(yearBucket, UnixTimestamp.now(), from, "");
