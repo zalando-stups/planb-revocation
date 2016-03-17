@@ -246,8 +246,7 @@ public class CassandraStore implements RevocationStore {
         // Only the first, although the result set should be 1 already.
         Row first = rs.one();
 
-        return Refresh.builder().refreshFrom(first.getInt("refresh_from")).refreshTimestamp(first.getInt("refresh_ts"))
-                      .build();
+        return Refresh.create(first.getInt("refresh_from"), first.getInt("refresh_ts"));
     }
 
     @Override
