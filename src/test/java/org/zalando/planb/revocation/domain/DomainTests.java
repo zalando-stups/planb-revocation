@@ -58,6 +58,9 @@ public class DomainTests {
         assertThat(serialized).isEqualTo(expected);
     }
 
+    /**
+     * Tests JSON deserialization of {@link Refresh} objects.
+     */
     @Test
     public void testRefreshJsonDeserialization() throws IOException {
         ObjectMapper mapper = new ObjectMapper();

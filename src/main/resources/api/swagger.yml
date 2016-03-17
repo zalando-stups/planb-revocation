@@ -36,7 +36,7 @@ paths:
         200:
           description: Successful response
           schema:
-            $ref: '#/definitions/RevocationInfo'
+            $ref: '#/definitions/RevocationList'
         400:
           description: Type mismatch. When the parameter 'from' is missing or not an integer
           schema:

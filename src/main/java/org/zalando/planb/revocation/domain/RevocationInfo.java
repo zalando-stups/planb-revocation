@@ -1,7 +1,8 @@
 package org.zalando.planb.revocation.domain;
 
-import java.util.EnumMap;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RevocationInfo {
 
-    private EnumMap<NotificationType, Object> meta;
+    private RevocationType type;
 
-    private List<Revocation> revocations;
+    @JsonProperty("revoked_at")
+    private Integer revokedAt;
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
+    @JsonSubTypes(
+        {
+            @JsonSubTypes.Type(value = RevokedTokenInfo.class, name = "TOKEN"),
+            @JsonSubTypes.Type(value = RevokedClaimsInfo.class, name = "CLAIM"),
+            @JsonSubTypes.Type(value = RevokedGlobal.class, name = "GLOBAL"),
+        }
+    )
+    private RevokedInfo data;
 }

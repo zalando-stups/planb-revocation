@@ -5,4 +5,4 @@ package org.zalando.planb.revocation.domain;
  *
  * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
-public interface RevocationData { }
+public interface RevokedInfo { }

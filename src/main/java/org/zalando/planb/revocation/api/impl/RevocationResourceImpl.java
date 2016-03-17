@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.domain.ClaimRevocationData;
-import org.zalando.planb.revocation.domain.GlobalRevocationData;
-import org.zalando.planb.revocation.domain.Refresh;
-import org.zalando.planb.revocation.domain.Revocation;
-import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.domain.RevocationInfo;
+import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
+import org.zalando.planb.revocation.domain.RevokedGlobal;
+import org.zalando.planb.revocation.domain.Refresh;
+import org.zalando.planb.revocation.domain.NotificationType;
+import org.zalando.planb.revocation.domain.RevocationList;
 import org.zalando.planb.revocation.domain.RevocationType;
-import org.zalando.planb.revocation.domain.TokenRevocationData;
+import org.zalando.planb.revocation.domain.RevokedTokenInfo;
 import org.zalando.planb.revocation.persistence.CassandraStore;
 import org.zalando.planb.revocation.persistence.RevocationData;
 import org.zalando.planb.revocation.persistence.RevocationStore;
@@ -59,24 +59,24 @@ public class RevocationResourceImpl implements RevocationResource {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public RevocationInfo get(@RequestParam(required = true) final int from) {
+    public RevocationList get(@RequestParam(required = true) final int from) {
         Collection<StoredRevocation> revocations = storage.getRevocations(from);
 
-        List<Revocation> apiRevocations = new ArrayList<>(revocations.size());
+        List<RevocationInfo> apiRevocations = new ArrayList<>(revocations.size());
         for (StoredRevocation stored : revocations) {
             final RevocationData data = stored.getData();
 
-            Revocation newRevocation = new Revocation();
+            RevocationInfo newRevocation = new RevocationInfo();
             newRevocation.setRevokedAt(stored.getRevokedAt());
             newRevocation.setType(stored.getType());
 
             if (data instanceof StoredGlobal) {
-                GlobalRevocationData apiData = new GlobalRevocationData();
+                RevokedGlobal apiData = new RevokedGlobal();
                 apiData.setIssuedBefore(((StoredGlobal) data).getIssued_before());
                 newRevocation.setData(apiData);
 
             } else if (data instanceof StoredClaim) {
-                ClaimRevocationData apiData = new ClaimRevocationData();
+                RevokedClaimsInfo apiData = new RevokedClaimsInfo();
                 apiData.setName(((StoredClaim) data).getClaimName());
                 apiData.setValueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
                         ((StoredClaim) data).getClaimValue()));
@@ -85,7 +85,7 @@ public class RevocationResourceImpl implements RevocationResource {
                 newRevocation.setData(apiData);
 
             } else if (data instanceof StoredToken) {
-                TokenRevocationData apiData = new TokenRevocationData();
+                RevokedTokenInfo apiData = new RevokedTokenInfo();
                 apiData.setTokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
                         ((StoredToken) data).getTokenHash()));
                 apiData.setHashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm());
@@ -95,7 +95,7 @@ public class RevocationResourceImpl implements RevocationResource {
             apiRevocations.add(newRevocation);
         }
 
-        RevocationInfo responseBody = new RevocationInfo();
+        RevocationList responseBody = new RevocationList();
         responseBody.setMeta(metaInformation());
         responseBody.setRevocations(apiRevocations);
 
@@ -105,13 +105,13 @@ public class RevocationResourceImpl implements RevocationResource {
     @Override
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpEntity<String> post(@RequestBody final Revocation revocation) {
+    public HttpEntity<String> post(@RequestBody final RevocationInfo revocation) {
         RevocationData data = null;
         switch (revocation.getType()) {
 
             case CLAIM :
 
-                ClaimRevocationData cr = (ClaimRevocationData) revocation.getData();
+                RevokedClaimsInfo cr = (RevokedClaimsInfo) revocation.getData();
 
                 // If issued_before is not set, defaults to the current timestamp
                 data = new StoredClaim(cr.getName(), cr.getValueHash(), Optional.ofNullable(cr.getIssuedBefore())
@@ -120,13 +120,13 @@ public class RevocationResourceImpl implements RevocationResource {
 
             case TOKEN :
 
-                TokenRevocationData tr = (TokenRevocationData) revocation.getData();
+                RevokedTokenInfo tr = (RevokedTokenInfo) revocation.getData();
                 data = new StoredToken(tr.getTokenHash());
                 break;
 
             case GLOBAL :
 
-                GlobalRevocationData gr = (GlobalRevocationData) revocation.getData();
+                RevokedGlobal gr = (RevokedGlobal) revocation.getData();
                 data = new StoredGlobal(gr.getIssuedBefore());
                 break;
         }

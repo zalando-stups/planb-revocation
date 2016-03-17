@@ -6,7 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.util.StopWatch;
-import org.zalando.planb.revocation.domain.Revocation;
+import org.zalando.planb.revocation.domain.RevocationInfo;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -24,7 +24,7 @@ public class RevocationsMetricAspect extends MetricsAspect {
     }
 
     @Around("execution (* org.zalando.planb.revocation.api.impl.RevocationResourceImpl.post(*)) && args(revocation)")
-    public Object around(ProceedingJoinPoint pjp, Revocation revocation) throws Throwable {
+    public Object around(ProceedingJoinPoint pjp, RevocationInfo revocation) throws Throwable {
         Object retval = null;
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -43,7 +43,7 @@ public class RevocationsMetricAspect extends MetricsAspect {
         }
     }
 
-    protected String revocationType(Revocation revocation) {
+    protected String revocationType(RevocationInfo revocation) {
         if (revocation == null) {
             return UNKNOWN;
         } else {
