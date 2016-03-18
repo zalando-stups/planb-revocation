@@ -14,11 +14,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.zalando.planb.revocation.domain.Refresh;
+import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.RevokedClaimsData;
+import org.zalando.planb.revocation.domain.RevokedData;
+import org.zalando.planb.revocation.domain.RevokedGlobal;
+import org.zalando.planb.revocation.domain.RevokedTokenData;
 import org.zalando.planb.revocation.util.LocalDateFormatter;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
@@ -47,7 +53,6 @@ public class CassandraStore implements RevocationStore {
     /*
      * Tables and queries for revocation_schema.cql
      */
-
     private static final String REVOCATION_TABLE = "revocation";
 
     private static final String REFRESH_TABLE = "refresh";
@@ -97,22 +102,22 @@ public class CassandraStore implements RevocationStore {
 
     private static class GlobalMapper implements RevocationDataMapper {
         @Override
-        public RevocationData get(final String data) throws IOException {
-            return MAPPER.readValue(data, StoredGlobal.class);
+        public RevokedData get(final String data) throws IOException {
+            return MAPPER.readValue(data, RevokedGlobal.class);
         }
     }
 
     private static class ClaimMapper implements RevocationDataMapper {
         @Override
-        public RevocationData get(final String data) throws IOException {
-            return MAPPER.readValue(data, StoredClaim.class);
+        public RevokedData get(final String data) throws IOException {
+            return MAPPER.readValue(data, RevokedClaimsData.class);
         }
     }
 
     private static class TokenMapper implements RevocationDataMapper {
         @Override
-        public RevocationData get(final String data) throws IOException {
-            return MAPPER.readValue(data, StoredToken.class);
+        public RevokedData get(final String data) throws IOException {
+            return MAPPER.readValue(data, RevokedTokenData.class);
         }
     }
 
@@ -173,9 +178,9 @@ public class CassandraStore implements RevocationStore {
     }
 
     @Override
-    public Collection<StoredRevocation> getRevocations(final int from) {
+    public Collection<RevocationData> getRevocations(final int from) {
 
-        Collection<StoredRevocation> revocations = new ArrayList<>();
+        Collection<RevocationData> revocations = new LinkedList<>();
 
         int currentTime = UnixTimestamp.now();
         if ((currentTime - from) > maxTimeDelta) {
@@ -193,10 +198,15 @@ public class CassandraStore implements RevocationStore {
                 try {
                     RevocationType type = RevocationType.valueOf(r.getString("revocation_type").toUpperCase());
                     String unmappedData = r.getString("revocation_data");
-                    RevocationData data = dataMappers.get(type).get(unmappedData);
-                    StoredRevocation revocation = new StoredRevocation(data, type, r.getString("revoked_by"));
-                    revocation.setRevokedAt(r.getInt("revoked_at"));
-                    revocations.add(revocation);
+                    RevokedData data = dataMappers.get(type).get(unmappedData);
+
+                    // TODO Implement revoked_by
+                    RevocationData revocationData = new RevocationData();
+                    revocationData.setType(type);
+                    revocationData.setRevokedAt(r.getInt("revoked_at"));
+                    revocationData.setData(data);
+
+                    revocations.add(revocationData);
                 } catch (IOException ex) {
                     log.error("Failed to read revocation", ex);
                 }
@@ -212,7 +222,7 @@ public class CassandraStore implements RevocationStore {
     }
 
     @Override
-    public boolean storeRevocation(final StoredRevocation revocation) {
+    public boolean storeRevocation(final RevocationData revocation) {
         String date = LocalDateFormatter.get().format(new Date(((long) revocation.getRevokedAt()) * 1000));
 
         int interval = getInterval(revocation.getRevokedAt());
@@ -220,8 +230,9 @@ public class CassandraStore implements RevocationStore {
             String data = MAPPER.writeValueAsString(revocation.getData());
             log.debug("Storing in bucket: {} {} {}", date, interval, data);
 
+            // TODO Implement revoked_by
             BoundStatement bs = insertRevocation.bind(date, interval, revocation.getType().name(), data,
-                    revocation.getRevokedBy(), revocation.getRevokedAt());
+                    "<!-- implement revoked_by -->", revocation.getRevokedAt());
 
             session.execute(bs);
             return true;

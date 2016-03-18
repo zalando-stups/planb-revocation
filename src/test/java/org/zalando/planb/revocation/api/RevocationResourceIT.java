@@ -1,59 +1,50 @@
 package org.zalando.planb.revocation.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.StrictAssertions.failBecauseExceptionWasNotThrown;
-
-import static org.springframework.http.RequestEntity.get;
-import static org.springframework.http.RequestEntity.post;
-
-import java.net.URI;
-
-import java.util.Collection;
-
 import org.json.JSONObject;
-
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-
 import org.springframework.test.context.ActiveProfiles;
-
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.domain.RevocationInfo;
-import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.domain.Problem;
+import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationList;
 import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.RevokedClaimsData;
+import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
+import org.zalando.planb.revocation.domain.RevokedTokenData;
 import org.zalando.planb.revocation.domain.RevokedTokenInfo;
 import org.zalando.planb.revocation.persistence.RevocationStore;
-import org.zalando.planb.revocation.persistence.StoredClaim;
-import org.zalando.planb.revocation.persistence.StoredRevocation;
-import org.zalando.planb.revocation.persistence.StoredToken;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
 import org.zalando.planb.revocation.util.InstantTimestamp;
 import org.zalando.planb.revocation.util.MessageHasher;
 
+import java.net.URI;
+import java.util.Collection;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.StrictAssertions.failBecauseExceptionWasNotThrown;
+import static org.springframework.http.RequestEntity.get;
+import static org.springframework.http.RequestEntity.post;
+
 /**
  * Integration tests for the {@code /revocations} endpoint.
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
@@ -81,14 +72,19 @@ public class RevocationResourceIT extends AbstractSpringTest {
     @Test
     public void testJsonFieldsInSnakeCase() {
 
-        // A Stored revocation always have a revokedAt field set to current time
-        StoredRevocation revocation = new StoredRevocation(new StoredToken("abcdef"), RevocationType.TOKEN, "int-test");
+        RevocationData revocation = new RevocationData();
+        revocation.setType(RevocationType.TOKEN);
+
+        RevokedTokenData revokedToken = new RevokedTokenData();
+        revokedToken.setToken("abcdef");
+
+        revocation.setData(revokedToken);
         revocation.setRevokedAt(InstantTimestamp.NOW.seconds());
         revocationStore.storeRevocation(revocation);
 
         ResponseEntity<String> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
-                    .build(), String.class);
+                URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
+                .build(), String.class);
 
         JSONObject jsonBody = new JSONObject(response.getBody());
 
@@ -104,8 +100,8 @@ public class RevocationResourceIT extends AbstractSpringTest {
     @Test
     public void testGetEmptyRevocations() {
         ResponseEntity<RevocationList> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
-                    .build(), RevocationList.class);
+                URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
+                .build(), RevocationList.class);
         RevocationList responseBody = response.getBody();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -122,7 +118,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
     /**
      * Tests {@code GET}ting revocations with {@code REFRESH_FROM} as meta information.
-     *
+     * <p>
      * <p>
      * <p>Asserts that refresh information is included, and that it matches the value persisted.</p>
      */
@@ -131,8 +127,8 @@ public class RevocationResourceIT extends AbstractSpringTest {
         revocationStore.storeRefresh(InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
         ResponseEntity<RevocationList> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + (InstantTimestamp.FIVE_MINUTES_AGO.seconds())))
-                    .build(), RevocationList.class);
+                URI.create(basePath() + "/revocations?from=" + (InstantTimestamp.FIVE_MINUTES_AGO.seconds())))
+                .build(), RevocationList.class);
         RevocationList responseBody = response.getBody();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -142,7 +138,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
          * using a toString here.
          */
         int refreshTimestampRetrieved = Integer.valueOf(responseBody.getMeta().get(NotificationType.REFRESH_TIMESTAMP)
-                    .toString());
+                .toString());
         int refreshFromRetrieved = Integer.valueOf(responseBody.getMeta().get(NotificationType.REFRESH_FROM).toString());
 
         assertThat(refreshTimestampRetrieved).isNotNull();
@@ -151,13 +147,13 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
     @Test
     public void testInsertRevocation() {
-        RevocationInfo requestBody = generateRevocation(RevocationType.GLOBAL);
+        RevocationData requestBody = generateRevocation(RevocationType.GLOBAL);
 
         ResponseEntity<RevocationInfo> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
-                    .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
+                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-        Collection<StoredRevocation> storedRevocations = revocationStore.getRevocations(
+        Collection<RevocationData> storedRevocations = revocationStore.getRevocations(
                 InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
         assertThat(storedRevocations).isNotEmpty();
@@ -166,18 +162,17 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
     @Test
     public void testInsertClaimRevocation() {
-        RevocationInfo requestBody = generateRevocation(RevocationType.CLAIM);
+        RevocationData requestBody = generateRevocation(RevocationType.CLAIM);
 
         ResponseEntity<RevocationInfo> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
                 .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-        Collection<StoredRevocation> storedRevocations = revocationStore.getRevocations(
+        Collection<RevocationData> storedRevocations = revocationStore.getRevocations(
                 InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
         assertThat(storedRevocations).isNotEmpty();
         assertThat(storedRevocations.stream().filter(r -> r.getType() == RevocationType.CLAIM).count()).isGreaterThan(0);
-        // TODO Check storage
     }
 
     /**
@@ -186,11 +181,11 @@ public class RevocationResourceIT extends AbstractSpringTest {
     @Test
     public void testUnauthorizedWhenNoTokenInInsert() {
 
-        RevocationInfo requestBody = generateRevocation(RevocationType.GLOBAL);
+        RevocationData requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
             ResponseEntity<RevocationInfo> responseEntity = restTemplate.exchange(post(
-                        URI.create(basePath() + "/revocations")).body(requestBody), RevocationInfo.class);
+                    URI.create(basePath() + "/revocations")).body(requestBody), RevocationInfo.class);
             failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
         } catch (HttpClientErrorException e) {
             assertThat(e.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -203,14 +198,14 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
     /**
      * Tests that when inserting revocations with a wrong access token, a HTTP {@code UNAUTHORIZED} is returned.
-     *
+     * <p>
      * <p>
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
     @Test
     public void testUnauthorizedWhenInvalidTokenInInsert() {
 
-        RevocationInfo requestBody = generateRevocation(RevocationType.GLOBAL);
+        RevocationData requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
             restTemplate.exchange(post(URI.create(basePath() + "/revocations")).header(HttpHeaders.AUTHORIZATION,
@@ -228,13 +223,13 @@ public class RevocationResourceIT extends AbstractSpringTest {
     /**
      * Tests that when there's a Server Error returned from the Token Info Endpoint, a HTTP
      * {@code INTERNAL SERVER ERROR} is returned.
-     *
+     * <p>
      * <p>
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
     @Test
     public void testServerErrorOnTokenInfo() {
-        RevocationInfo requestBody = generateRevocation(RevocationType.GLOBAL);
+        RevocationData requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
             restTemplate.exchange(post(URI.create(basePath() + "/revocations")).header(HttpHeaders.AUTHORIZATION,
@@ -253,33 +248,30 @@ public class RevocationResourceIT extends AbstractSpringTest {
      * Tests that when <code>GET</code>ing revocations, a <code>TOKEN</code> revocation is returned properly encoded and
      * encrypted. After inserting a known <code>TOKEN</code> revocation, performs a <code>GET</code> in the endpoint and
      * verifies that the response contains the same revocation information, containing the following:
-     *
+     * <p>
      * <p>
      * <ul>
-     *   <li>A <code>token_hash</code> field, encoded and encrypted according to configuration;</li>
-     *   <li>A <code>hash_algorithm</code> field, with the encryption algorithm used.</li>
+     * <li>A <code>token_hash</code> field, encoded and encrypted according to configuration;</li>
+     * <li>A <code>hash_algorithm</code> field, with the encryption algorithm used.</li>
      * </ul>
-     *
+     * <p>
      * <p>Finally verifies that the result of encrypting and decoding the original value matches <code>
      * token_hash</code>.
      */
     @Ignore
     @Test
     public void testSHA256TokenHashing() {
-        RevocationInfo tokenRevocation = generateRevocation(RevocationType.TOKEN);
+        RevocationData tokenRevocation = generateRevocation(RevocationType.TOKEN);
         RevokedTokenInfo revocationData = (RevokedTokenInfo) tokenRevocation.getData();
         String unhashedToken = revocationData.getTokenHash();
 
         // Store in backend
-        StoredRevocation storedRevocation = new StoredRevocation(new StoredToken(revocationData.getTokenHash()),
-                tokenRevocation.getType(), "int-test");
-        storedRevocation.setRevokedAt(tokenRevocation.getRevokedAt());
-        revocationStore.storeRevocation(storedRevocation);
+        revocationStore.storeRevocation(tokenRevocation);
 
         // Get revocations. We should get the one we stored
         ResponseEntity<RevocationList> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
-                    .build(), RevocationList.class);
+                URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
+                .build(), RevocationList.class);
 
         RevokedTokenInfo fromService = (RevokedTokenInfo) response.getBody().getRevocations().get(0).getData();
         assertThat(fromService.getHashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.TOKEN)
@@ -293,48 +285,41 @@ public class RevocationResourceIT extends AbstractSpringTest {
      * Tests that when <code>GET</code>ing revocations, a <code>CLAIM</code> revocation is returned properly encoded and
      * encrypted. After inserting a known <code>CLAIM</code> revocation, performs a <code>GET</code> in the endpoint and
      * verifies that the response contains the same revocation information, containing the following:
-     *
+     * <p>
      * <p>
      * <ul>
-     *   <li>A <code>value_hash</code> field, encoded and encrypted according to configuration;</li>
-     *   <li>A <code>hash_algorithm</code> field, with the encryption algorithm used.</li>
+     * <li>A <code>value_hash</code> field, encoded and encrypted according to configuration;</li>
+     * <li>A <code>hash_algorithm</code> field, with the encryption algorithm used.</li>
      * </ul>
-     *
+     * <p>
      * <p>Finally verifies that the result of encrypting and decoding the original value matches <code>
      * value_hash</code>.
      */
     @Ignore
     @Test
     public void testClaimHashing() {
-        RevocationInfo claimRevocation = generateRevocation(RevocationType.CLAIM);
-        RevokedClaimsInfo revocationData = (RevokedClaimsInfo) claimRevocation.getData();
-        String unhashedValue = revocationData.getValueHash();
-
-        // Store in backend
-        StoredRevocation storedRevocation = new StoredRevocation(new StoredClaim(revocationData.getName(),
-                    revocationData.getValueHash(), revocationData.getIssuedBefore()), claimRevocation.getType(),
-                "int-test");
-        storedRevocation.setRevokedAt(claimRevocation.getRevokedAt());
-        revocationStore.storeRevocation(storedRevocation);
+        RevocationData claimRevocation = generateRevocation(RevocationType.CLAIM);
+        revocationStore.storeRevocation(claimRevocation);
 
         // Get revocations. We should get the one we stored
         ResponseEntity<RevocationList> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
-                    .build(), RevocationList.class);
+                URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
+                .build(), RevocationList.class);
 
         // Assert that it contains revocation
         RevokedClaimsInfo fromService = (RevokedClaimsInfo) response.getBody().getRevocations().get(0).getData();
         assertThat(fromService.getHashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.CLAIM)
                 .getAlgorithm());
 
-        String hashedValue = messageHasher.hashAndEncode(RevocationType.CLAIM, unhashedValue);
+        String hashedValue = messageHasher.hashAndEncode(RevocationType.CLAIM, ((RevokedClaimsData) claimRevocation
+                .getData()).getClaims().values());
         assertThat(fromService.getValueHash()).isEqualTo(hashedValue);
     }
 
     /**
      * Tests that when {@code GET}ing revocations with a timestamp too old - according to {@link CassandraProperties} -,
      * returns an error.
-     *
+     * <p>
      * <p>
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
@@ -345,7 +330,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
         try {
             restTemplate.exchange(get(URI.create(basePath() + "/revocations?from=" + tooOldTimeStamp)).build(),
-                String.class);
+                    String.class);
             failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
         } catch (HttpClientErrorException e) {
             assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -363,7 +348,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
         int notTooOldTimeStamp = InstantTimestamp.NOW.seconds() - cassandraProperties.getMaxTimeDelta() + 60;
 
         ResponseEntity<String> response = restTemplate.exchange(get(
-                    URI.create(basePath() + "/revocations?from=" + notTooOldTimeStamp)).build(), String.class);
+                URI.create(basePath() + "/revocations?from=" + notTooOldTimeStamp)).build(), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

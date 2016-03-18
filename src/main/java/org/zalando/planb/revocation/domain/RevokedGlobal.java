@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class RevokedGlobal implements RevokedInfo, Revoked {
+public class RevokedGlobal implements RevokedInfo, RevokedData {
 
     @JsonProperty("issued_before")
     private Integer issuedBefore;

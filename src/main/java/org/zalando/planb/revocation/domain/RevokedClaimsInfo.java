@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * <ul>
@@ -26,7 +27,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class RevokedClaimsInfo implements RevokedInfo {
-    private List<String> names;
+    private Set<String> names;
 
     @JsonProperty("value_hash")
     private String valueHash;

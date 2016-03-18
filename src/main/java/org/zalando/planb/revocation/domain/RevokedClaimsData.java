@@ -19,7 +19,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class RevokedClaimsData implements Revoked {
+public class RevokedClaimsData implements RevokedData {
 
     private Map<String, String> claims;
 

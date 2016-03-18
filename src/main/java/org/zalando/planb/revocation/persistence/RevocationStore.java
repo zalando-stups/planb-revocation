@@ -3,15 +3,22 @@ package org.zalando.planb.revocation.persistence;
 import java.util.Collection;
 
 import org.zalando.planb.revocation.domain.Refresh;
+import org.zalando.planb.revocation.domain.RevocationData;
 
 /**
  * Created by jmussler on 11.02.16.
  */
 public interface RevocationStore {
 
-    Collection<StoredRevocation> getRevocations(int from);
+    Collection<RevocationData> getRevocations(int from);
 
-    boolean storeRevocation(StoredRevocation revocation);
+    /**
+     * Stores the specified revocation data into the store.
+     *
+     * @param revocation    the revocation to store
+     * @return  {@code true} if the opertion was successful, {@code false} otherwise
+     */
+    boolean storeRevocation(RevocationData revocation);
 
     /**
      * Returns the latest refresh notification.

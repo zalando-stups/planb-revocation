@@ -1,14 +1,10 @@
 package org.zalando.planb.revocation.api.impl;
 
-import java.util.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,31 +12,34 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.domain.RevocationInfo;
-import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
-import org.zalando.planb.revocation.domain.RevokedGlobal;
-import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.NotificationType;
+import org.zalando.planb.revocation.domain.Refresh;
+import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationList;
 import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.RevokedClaimsData;
+import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
+import org.zalando.planb.revocation.domain.RevokedData;
+import org.zalando.planb.revocation.domain.RevokedGlobal;
+import org.zalando.planb.revocation.domain.RevokedInfo;
+import org.zalando.planb.revocation.domain.RevokedTokenData;
 import org.zalando.planb.revocation.domain.RevokedTokenInfo;
 import org.zalando.planb.revocation.persistence.CassandraStore;
-import org.zalando.planb.revocation.persistence.RevocationData;
 import org.zalando.planb.revocation.persistence.RevocationStore;
-import org.zalando.planb.revocation.persistence.StoredClaim;
-import org.zalando.planb.revocation.persistence.StoredGlobal;
-import org.zalando.planb.revocation.persistence.StoredRevocation;
-import org.zalando.planb.revocation.persistence.StoredToken;
 import org.zalando.planb.revocation.util.MessageHasher;
-import org.zalando.planb.revocation.util.UnixTimestamp;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.List;
 
 /**
  * TODO: small javadoc
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @RestController
 @RequestMapping(value = "/revocations", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,36 +59,38 @@ public class RevocationResourceImpl implements RevocationResource {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public RevocationList get(@RequestParam(required = true) final int from) {
-        Collection<StoredRevocation> revocations = storage.getRevocations(from);
+        Collection<RevocationData> revocations = storage.getRevocations(from);
 
         List<RevocationInfo> apiRevocations = new ArrayList<>(revocations.size());
-        for (StoredRevocation stored : revocations) {
-            final RevocationData data = stored.getData();
+        for (RevocationData stored : revocations) {
+            final RevokedData data = stored.getData();
 
             RevocationInfo newRevocation = new RevocationInfo();
             newRevocation.setRevokedAt(stored.getRevokedAt());
             newRevocation.setType(stored.getType());
 
-            if (data instanceof StoredGlobal) {
-                RevokedGlobal apiData = new RevokedGlobal();
-                apiData.setIssuedBefore(((StoredGlobal) data).getIssued_before());
-                newRevocation.setData(apiData);
+            if (data instanceof RevokedGlobal) {
+                // No transformation necessary
+                newRevocation.setData((RevokedInfo) data);
 
-            } else if (data instanceof StoredClaim) {
-                RevokedClaimsInfo apiData = new RevokedClaimsInfo();
-                apiData.setName(((StoredClaim) data).getClaimName());
-                apiData.setValueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
-                        ((StoredClaim) data).getClaimValue()));
-                apiData.setHashAlgorithm(messageHasher.getHashers().get(RevocationType.CLAIM).getAlgorithm());
-                apiData.setIssuedBefore(((StoredClaim) data).getIssuedBefore());
-                newRevocation.setData(apiData);
+            } else if (data instanceof RevokedClaimsData) {
+                RevokedClaimsInfo revokedClaims = new RevokedClaimsInfo();
 
-            } else if (data instanceof StoredToken) {
-                RevokedTokenInfo apiData = new RevokedTokenInfo();
-                apiData.setTokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
-                        ((StoredToken) data).getTokenHash()));
-                apiData.setHashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm());
-                newRevocation.setData(apiData);
+                revokedClaims.setNames(((RevokedClaimsData) data).getClaims().keySet());
+                revokedClaims.setValueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
+                        ((RevokedClaimsData) data).getClaims().values()));
+                revokedClaims.setHashAlgorithm(messageHasher.getHashers().get(RevocationType.CLAIM).getAlgorithm());
+                revokedClaims.setIssuedBefore(((RevokedClaimsData) data).getIssuedBefore());
+                revokedClaims.setSeparator(messageHasher.getSeparator());
+
+                newRevocation.setData(revokedClaims);
+
+            } else if (data instanceof RevokedTokenData) {
+                RevokedTokenInfo revokedToken = new RevokedTokenInfo();
+                revokedToken.setTokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
+                        ((RevokedTokenData) data).getToken()));
+                revokedToken.setHashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm());
+                newRevocation.setData(revokedToken);
             }
 
             apiRevocations.add(newRevocation);
@@ -105,34 +106,9 @@ public class RevocationResourceImpl implements RevocationResource {
     @Override
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpEntity<String> post(@RequestBody final RevocationInfo revocation) {
-        RevocationData data = null;
-        switch (revocation.getType()) {
+    public HttpEntity<String> post(@RequestBody final RevocationData revocation) {
 
-            case CLAIM :
-
-                RevokedClaimsInfo cr = (RevokedClaimsInfo) revocation.getData();
-
-                // If issued_before is not set, defaults to the current timestamp
-                data = new StoredClaim(cr.getName(), cr.getValueHash(), Optional.ofNullable(cr.getIssuedBefore())
-                        .orElse(UnixTimestamp.now()));
-                break;
-
-            case TOKEN :
-
-                RevokedTokenInfo tr = (RevokedTokenInfo) revocation.getData();
-                data = new StoredToken(tr.getTokenHash());
-                break;
-
-            case GLOBAL :
-
-                RevokedGlobal gr = (RevokedGlobal) revocation.getData();
-                data = new StoredGlobal(gr.getIssuedBefore());
-                break;
-        }
-
-        StoredRevocation storedRevocation = new StoredRevocation(data, revocation.getType(), "<!--add revoked by-->");
-        if (storage.storeRevocation(storedRevocation)) {
+        if (storage.storeRevocation(revocation)) {
 
             // TODO Refactor
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -144,13 +120,13 @@ public class RevocationResourceImpl implements RevocationResource {
     private EnumMap<NotificationType, Object> metaInformation() {
         EnumMap<NotificationType, Object> metaInfo = new EnumMap<>(NotificationType.class);
 
-        if(storage instanceof CassandraStore) {
+        if (storage instanceof CassandraStore) {
             metaInfo.put(NotificationType.MAX_TIME_DELTA, cassandraProperties.getMaxTimeDelta());
         }
 
         Refresh refresh = storage.getRefresh();
 
-        if(refresh != null) {
+        if (refresh != null) {
             metaInfo.put(NotificationType.REFRESH_FROM, refresh.refreshFrom());
             metaInfo.put(NotificationType.REFRESH_TIMESTAMP, refresh.refreshTimestamp());
         }

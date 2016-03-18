@@ -1,10 +1,7 @@
 package org.zalando.planb.revocation.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 /**
  * <ul>
@@ -15,7 +12,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class RevokedTokenData implements Revoked {
+public class RevokedTokenData implements RevokedData {
 
     private String token;
 }
