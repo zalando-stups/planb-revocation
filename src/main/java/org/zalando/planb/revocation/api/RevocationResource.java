@@ -2,8 +2,8 @@ package org.zalando.planb.revocation.api;
 
 import org.springframework.http.HttpEntity;
 
-import org.zalando.planb.revocation.domain.Revocation;
-import org.zalando.planb.revocation.domain.RevocationInfo;
+import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationList;
 
 /**
  * Resource to get and post revocations.
@@ -21,7 +21,7 @@ public interface RevocationResource {
      *
      * @return  all the revocations since the specified timestamp
      */
-    RevocationInfo get(int from);
+    RevocationList get(int from);
 
     /**
      * Posts the specified revocation to be stored.
@@ -32,5 +32,5 @@ public interface RevocationResource {
      *
      * @return  HTTP Status {@code CREATED}, if the revocation was successfully stored
      */
-    HttpEntity<String> post(Revocation revocation);
+    HttpEntity<String> post(RevocationData revocation);
 }

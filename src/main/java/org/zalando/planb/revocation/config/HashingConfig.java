@@ -15,7 +15,7 @@ import org.zalando.planb.revocation.util.MessageHasher;
 import lombok.Getter;
 
 @Configuration
-@EnableConfigurationProperties({ HashingProperties.class })
+@EnableConfigurationProperties({HashingProperties.class})
 @Getter
 public class HashingConfig {
 
@@ -24,6 +24,7 @@ public class HashingConfig {
 
     @Bean
     public MessageHasher messageHasher() throws NoSuchAlgorithmException {
-        return new MessageHasher(hashingProperties.getAlgorithms(), hashingProperties.getSalt());
+        return new MessageHasher(hashingProperties.getAlgorithms(), hashingProperties.getSalt(),
+                hashingProperties.getSeparator());
     }
 }

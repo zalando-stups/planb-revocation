@@ -7,23 +7,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.zalando.planb.revocation.domain.Refresh;
+import org.zalando.planb.revocation.domain.RevocationData;
 
 /**
  * Created by jmussler on 12.02.16.
  */
 public class InMemoryStore implements RevocationStore {
 
-    private final List<StoredRevocation> revocations = new ArrayList<>();
+    private final List<RevocationData> revocations = new ArrayList<>();
 
     private final LinkedList<Refresh> refreshNotifications = new LinkedList<>();
 
     @Override
-    public Collection<StoredRevocation> getRevocations(final int from) {
+    public Collection<RevocationData> getRevocations(final int from) {
         return revocations.stream().filter(x -> x.getRevokedAt() > from).collect(Collectors.toList());
     }
 
     @Override
-    public boolean storeRevocation(final StoredRevocation revocation) {
+    public boolean storeRevocation(final RevocationData revocation) {
         return revocations.add(revocation);
     }
 
@@ -34,6 +35,6 @@ public class InMemoryStore implements RevocationStore {
 
     @Override
     public boolean storeRefresh(final int from) {
-        return refreshNotifications.offer(Refresh.builder().refreshFrom(from).build());
+        return refreshNotifications.offer(Refresh.create(from));
     }
 }

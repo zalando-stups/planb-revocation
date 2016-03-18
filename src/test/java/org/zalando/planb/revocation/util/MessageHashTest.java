@@ -55,6 +55,23 @@ public class MessageHashTest {
     }
 
     /**
+     * Asserts that a {@link MessageHasher} properly hashes and encodes concatenated a message.
+     *
+     * @throws NoSuchAlgorithmException
+     */
+    @Test
+    public void testConcatenatedHashing() throws NoSuchAlgorithmException {
+        String concatenatedMessage = message + hashingProperties.getSeparator() + message;
+        MessageDigest hasher = MessageDigest.getInstance(hashingProperties.getAlgorithms().get(RevocationType.CLAIM));
+        hasher.update((hashingProperties.getSalt() + concatenatedMessage).getBytes());
+
+        String expected = Base64.getUrlEncoder().encodeToString(hasher.digest());
+        String base64sha256Hashed = messageHasher.hashAndEncode(RevocationType.TOKEN, concatenatedMessage);
+
+        assertEquals(expected, base64sha256Hashed);
+    }
+
+    /**
      * Asserts that, when no encryption algorithm is set for a {@link MessageHasher}, only the Base64 encding is
      * performed.
      *
@@ -62,7 +79,7 @@ public class MessageHashTest {
      */
     @Test
     public void testNullHashing() throws NoSuchAlgorithmException {
-        MessageHasher nullHasher = new MessageHasher(null, null);
+        MessageHasher nullHasher = new MessageHasher(null, null, null);
 
         assertEquals(Base64.getEncoder().encodeToString(message.getBytes()),
             nullHasher.hashAndEncode(RevocationType.TOKEN, message));

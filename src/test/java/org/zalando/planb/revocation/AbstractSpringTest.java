@@ -2,6 +2,7 @@ package org.zalando.planb.revocation;
 
 import com.github.tomakehurst.wiremock.http.ContentTypeHeader;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -10,12 +11,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-import org.zalando.planb.revocation.domain.ClaimRevocationData;
-import org.zalando.planb.revocation.domain.GlobalRevocationData;
-import org.zalando.planb.revocation.domain.Revocation;
 import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevokedClaimsData;
+import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
+import org.zalando.planb.revocation.domain.RevokedData;
+import org.zalando.planb.revocation.domain.RevokedGlobal;
+import org.zalando.planb.revocation.domain.RevocationInfo;
+import org.zalando.planb.revocation.domain.RevokedInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
-import org.zalando.planb.revocation.domain.TokenRevocationData;
+import org.zalando.planb.revocation.domain.RevokedTokenData;
+import org.zalando.planb.revocation.domain.RevokedTokenInfo;
 import org.zalando.planb.revocation.util.InstantTimestamp;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -82,36 +87,42 @@ public abstract class AbstractSpringTest {
     }
 
     // Some utility methods
-    public static Revocation generateRevocation(final RevocationType type) {
+    public static RevocationData generateRevocation(final RevocationType type) {
 
-        Revocation generated = new Revocation();
+        RevocationData generated = new RevocationData();
 
-        RevocationData revocationData = null;
         switch (type) {
 
             case TOKEN :
                 generated.setType(RevocationType.TOKEN);
-                revocationData = new TokenRevocationData();
-                ((TokenRevocationData) revocationData).setTokenHash(SAMPLE_TOKEN);
+
+                RevokedTokenData revokedToken = new RevokedTokenData();
+                revokedToken.setToken(SAMPLE_TOKEN);
+
+                generated.setData(revokedToken);
                 break;
 
             case CLAIM :
                 generated.setType(RevocationType.CLAIM);
-                revocationData = new ClaimRevocationData();
-                ((ClaimRevocationData) revocationData).setName("uid");
-                ((ClaimRevocationData) revocationData).setValueHash("rreis");
-                ((ClaimRevocationData) revocationData).setIssuedBefore(InstantTimestamp.NOW.seconds());
+
+                RevokedClaimsData revokedClaims = new RevokedClaimsData();
+                revokedClaims.setClaims(ImmutableMap.of("uid", "rreis", "sub", "abcd"));
+                revokedClaims.setIssuedBefore(InstantTimestamp.NOW.seconds());
+
+                generated.setData(revokedClaims);
                 break;
 
             case GLOBAL :
                 generated.setType(RevocationType.GLOBAL);
-                revocationData = new GlobalRevocationData();
-                ((GlobalRevocationData) revocationData).setIssuedBefore(InstantTimestamp.NOW.seconds());
+
+                RevokedGlobal revokedGlobal = new RevokedGlobal();
+                revokedGlobal.setIssuedBefore(InstantTimestamp.NOW.seconds());
+
+                generated.setData(revokedGlobal);
                 break;
         }
 
         generated.setRevokedAt(InstantTimestamp.NOW.seconds());
-        generated.setData(revocationData);
 
         return generated;
     }

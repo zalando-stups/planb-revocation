@@ -5,10 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * <ul>
- *     <li>{@code name}: The claim of the tokens to revoke;</li>
- *     <li>{@code valueHash}: The revoked claim hashed using hash_algorithm, in URL Base64 encoding;</li>
+ *     <li>{@code names}: List with claim names;</li>
+ *     <li>{@code valueHash}: The revoked claim values, concatenated using a separator character (default is '|').
+ *     The string hashed using {@code hash_algorithm}, in URL Base64 encoding;
+ *     </li>
+ *     <li>{@code separator}: The character used to concatenate claim values;</li>
  *     <li>{@code hashAlgorithm}: The algorithm used for hashing the Claim;</li>
  *     <li>{@code issuedBefore}: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked.</li>
  * </ul>
@@ -20,14 +26,16 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ClaimRevocationData implements RevocationData {
-    private String name;
+public class RevokedClaimsInfo implements RevokedInfo {
+    private Set<String> names;
 
     @JsonProperty("value_hash")
     private String valueHash;
 
     @JsonProperty("hash_algorithm")
     private String hashAlgorithm;
+
+    private Character separator;
 
     @JsonProperty("issued_before")
     private Integer issuedBefore;

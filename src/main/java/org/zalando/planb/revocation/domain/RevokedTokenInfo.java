@@ -13,7 +13,7 @@ import lombok.Data;
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Team Greendale</a>
  */
 @Data
-public class TokenRevocationData implements RevocationData {
+public class RevokedTokenInfo implements RevokedInfo {
     @JsonProperty("token_hash")
     private String tokenHash;
 
