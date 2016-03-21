@@ -37,7 +37,7 @@ import java.net.URI;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.StrictAssertions.failBecauseExceptionWasNotThrown;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.springframework.http.RequestEntity.get;
 import static org.springframework.http.RequestEntity.post;
 
@@ -84,6 +84,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
 
         ResponseEntity<String> response = restTemplate.exchange(get(
                 URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
+                .header("X-Forwarded-For", "0.0.8.15") // to test the request ip logging when forwarded from a load balancer
                 .build(), String.class);
 
         JSONObject jsonBody = new JSONObject(response.getBody());
