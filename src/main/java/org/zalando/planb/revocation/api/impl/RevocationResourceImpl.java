@@ -1,40 +1,28 @@
 package org.zalando.planb.revocation.api.impl;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.domain.NotificationType;
-import org.zalando.planb.revocation.domain.Refresh;
-import org.zalando.planb.revocation.domain.RevocationData;
-import org.zalando.planb.revocation.domain.RevocationInfo;
-import org.zalando.planb.revocation.domain.RevocationList;
-import org.zalando.planb.revocation.domain.RevocationType;
-import org.zalando.planb.revocation.domain.RevokedClaimsData;
-import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
-import org.zalando.planb.revocation.domain.RevokedData;
-import org.zalando.planb.revocation.domain.RevokedGlobal;
-import org.zalando.planb.revocation.domain.RevokedInfo;
-import org.zalando.planb.revocation.domain.RevokedTokenData;
-import org.zalando.planb.revocation.domain.RevokedTokenInfo;
+import org.zalando.planb.revocation.domain.*;
 import org.zalando.planb.revocation.persistence.CassandraStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.util.MessageHasher;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
+
+import static java.time.Instant.ofEpochSecond;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * TODO: small javadoc
@@ -44,6 +32,8 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/revocations", produces = MediaType.APPLICATION_JSON_VALUE)
 public class RevocationResourceImpl implements RevocationResource {
+
+    private final Logger log = getLogger(getClass());
 
     @Autowired
     private RevocationStore storage;
@@ -59,6 +49,7 @@ public class RevocationResourceImpl implements RevocationResource {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public RevocationList get(@RequestParam(required = true) final int from) {
+        log.debug("GET revocations since {} ({})", from, ZonedDateTime.ofInstant(ofEpochSecond(from), ZoneId.systemDefault()));
         Collection<RevocationData> revocations = storage.getRevocations(from);
 
         List<RevocationInfo> apiRevocations = new ArrayList<>(revocations.size());

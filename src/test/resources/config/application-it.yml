@@ -5,3 +5,7 @@ spring:
 cassandra:
   contactPoints: 127.0.0.1
   clusterName: Local Cluster
+
+logging:
+  level:
+    org.zalando.planb: DEBUG
