@@ -18,7 +18,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.zalando.planb.revocation.domain.*;
+import org.zalando.planb.revocation.domain.Refresh;
+import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.RevokedClaimsData;
+import org.zalando.planb.revocation.domain.RevokedData;
+import org.zalando.planb.revocation.domain.RevokedGlobal;
+import org.zalando.planb.revocation.domain.RevokedTokenData;
+import org.zalando.planb.revocation.domain.StoredRevocationData;
 import org.zalando.planb.revocation.util.LocalDateFormatter;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
@@ -66,7 +73,7 @@ public class CassandraStore implements RevocationStore {
                                                                           .value("revocation_data", bindMarker())
                                                                           .value("revoked_by", bindMarker())
                                                                           .value("revoked_at", bindMarker()).value(
-                    "bucket_uuid", now());
+                                                                              "bucket_uuid", now());
 
     private static final RegularStatement INSERT_REFRESH = QueryBuilder.insertInto(REFRESH_TABLE)
                                                                        .value("refresh_year", bindMarker())
