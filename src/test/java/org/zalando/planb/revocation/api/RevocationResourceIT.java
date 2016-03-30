@@ -18,16 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.domain.NotificationType;
-import org.zalando.planb.revocation.domain.Problem;
-import org.zalando.planb.revocation.domain.RevocationData;
-import org.zalando.planb.revocation.domain.RevocationInfo;
-import org.zalando.planb.revocation.domain.RevocationList;
-import org.zalando.planb.revocation.domain.RevocationType;
-import org.zalando.planb.revocation.domain.RevokedClaimsData;
-import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
-import org.zalando.planb.revocation.domain.RevokedTokenData;
-import org.zalando.planb.revocation.domain.RevokedTokenInfo;
+import org.zalando.planb.revocation.domain.*;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
 import org.zalando.planb.revocation.util.InstantTimestamp;
@@ -72,14 +63,10 @@ public class RevocationResourceIT extends AbstractSpringTest {
     @Test
     public void testJsonFieldsInSnakeCase() {
 
-        RevocationData revocation = new RevocationData();
-        revocation.setType(RevocationType.TOKEN);
-
         RevokedTokenData revokedToken = new RevokedTokenData();
         revokedToken.setToken("abcdef");
+        StoredRevocationData revocation = new StoredRevocationData(RevocationType.TOKEN, revokedToken, InstantTimestamp.NOW.seconds());
 
-        revocation.setData(revokedToken);
-        revocation.setRevokedAt(InstantTimestamp.NOW.seconds());
         revocationStore.storeRevocation(revocation);
 
         ResponseEntity<String> response = restTemplate.exchange(get(
@@ -154,7 +141,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
                 .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-        Collection<RevocationData> storedRevocations = revocationStore.getRevocations(
+        Collection<StoredRevocationData> storedRevocations = revocationStore.getRevocations(
                 InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
         assertThat(storedRevocations).isNotEmpty();
@@ -169,7 +156,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
                 .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-        Collection<RevocationData> storedRevocations = revocationStore.getRevocations(
+        Collection<StoredRevocationData> storedRevocations = revocationStore.getRevocations(
                 InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
         assertThat(storedRevocations).isNotEmpty();

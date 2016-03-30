@@ -18,9 +18,6 @@ public class RevocationData {
 
     private RevocationType type;
 
-    @JsonProperty("revoked_at")
-    private Integer revokedAt = UnixTimestamp.now();
-
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes(
         {
