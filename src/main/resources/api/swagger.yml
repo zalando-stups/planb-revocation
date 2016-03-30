@@ -53,7 +53,7 @@ paths:
             the revocation associated with the tokens to revoke
           in: body
           schema:
-            $ref: '#/definitions/Revocation'
+            $ref: '#/definitions/RevocationData'
       responses:
         # Response code
         201:
@@ -102,7 +102,7 @@ paths:
             $ref: '#/definitions/Problem'
 
 definitions:
-  RevocationInfo:
+  RevocationList:
     type: object
     properties:
       meta:
@@ -120,8 +120,8 @@ definitions:
       revocations:
         type: array
         items:
-          $ref: '#/definitions/Revocation'
-  Revocation:
+          $ref: '#/definitions/RevocationInfo'
+  RevocationInfo:
     type: object
     properties:
       type:
@@ -132,37 +132,42 @@ definitions:
       data:
         description: |
         type: object
-        format: '#/definitions/Data'
-  Data:
+        format: '#/definitions/RevokedInfo'
+  RevokedInfo:
     type: object
-  Claim:
+  RevokedClaimsInfo:
     allOf:
-    - $ref: '#/definitions/Data'
+    - $ref: '#/definitions/RevokedInfo'
     - type: object
       properties:
-        name:
-          type: string
-          description: The claim of the tokens to revoke
+        names:
+          type: array
+          items:
+            type: string
+          description: Set of claim fields
         value_hash:
           type: string
-          description: The revoked claim hashed using hash_algorithm, in URL Base64 encoding
+          description: The revoked claim values, using separator as a delimiter. Hashed using hash_algorithm, in URL Base64 encoding
+        separator:
+          type: string
+          description: Character used to delimit claim values in the value_hash field
         hash_algorithm:
           type: string
           description: The algorithm used for hashing the Claim
         issued_before:
           type: integer
           description: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked. If this property is not set when posting a Claim Revocation, it will default to the current UNIX timestamp (UTC).
-  Global:
+  RevokedGlobalInfo:
     allOf:
-    - $ref: '#/definitions/Data'
+    - $ref: '#/definitions/RevokedInfo'
     - type: object
       properties:
         issued_before:
           type: integer
           description: a UNIX Timestamp (UTC) indication that tokens issued before it are revoked.
-  Token:
+  RevokedTokenInfo:
     allOf:
-    - $ref: '#/definitions/Data'
+    - $ref: '#/definitions/RevokedInfo'
     - type: object
       properties:
         token_hash:
@@ -171,6 +176,62 @@ definitions:
         hash_algorithm:
           type: string
           description: The algorithm used for hashing the Token
+
+  RevocationData:
+    type: object
+    properties:
+      type:
+        type: string
+        enum: [ "TOKEN", "CLAIM", "GLOBAL" ]
+      revoked_at:
+        type: integer
+      data:
+        description: |
+        type: object
+        format: '#/definitions/RevokedData'
+  RevokedData:
+    type: object
+  RevokedClaimsData:
+    allOf:
+    - $ref: '#/definitions/RevokedData'
+    - type: object
+      properties:
+        claims:
+          type: object
+          properties:
+            claimValues:
+              type: string
+            additionalProperties:
+            - $ref: '#/definitions/ClaimTuple'
+          description: The claim of the tokens to revoke
+        issued_before:
+          type: integer
+          description: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked. If this property is not set when posting a Claim Revocation, it will default to the current UNIX timestamp (UTC).
+  ClaimTuple:
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+    description: A value pair relating claim names with their corresponding values. Used in RevokedClaimsData.
+
+  RevokedGlobalData:
+    allOf:
+    - $ref: '#/definitions/RevokedData'
+    - type: object
+      properties:
+        issued_before:
+          type: integer
+          description: a UNIX Timestamp (UTC) indication that tokens issued before it are revoked.
+  RevokedTokenData:
+    allOf:
+    - $ref: '#/definitions/RevokedData'
+    - type: object
+      properties:
+        token:
+          type: string
+          description: The revoked token
+
   Problem:
     type: object
     description: |
