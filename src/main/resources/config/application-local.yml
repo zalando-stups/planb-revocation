@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: inmem
+    include: default
 
 cassandra:
   contactPoints: 127.0.0.1
