@@ -25,7 +25,7 @@ import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.domain.RevokedData;
 import org.zalando.planb.revocation.domain.RevokedGlobal;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
-import org.zalando.planb.revocation.domain.StoredRevocationData;
+import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.util.LocalDateFormatter;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
@@ -179,9 +179,9 @@ public class CassandraStore implements RevocationStore {
     }
 
     @Override
-    public Collection<StoredRevocationData> getRevocations(final int from) {
+    public Collection<RevocationRequest> getRevocations(final int from) {
 
-        Collection<StoredRevocationData> revocations = new LinkedList<>();
+        Collection<RevocationRequest> revocations = new LinkedList<>();
 
         int currentTime = UnixTimestamp.now();
         if ((currentTime - from) > maxTimeDelta) {
@@ -202,7 +202,7 @@ public class CassandraStore implements RevocationStore {
                     RevokedData data = dataMappers.get(type).get(unmappedData);
 
                     // TODO Implement revoked_by
-                    StoredRevocationData revocationData = new StoredRevocationData();
+                    RevocationRequest revocationData = new RevocationRequest();
                     revocationData.setType(type);
                     revocationData.setRevokedAt(r.getInt("revoked_at"));
                     revocationData.setData(data);

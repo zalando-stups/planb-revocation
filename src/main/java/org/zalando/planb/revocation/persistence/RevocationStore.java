@@ -4,14 +4,14 @@ import java.util.Collection;
 
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
-import org.zalando.planb.revocation.domain.StoredRevocationData;
+import org.zalando.planb.revocation.domain.RevocationRequest;
 
 /**
  * Created by jmussler on 11.02.16.
  */
 public interface RevocationStore {
 
-    Collection<StoredRevocationData> getRevocations(int from);
+    Collection<RevocationRequest> getRevocations(int from);
 
     /**
      * Stores the specified revocation data into the store.

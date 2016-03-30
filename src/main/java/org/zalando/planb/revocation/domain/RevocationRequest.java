@@ -15,12 +15,12 @@ import org.zalando.planb.revocation.util.UnixTimestamp;
  */
 @Data
 @NoArgsConstructor
-public class StoredRevocationData extends RevocationData {
+public class RevocationRequest extends RevocationData {
 
     @JsonProperty("revoked_at")
     private Integer revokedAt = UnixTimestamp.now();
 
-    public StoredRevocationData(RevocationType type, RevokedData data, Integer revokedAt) {
+    public RevocationRequest(RevocationType type, RevokedData data, Integer revokedAt) {
         this.setType(type);
         this.setData(data);
         this.revokedAt = revokedAt;
