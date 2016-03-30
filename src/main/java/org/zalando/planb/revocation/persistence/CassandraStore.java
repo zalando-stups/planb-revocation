@@ -18,9 +18,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.CurrentUser;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.domain.RevokedData;
 import org.zalando.planb.revocation.domain.RevokedGlobal;
@@ -100,6 +102,9 @@ public class CassandraStore implements RevocationStore {
     private final PreparedStatement storeRefresh;
 
     private final Map<RevocationType, RevocationDataMapper> dataMappers = new EnumMap<>(RevocationType.class);
+
+    @Autowired
+    private CurrentUser currentUser;
 
     private static class GlobalMapper implements RevocationDataMapper {
         @Override
@@ -201,7 +206,6 @@ public class CassandraStore implements RevocationStore {
                     String unmappedData = r.getString("revocation_data");
                     RevokedData data = dataMappers.get(type).get(unmappedData);
 
-                    // TODO Implement revoked_by
                     RevocationRequest revocationData = new RevocationRequest();
                     revocationData.setType(type);
                     revocationData.setRevokedAt(r.getInt("revoked_at"));
@@ -232,9 +236,8 @@ public class CassandraStore implements RevocationStore {
             String data = MAPPER.writeValueAsString(revocation.getData());
             log.debug("Storing in bucket: {} {} {}", date, interval, data);
 
-            // TODO Implement revoked_by
             final BoundStatement bs = insertRevocation.bind(date, interval, revocation.getType().name(), data,
-                    "<!-- implement revoked_by -->", revokedAt);
+                    currentUser.get(), revokedAt);
 
             session.execute(bs);
             return true;
@@ -262,12 +265,18 @@ public class CassandraStore implements RevocationStore {
         return Refresh.create(first.getInt("refresh_from"), first.getInt("refresh_ts"));
     }
 
+    /**
+     * Stores a force refresh notification, specified by the provided timestamp.
+     *
+     * @param   from  UTC UNIX timestamp from when to refresh revocations.
+     *
+     * @return  {@code true} if the operation was successful.
+     */
     @Override
     public boolean storeRefresh(final int from) {
 
-        // TODO Include refresh_by
         int yearBucket = LocalDate.now(ZoneId.of("UTC")).getYear();
-        BoundStatement statement = storeRefresh.bind(yearBucket, UnixTimestamp.now(), from, "");
+        BoundStatement statement = storeRefresh.bind(yearBucket, UnixTimestamp.now(), from, currentUser.get());
         session.execute(statement);
 
         return true;
