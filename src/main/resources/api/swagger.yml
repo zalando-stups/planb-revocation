@@ -53,7 +53,7 @@ paths:
             the revocation associated with the tokens to revoke
           in: body
           schema:
-            $ref: '#/definitions/RevocationData'
+            $ref: '#/definitions/RevocationRequest'
       responses:
         # Response code
         201:
@@ -185,6 +185,16 @@ definitions:
         enum: [ "TOKEN", "CLAIM", "GLOBAL" ]
       revoked_at:
         type: integer
+      data:
+        description: |
+        type: object
+        format: '#/definitions/RevokedData'
+  RevocationRequest:
+    type: object
+    properties:
+      type:
+        type: string
+        enum: [ "TOKEN", "CLAIM", "GLOBAL" ]
       data:
         description: |
         type: object

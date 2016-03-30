@@ -8,24 +8,27 @@ import java.util.stream.Collectors;
 
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationRequest;
+import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
  * Created by jmussler on 12.02.16.
  */
 public class InMemoryStore implements RevocationStore {
 
-    private final List<RevocationData> revocations = new ArrayList<>();
+    private final List<RevocationRequest> revocations = new ArrayList<>();
 
     private final LinkedList<Refresh> refreshNotifications = new LinkedList<>();
 
     @Override
-    public Collection<RevocationData> getRevocations(final int from) {
+    public Collection<RevocationRequest> getRevocations(final int from) {
         return revocations.stream().filter(x -> x.getRevokedAt() > from).collect(Collectors.toList());
     }
 
     @Override
     public boolean storeRevocation(final RevocationData revocation) {
-        return revocations.add(revocation);
+        final RevocationRequest revocationRequest = new RevocationRequest(revocation.getType(), revocation.getData(), UnixTimestamp.now());
+        return revocations.add(revocationRequest);
     }
 
     @Override

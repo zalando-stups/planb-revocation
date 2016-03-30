@@ -50,10 +50,10 @@ public class RevocationResourceImpl implements RevocationResource {
     @ResponseBody
     public RevocationList get(@RequestParam(required = true) final int from) {
         log.debug("GET revocations since {} ({})", from, ZonedDateTime.ofInstant(ofEpochSecond(from), ZoneId.systemDefault()));
-        Collection<RevocationData> revocations = storage.getRevocations(from);
+        Collection<RevocationRequest> revocations = storage.getRevocations(from);
 
         List<RevocationInfo> apiRevocations = new ArrayList<>(revocations.size());
-        for (RevocationData stored : revocations) {
+        for (RevocationRequest stored : revocations) {
             final RevokedData data = stored.getData();
 
             RevocationInfo newRevocation = new RevocationInfo();
@@ -98,7 +98,7 @@ public class RevocationResourceImpl implements RevocationResource {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public HttpEntity<String> post(@RequestBody final RevocationData revocation) {
-
+        // don't use revocation data here
         if (storage.storeRevocation(revocation)) {
 
             // TODO Refactor

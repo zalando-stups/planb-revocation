@@ -122,8 +122,6 @@ public abstract class AbstractSpringTest {
                 break;
         }
 
-        generated.setRevokedAt(InstantTimestamp.NOW.seconds());
-
         return generated;
     }
 }
