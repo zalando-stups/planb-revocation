@@ -1,10 +1,13 @@
 package org.zalando.planb.revocation.persistence;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
-import org.zalando.planb.revocation.domain.*;
+import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationRequest;
+import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.RevokedData;
+import org.zalando.planb.revocation.domain.RevokedTokenData;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
 import java.util.Collection;
