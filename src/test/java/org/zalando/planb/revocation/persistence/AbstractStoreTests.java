@@ -2,9 +2,6 @@ package org.zalando.planb.revocation.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 
-import org.springframework.test.context.ActiveProfiles;
-
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.util.InstantTimestamp;
+import org.zalando.planb.revocation.util.security.WithMockCustomUser;
 
 /**
  * Abstract implementation of tests to be executed by multiple Spring Profiles.
@@ -29,7 +25,7 @@ import org.zalando.planb.revocation.util.InstantTimestamp;
 public abstract class AbstractStoreTests extends AbstractSpringTest {
 
     @Autowired
-    private RevocationStore revocationStore;
+    RevocationStore revocationStore;
 
     /**
      * Tests insertion of a refresh notification.
@@ -43,6 +39,7 @@ public abstract class AbstractStoreTests extends AbstractSpringTest {
      * </p>
      */
     @Test
+    @WithMockCustomUser
     public void testInsertRefresh() {
 
         // Insert refresh

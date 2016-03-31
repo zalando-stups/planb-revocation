@@ -33,6 +33,7 @@ import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
 import org.zalando.planb.revocation.util.InstantTimestamp;
 import org.zalando.planb.revocation.util.MessageHasher;
+import org.zalando.planb.revocation.util.security.WithMockCustomUser;
 
 import java.net.URI;
 import java.util.Collection;
@@ -71,6 +72,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
     }
 
     @Test
+    @WithMockCustomUser
     public void testJsonFieldsInSnakeCase() {
 
         RevokedTokenData revokedToken = new RevokedTokenData();
@@ -121,6 +123,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
      * <p>Asserts that refresh information is included, and that it matches the value persisted.</p>
      */
     @Test
+    @WithMockCustomUser
     public void testGetRefreshFromInMeta() {
         revocationStore.storeRefresh(InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
