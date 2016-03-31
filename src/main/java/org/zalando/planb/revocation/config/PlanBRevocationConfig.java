@@ -1,14 +1,12 @@
 package org.zalando.planb.revocation.config;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.util.StringUtils;
-
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.persistence.CassandraStore;
@@ -20,7 +18,7 @@ import org.zalando.planb.revocation.service.impl.StaticSchemaDiscoveryService;
 import org.zalando.planb.revocation.service.impl.SwaggerFromYamlFileService;
 
 import com.datastax.driver.core.Cluster;
-
+import com.datastax.driver.core.policies.AddressTranslator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
@@ -36,6 +34,9 @@ public class PlanBRevocationConfig {
 
     @Autowired
     private ApiGuildProperties apiGuildProperties;
+
+    @Autowired
+    private Optional<AddressTranslator> addressTranslator;
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -64,6 +65,7 @@ public class PlanBRevocationConfig {
         // Build Cluster
         final Cluster.Builder builder = Cluster.builder();
         builder.addContactPoints(cassandraProperties.getContactPoints().split(","));
+        addressTranslator.ifPresent(builder::withAddressTranslator);
         builder.withClusterName(cassandraProperties.getClusterName());
         builder.withPort(cassandraProperties.getPort());
 
