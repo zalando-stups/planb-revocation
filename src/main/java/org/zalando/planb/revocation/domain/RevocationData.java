@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
@@ -12,7 +14,8 @@ import org.zalando.planb.revocation.util.UnixTimestamp;
  *
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 public class RevocationData {
 

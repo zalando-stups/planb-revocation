@@ -3,9 +3,7 @@ package org.zalando.planb.revocation.domain;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
@@ -13,7 +11,8 @@ import org.zalando.planb.revocation.util.UnixTimestamp;
  *
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 public class RevocationRequest extends RevocationData {
 
