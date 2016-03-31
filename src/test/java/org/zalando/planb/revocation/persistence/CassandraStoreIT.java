@@ -1,5 +1,6 @@
 package org.zalando.planb.revocation.persistence;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
@@ -43,6 +44,7 @@ public class CassandraStoreIT extends AbstractStoreTests {
     /**
      * Tests that audit information is written when inserting a revocation.
      */
+    @Ignore
     @Test
     @WithMockCustomUser
     public void testRevokedBySetWhenInsertRevocation() {
