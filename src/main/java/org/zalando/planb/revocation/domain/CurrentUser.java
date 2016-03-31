@@ -1,5 +1,6 @@
 package org.zalando.planb.revocation.domain;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,6 +37,13 @@ public class CurrentUser implements Supplier<String> {
      */
     @Override
     public String get() {
+        OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
+        UsernamePasswordAuthenticationToken usernameToken = (UsernamePasswordAuthenticationToken) authentication.getUserAuthentication();
+
+        System.out.println("AUTHENTICATION: " + authentication);
+        System.out.println("USER AUTHENTICATION: " + authentication.getUserAuthentication());
+
+
         return Optional.of(SecurityContextHolder.getContext())
                 .map(SecurityContext::getAuthentication)
                 .map(auth -> (OAuth2Authentication) auth)

@@ -11,6 +11,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -33,6 +36,7 @@ import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
 import org.zalando.planb.revocation.util.InstantTimestamp;
 import org.zalando.planb.revocation.util.MessageHasher;
+import org.zalando.planb.revocation.util.WithMockCustomUser;
 
 import java.net.URI;
 import java.util.Collection;
@@ -71,6 +75,7 @@ public class RevocationResourceIT extends AbstractSpringTest {
     }
 
     @Test
+    @WithMockCustomUser
     public void testJsonFieldsInSnakeCase() {
 
         RevokedTokenData revokedToken = new RevokedTokenData();
