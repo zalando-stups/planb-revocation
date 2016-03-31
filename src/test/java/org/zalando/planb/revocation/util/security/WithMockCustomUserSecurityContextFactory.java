@@ -1,4 +1,4 @@
-package org.zalando.planb.revocation.util;
+package org.zalando.planb.revocation.util.security;
 
 import autovalue.shaded.com.google.common.common.collect.ImmutableMap;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,12 +9,20 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
 /**
- * TODO: small javadoc
+ * A {@link SecurityContext} factory for {@link WithMockCustomUser}.
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 public class WithMockCustomUserSecurityContextFactory implements WithSecurityContextFactory<WithMockCustomUser> {
 
+    /**
+     * Creates a mock security context, which mocks an OAuth Request and an authentication token.
+     * <p>
+     * <p>The token details will be set with the provided {@link WithMockCustomUser}.</p>
+     *
+     * @param customUser a mock user which will be used to set the realm and uid in the authentication token.
+     * @return a new {@link SecurityContext}.
+     */
     @Override
     public SecurityContext createSecurityContext(WithMockCustomUser customUser) {
 
