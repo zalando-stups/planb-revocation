@@ -26,12 +26,22 @@ public class ExceptionsResourceTest {
         mockMvc.perform(get("/exception")).andExpect(status().is5xxServerError());
     }
 
+    @Test
+    public void invokeNoMessage() throws Exception {
+        mockMvc.perform(get("/exceptionNoMessage")).andExpect(status().is5xxServerError());
+    }
+
     @RestController
     static class FakeController {
 
         @RequestMapping("/exception")
         public void exception() {
             throw new FakeException("Not handled by others");
+        }
+
+        @RequestMapping("/exceptionNoMessage")
+        public void exceptionNoMessage() {
+            throw new FakeException();
         }
     }
 
@@ -40,6 +50,10 @@ public class ExceptionsResourceTest {
 
         public FakeException(String message) {
             super(message);
+        }
+
+        public FakeException() {
+            super();
         }
     }
 
