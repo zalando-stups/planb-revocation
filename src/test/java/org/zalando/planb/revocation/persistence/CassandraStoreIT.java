@@ -1,12 +1,13 @@
 package org.zalando.planb.revocation.persistence;
 
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.util.InstantTimestamp;
-import org.zalando.planb.revocation.util.persistence.CassandraAuditStore;
+import org.zalando.planb.revocation.util.persistence.CassandraSupportStore;
 import org.zalando.planb.revocation.util.security.WithMockCustomUser;
 
 import java.util.Collection;
@@ -22,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CassandraStoreIT extends AbstractStoreTests {
 
     @Autowired
-    private CassandraAuditStore auditStore;
+    private CassandraSupportStore auditStore;
 
     /**
      * Tests that audit information is written when inserting a refresh notification.
@@ -44,7 +45,6 @@ public class CassandraStoreIT extends AbstractStoreTests {
     /**
      * Tests that audit information is written when inserting a revocation.
      */
-    @Ignore
     @Test
     @WithMockCustomUser
     public void testRevokedBySetWhenInsertRevocation() {
@@ -58,5 +58,16 @@ public class CassandraStoreIT extends AbstractStoreTests {
         // verify it's the default value for uid and realm from our mock user
         assertThat(revokedByValues.size()).isEqualTo(1);
         assertThat(revokedByValues.iterator().next()).isEqualTo("/services/test0");
+    }
+
+    /**
+     * Cleans up Cassandra revocation keyspace between tests.
+     *
+     * <p>Needed because all tests are written assuming an empty store.</p>
+     */
+    @After
+    public void cleanup() {
+
+        auditStore.cleanup();
     }
 }
