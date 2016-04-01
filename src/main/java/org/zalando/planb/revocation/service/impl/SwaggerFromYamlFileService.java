@@ -1,15 +1,11 @@
 package org.zalando.planb.revocation.service.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Map;
 
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.util.Assert;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 import org.zalando.planb.revocation.api.exception.YamlParsingException;
 import org.zalando.planb.revocation.service.SwaggerService;
 
@@ -20,14 +16,12 @@ import org.zalando.planb.revocation.service.SwaggerService;
  */
 public class SwaggerFromYamlFileService implements SwaggerService {
 
-    @Autowired
-    private ApplicationContext context;
-
     private final String yamlResource;
 
     private String swaggerJson;
 
     public SwaggerFromYamlFileService(final String yamlResource) {
+        Assert.hasText(yamlResource, "'yamlResource' should never be null or empty");
         this.yamlResource = yamlResource;
     }
 
@@ -36,22 +30,13 @@ public class SwaggerFromYamlFileService implements SwaggerService {
         return swaggerJson != null ? swaggerJson : convertToJson();
     }
 
-    private String convertToJson() {
-        final StringBuilder stringBuilder = new StringBuilder();
-        final Yaml yaml = new Yaml();
-
-        try(InputStream in = context.getResource(yamlResource).getInputStream();
-                BufferedReader r = new BufferedReader(new InputStreamReader(in))) {
-
-            String line;
-
-            while ((line = r.readLine()) != null) {
-                stringBuilder.append(line).append('\n');
-            }
-        } catch (final IOException e) {
+    protected String convertToJson() {
+        try {
+            swaggerJson = new JSONObject(new Yaml().loadAs(getClass().getResourceAsStream(yamlResource), Map.class))
+                    .toString();
+            return swaggerJson;
+        } catch (YAMLException e) {
             throw new YamlParsingException();
         }
-
-        return new JSONObject(yaml.loadAs(stringBuilder.toString(), Map.class)).toString();
     }
 }
