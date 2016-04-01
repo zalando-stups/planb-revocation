@@ -7,7 +7,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.zalando.planb.revocation.util.LocalDateFormatter;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
@@ -21,14 +21,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Utility Interface to Cassandra cluster, to get audit information.
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Slf4j
-public class CassandraAuditStore {
+public class CassandraSupportStore {
+
+    private static final Logger log = getLogger(CassandraSupportStore.class);
 
     /*
      * Tables and queries for revocation_schema.cql
@@ -51,25 +53,42 @@ public class CassandraAuditStore {
                     .from(REFRESH_TABLE)
                     .where(eq("refresh_year", bindMarker())).limit(1);
 
+    // Queries for cleaning up between tests.
+    private static final RegularStatement CLEANUP_REVOCATIONS = QueryBuilder.truncate(REVOCATION_TABLE);
+
+    private static final RegularStatement CLEANUP_REFRESH = QueryBuilder.truncate(REFRESH_TABLE);
+
     private static final int BUCKET_LENGTH = 8 * 60 * 60; // 8 Hours per bucket/row
+
     private final Session session;
+
     private final int maxTimeDelta;
+
     private final PreparedStatement getRevokedBy;
+
     private final PreparedStatement getCreatedBy;
+
+    private final PreparedStatement cleanupRevocations;
+
+    private final PreparedStatement cleanupRefresh;
 
     /**
      * Constructs a new instance configured with the provided {@code session} and {@code maxTimeDelta}.
      *
      * @param session      session configured to a Cassandra cluster
      * @param read         consistency level for SELECT queries
+     * @param write        consistency level for TRUNCATE queries
      * @param maxTimeDelta maximum time span limit to get revocations, in seconds
      */
-    public CassandraAuditStore(final Session session, final ConsistencyLevel read, final int maxTimeDelta) {
+    public CassandraSupportStore(final Session session, final ConsistencyLevel read, final ConsistencyLevel write,
+                                 final int maxTimeDelta) {
         this.session = session;
         this.maxTimeDelta = maxTimeDelta;
 
         getRevokedBy = session.prepare(SELECT_REVOCATION_REVOKED_BY).setConsistencyLevel(read);
         getCreatedBy = session.prepare(SELECT_REFRESH_CREATED_BY).setConsistencyLevel(read);
+        cleanupRevocations = session.prepare(CLEANUP_REVOCATIONS).setConsistencyLevel(write);
+        cleanupRefresh = session.prepare(CLEANUP_REFRESH).setConsistencyLevel(write);
     }
 
     protected static List<Bucket> getBuckets(int from, final int currentTime) {
@@ -142,6 +161,17 @@ public class CassandraAuditStore {
         Row first = rs.one();
 
         return first.getString("created_by");
+    }
+
+    /**
+     * Cleans up the revocation and refresh tables.
+     *
+     * <p>This is useful between executions of integration tests.</p>
+     */
+    public void cleanup() {
+
+        session.execute(cleanupRevocations.bind());
+        session.execute(cleanupRefresh.bind());
     }
 
     static class Bucket {

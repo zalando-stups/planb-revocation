@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
+import org.zalando.planb.revocation.AbstractSpringIT;
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.domain.NotificationType;
@@ -29,8 +30,7 @@ import org.zalando.planb.revocation.util.InstantTimestamp;
  */
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
-@ActiveProfiles("it")
-public class NotificationResourceIT extends AbstractSpringTest {
+public class NotificationResourceIT extends AbstractSpringIT {
 
     @Value("${local.server.port}")
     private int port;

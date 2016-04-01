@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.zalando.planb.revocation.AbstractSpringIT;
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
@@ -50,8 +51,7 @@ import static org.springframework.http.RequestEntity.post;
  */
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
-@ActiveProfiles("it")
-public class RevocationResourceIT extends AbstractSpringTest {
+public class RevocationResourceIT extends AbstractSpringIT {
 
     @Value("${local.server.port}")
     private int port;
@@ -96,7 +96,6 @@ public class RevocationResourceIT extends AbstractSpringTest {
      * Tests {@code GET}ting revocations with an empty storage. Asserts that no revocations are returned, and that the
      * meta section contains information about the maximum time delta allowed.
      */
-    @Ignore
     @Test
     public void testGetEmptyRevocations() {
         ResponseEntity<RevocationList> response = restTemplate.exchange(get(
@@ -259,12 +258,12 @@ public class RevocationResourceIT extends AbstractSpringTest {
      * <p>Finally verifies that the result of encrypting and decoding the original value matches <code>
      * token_hash</code>.
      */
-    @Ignore
     @Test
+    @WithMockCustomUser
     public void testSHA256TokenHashing() {
         RevocationData tokenRevocation = generateRevocation(RevocationType.TOKEN);
-        RevokedTokenInfo revocationData = (RevokedTokenInfo) tokenRevocation.getData();
-        String unhashedToken = revocationData.getTokenHash();
+        RevokedTokenData revocationData = (RevokedTokenData) tokenRevocation.getData();
+        String unhashedToken = revocationData.getToken();
 
         // Store in backend
         revocationStore.storeRevocation(tokenRevocation);
@@ -296,8 +295,8 @@ public class RevocationResourceIT extends AbstractSpringTest {
      * <p>Finally verifies that the result of encrypting and decoding the original value matches <code>
      * value_hash</code>.
      */
-    @Ignore
     @Test
+    @WithMockCustomUser
     public void testClaimHashing() {
         RevocationData claimRevocation = generateRevocation(RevocationType.CLAIM);
         revocationStore.storeRevocation(claimRevocation);

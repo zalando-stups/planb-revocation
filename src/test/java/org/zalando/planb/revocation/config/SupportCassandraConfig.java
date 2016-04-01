@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.util.persistence.CassandraAuditStore;
+import org.zalando.planb.revocation.util.persistence.CassandraSupportStore;
 
 /**
  * Support beans for accessing a Cassandra data store.
@@ -25,8 +25,9 @@ public class SupportCassandraConfig {
     private StorageConfig storageConfig;
 
     @Bean
-    public CassandraAuditStore auditStore() {
-        return new CassandraAuditStore(storageConfig.cassandraSession(), cassandraProperties.getReadConsistencyLevel(),
+    public CassandraSupportStore auditStore() {
+        return new CassandraSupportStore(storageConfig.cassandraSession(),
+                cassandraProperties.getReadConsistencyLevel(), cassandraProperties.getWriteConsistencyLevel(),
                 cassandraProperties.getMaxTimeDelta());
     }
 }
