@@ -13,5 +13,5 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "api")
 public class ApiGuildProperties {
 
-    private String swaggerFile = "classpath:api/swagger.yml";
+    private String swaggerFile = "/api/swagger.yml";
 }
