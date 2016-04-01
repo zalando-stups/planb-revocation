@@ -1,8 +1,5 @@
 package org.zalando.planb.revocation.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +9,11 @@ import org.zalando.planb.revocation.service.SchemaDiscoveryService;
 import org.zalando.planb.revocation.service.SwaggerService;
 import org.zalando.planb.revocation.service.impl.StaticSchemaDiscoveryService;
 import org.zalando.planb.revocation.service.impl.SwaggerFromYamlFileService;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+
+import lombok.Getter;
 
 @Configuration
 @EnableConfigurationProperties(ApiGuildProperties.class)

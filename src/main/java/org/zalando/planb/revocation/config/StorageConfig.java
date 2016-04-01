@@ -2,7 +2,12 @@ package org.zalando.planb.revocation.config;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.policies.AddressTranslator;
+
 import lombok.Getter;
+
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +25,9 @@ public class StorageConfig {
 
     @Autowired
     private CassandraProperties cassandraProperties;
+
+    @Autowired
+    private Optional<AddressTranslator> addressTranslator;
 
     /**
      * Storage used for revocations.
@@ -46,6 +54,7 @@ public class StorageConfig {
         // Build Cluster
         final Cluster.Builder builder = Cluster.builder();
         builder.addContactPoints(cassandraProperties.getContactPoints().split(","));
+        addressTranslator.ifPresent(builder::withAddressTranslator);
         builder.withClusterName(cassandraProperties.getClusterName());
         builder.withPort(cassandraProperties.getPort());
 

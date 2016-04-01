@@ -6,9 +6,6 @@ target
 .project
 .settings
 .factorypath
+.apt_generated
 
 scm-source.json
-
-.factorypath
-
-.apt_generated
