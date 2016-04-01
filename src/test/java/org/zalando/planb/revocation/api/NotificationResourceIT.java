@@ -1,32 +1,23 @@
 package org.zalando.planb.revocation.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.springframework.http.RequestEntity.post;
 
 import java.net.URI;
-import java.util.EnumMap;
 
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-
 import org.springframework.test.context.ActiveProfiles;
-
 import org.springframework.web.client.RestTemplate;
-
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
-import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.util.InstantTimestamp;

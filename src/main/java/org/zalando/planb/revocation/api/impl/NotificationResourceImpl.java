@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.planb.revocation.api.NotificationResource;
 import org.zalando.planb.revocation.domain.NotificationType;
@@ -19,12 +18,16 @@ import org.zalando.planb.revocation.persistence.RevocationStore;
 @RequestMapping(path = "/notifications", produces = MediaType.APPLICATION_JSON_VALUE)
 public class NotificationResourceImpl implements NotificationResource {
 
+
+    private final RevocationStore storage;
+
     @Autowired
-    private RevocationStore storage;
+    public NotificationResourceImpl(RevocationStore storage) {
+        this.storage = storage;
+    }
 
     @Override
     @RequestMapping(value="/{type}", method = RequestMethod.POST)
-    @ResponseStatus(HttpStatus.CREATED)
     public HttpEntity<String> post(@PathVariable("type") NotificationType type, @RequestParam Object value) {
 
         // Verifies if the type can be set
