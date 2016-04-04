@@ -18,8 +18,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Data
 @ConfigurationProperties(prefix = "revocation")
+@Data
 public class RevocationProperties {
 
     private Integer timestampThresold = 5;
