@@ -34,7 +34,7 @@ import lombok.Data;
  *   <li>{@code cassandra.username} - User account to access the Cassandra cluster. Default value is empty;</li>
  *   <li>{@code cassandra.password} - User password to access the Cassandra cluster. Default value is empty;</li>
  *   <li>{@code cassandra.maxTimeDelta} - The maximum time span limit to get revocations, in seconds. Default value is
- *     {@code 2592000}, meaning that a client can get revocations from since 30 days ago maximum.</li>
+ *     {@code 2678400}, meaning that a client can get revocations from since 31 days ago maximum.</li>
  * </ul>
  *
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
@@ -60,5 +60,5 @@ public class CassandraProperties {
     private Optional<String> password = Optional.empty();
 
     // Maybe this maxTimeDelta should be derived from the bucket size in Cassandra...
-    private int maxTimeDelta = (int) Duration.ofDays(30).getSeconds();
+    private int maxTimeDelta = (int) Duration.ofDays(31).getSeconds();
 }
