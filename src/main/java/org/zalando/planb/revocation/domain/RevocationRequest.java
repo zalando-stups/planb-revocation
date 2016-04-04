@@ -1,9 +1,12 @@
 package org.zalando.planb.revocation.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
@@ -14,15 +17,17 @@ import org.zalando.planb.revocation.util.UnixTimestamp;
 @Setter
 @Getter
 @NoArgsConstructor
-public class RevocationRequest extends RevocationData {
+public class RevocationRequest {
 
-    @JsonProperty("revoked_at")
-    private Integer revokedAt = UnixTimestamp.now();
+    private RevocationType type;
 
-    public RevocationRequest(RevocationType type, RevokedData data, Integer revokedAt) {
-        this.setType(type);
-        this.setData(data);
-        this.revokedAt = revokedAt;
-    }
-
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
+    @JsonSubTypes(
+        {
+            @JsonSubTypes.Type(value = RevokedTokenData.class, name = "TOKEN"),
+            @JsonSubTypes.Type(value = RevokedClaimsData.class, name = "CLAIM"),
+            @JsonSubTypes.Type(value = RevokedGlobal.class, name = "GLOBAL"),
+        }
+    )
+    private RevokedData data;
 }

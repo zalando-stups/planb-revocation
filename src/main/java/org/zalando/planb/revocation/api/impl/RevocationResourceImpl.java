@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
+import org.zalando.planb.revocation.config.properties.RevocationProperties;
 import org.zalando.planb.revocation.domain.*;
 import org.zalando.planb.revocation.persistence.CassandraStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
@@ -25,7 +26,7 @@ import static java.time.Instant.ofEpochSecond;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * TODO: small javadoc
+ * Controller implementation for the revocations endpoint.
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
@@ -44,16 +45,19 @@ public class RevocationResourceImpl implements RevocationResource {
     @Autowired
     private CassandraProperties cassandraProperties;
 
+    @Autowired
+    private RevocationProperties revocationProperties;
+
     @Override
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public RevocationList get(@RequestParam(required = true) final int from) {
         log.debug("GET revocations since {} ({})", from, ZonedDateTime.ofInstant(ofEpochSecond(from), ZoneId.systemDefault()));
-        Collection<RevocationRequest> revocations = storage.getRevocations(from);
+        Collection<RevocationData> revocations = storage.getRevocations(from);
 
         List<RevocationInfo> apiRevocations = new ArrayList<>(revocations.size());
-        for (RevocationRequest stored : revocations) {
+        for (RevocationData stored : revocations) {
             final RevokedData data = stored.getData();
 
             RevocationInfo newRevocation = new RevocationInfo();
@@ -97,8 +101,8 @@ public class RevocationResourceImpl implements RevocationResource {
     @Override
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpEntity<String> post(@RequestBody final RevocationData revocation) {
-        // don't use revocation data here
+    public HttpEntity<String> post(@RequestBody final RevocationRequest revocation) {
+
         if (storage.storeRevocation(revocation)) {
 
             // TODO Refactor
