@@ -83,7 +83,7 @@ Revoking tokens by "sub" claim:
     $ curl -X POST \
          -H "Authorization: Bearer $tok" \
          -H 'Content-Type: application/json' \
-         -d '{"type": "CLAIM", "data": {"name": "sub", "value_hash": ""}}' \
+         -d '{"type": "CLAIM", "data": {"claims": {"sub": "jdoe"}}}' \
          "http://localhost:8080/revocations"
 
 .. _Plan B OpenID Connect Provider: https://github.com/zalando/planb-provider
