@@ -1,13 +1,10 @@
 package org.zalando.planb.revocation.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
  * TODO: small javadoc

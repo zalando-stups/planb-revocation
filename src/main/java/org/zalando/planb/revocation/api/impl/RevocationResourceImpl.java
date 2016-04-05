@@ -52,7 +52,7 @@ public class RevocationResourceImpl implements RevocationResource {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public RevocationList get(@RequestParam(required = true) final int from) {
+    public RevocationList get(@RequestParam final int from) {
         log.debug("GET revocations since {} ({})", from, ZonedDateTime.ofInstant(ofEpochSecond(from), ZoneId.systemDefault()));
         Collection<RevocationData> revocations = storage.getRevocations(from);
 
@@ -102,6 +102,19 @@ public class RevocationResourceImpl implements RevocationResource {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public HttpEntity<String> post(@RequestBody final RevocationRequest revocation) {
+
+        int timestamp;
+        switch(revocation.getType()) {
+            case TOKEN:
+                timestamp = ((RevokedTokenData) revocation.getData()).getIssuedBefore();
+                break;
+            case CLAIM:
+                timestamp = ((RevokedClaimsData) revocation.getData()).getIssuedBefore();
+                break;
+            case GLOBAL:
+                timestamp = ((RevokedGlobal) revocation.getData()).getIssuedBefore();
+                break;
+        }
 
         if (storage.storeRevocation(revocation)) {
 
