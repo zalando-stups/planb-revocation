@@ -29,8 +29,6 @@ public interface RevocationResource {
      * <p>Revokes tokens associated with the specified revocation type.</p>
      *
      * @param   revocation  the revocation associated with the tokens to revoke
-     *
-     * @return  HTTP Status {@code CREATED}, if the revocation was successfully stored
      */
-    HttpEntity<String> post(RevocationRequest revocation);
+    void post(RevocationRequest revocation);
 }

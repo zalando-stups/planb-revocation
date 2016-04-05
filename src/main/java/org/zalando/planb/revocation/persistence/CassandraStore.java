@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zalando.planb.revocation.api.exception.SerializationException;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
@@ -227,7 +228,7 @@ public class CassandraStore implements RevocationStore {
     }
 
     @Override
-    public boolean storeRevocation(final RevocationRequest revocation) {
+    public void storeRevocation(final RevocationRequest revocation) {
         final Integer revokedAt = UnixTimestamp.now();
         final String date = LocalDateFormatter.get().format(new Date(((long) revokedAt) * 1000));
 
@@ -240,10 +241,8 @@ public class CassandraStore implements RevocationStore {
                     currentUser.get(), revokedAt);
 
             session.execute(bs);
-            return true;
         } catch (JsonProcessingException ex) {
-            log.error("Failed to serialize json", ex);
-            return false;
+            throw new SerializationException();
         }
     }
 
@@ -269,16 +268,12 @@ public class CassandraStore implements RevocationStore {
      * Stores a force refresh notification, specified by the provided timestamp.
      *
      * @param   from  UTC UNIX timestamp from when to refresh revocations.
-     *
-     * @return  {@code true} if the operation was successful.
      */
     @Override
-    public boolean storeRefresh(final int from) {
+    public void storeRefresh(final int from) {
 
         int yearBucket = LocalDate.now(ZoneId.of("UTC")).getYear();
         BoundStatement statement = storeRefresh.bind(yearBucket, UnixTimestamp.now(), from, currentUser.get());
         session.execute(statement);
-
-        return true;
     }
 }

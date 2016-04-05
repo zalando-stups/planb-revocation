@@ -29,8 +29,7 @@ public class InMemoryStoreTest extends AbstractStoreTests {
     public void testInMemoryStore() throws InterruptedException {
         int timestamp = UnixTimestamp.now();
 
-        boolean result = revocationStore.storeRevocation(generateRevocation());
-        assertThat(result).isEqualTo(true);
+        revocationStore.storeRevocation(generateRevocation());
 
         Collection<RevocationData> revocations = revocationStore.getRevocations(timestamp-100);
         assertThat(revocations.size()).isNotZero();

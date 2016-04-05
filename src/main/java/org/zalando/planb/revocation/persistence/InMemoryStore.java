@@ -26,9 +26,9 @@ public class InMemoryStore implements RevocationStore {
     }
 
     @Override
-    public boolean storeRevocation(final RevocationRequest revocation) {
+    public void storeRevocation(final RevocationRequest revocation) {
         final RevocationData revocationData = new RevocationData(revocation.getType(), revocation.getData(), UnixTimestamp.now());
-        return revocations.add(revocationData);
+        revocations.add(revocationData);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class InMemoryStore implements RevocationStore {
     }
 
     @Override
-    public boolean storeRefresh(final int from) {
-        return refreshNotifications.offer(Refresh.create(from));
+    public void storeRefresh(final int from) {
+        refreshNotifications.offer(Refresh.create(from));
     }
 }
