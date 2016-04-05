@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.zalando.planb.revocation.util.UnixTimestamp;
+import org.zalando.planb.revocation.util.security.WithMockCustomUser;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -71,4 +72,36 @@ public class DomainTests {
         assertThat(deserialized.refreshFrom()).isEqualTo(1458232925);
         assertThat(deserialized.refreshTimestamp()).isEqualTo(1458232985);
     }
+
+    /**
+     * Tests that a default timestamp is set in {@link RevokedClaimsData#issuedBefore} when creating a new instance.
+     */
+    @Test
+    public void testIssuedBeforeDefaultTimestampInClaim() {
+        RevokedClaimsData claimsData = new RevokedClaimsData();
+
+        assertThat(claimsData.getIssuedBefore()).isNotNull();
+    }
+
+    /**
+     * Tests that a default timestamp is set in {@link RevokedTokenData#issuedBefore} when creating a new instance.
+     */
+    @Test
+    public void testIssuedBeforeDefaultTimestampInToken() {
+        RevokedTokenData claimsData = new RevokedTokenData();
+
+        assertThat(claimsData.getIssuedBefore()).isNotNull();
+    }
+
+    /**
+     * Tests that a default timestamp is set in {@link RevokedGlobal#issuedBefore} when creating a new instance.
+     */
+    @Test
+    public void testIssuedBeforeDefaultTimestampInGlobal() {
+        RevokedGlobal globalData = new RevokedGlobal();
+
+        assertThat(globalData.getIssuedBefore()).isNotNull();
+    }
+
+
 }

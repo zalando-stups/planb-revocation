@@ -23,8 +23,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
+import org.zalando.planb.revocation.config.properties.RevocationProperties;
 import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
+import org.zalando.planb.revocation.util.InstantTimestamp;
 
 /**
  * Unit tests for endpoint {@code /revocations}.
@@ -38,6 +40,9 @@ public class RevocationResourceTest extends AbstractSpringTest {
 
     @Autowired
     private WebApplicationContext context;
+
+    @Autowired
+    private RevocationProperties revocationProperties;
 
     private MockMvc mvc;
 
@@ -134,11 +139,49 @@ public class RevocationResourceTest extends AbstractSpringTest {
     public void testBadRequestWhenUnexpectedJsonBodyInPost() throws Exception {
         String jsonObject = "{ space: [ { odyssey: [ \"2001\" ] } ] }";
         ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
-                    MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
-                    jsonObject));
+                MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
+                jsonObject));
 
         result.andExpect(status().isBadRequest());
 
         ApiGuildCompliance.isStandardProblem(result);
+    }
+
+    /**
+     * Tests that when {@code POST}ing revocations with a future {@code issued_before} field, a HTTP {@code BAD_REQUEST}
+     * is returned.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
+     */
+    @Test
+    public void testBadRequestWhenPostingFutureRevocation() throws Exception {
+        String claimRevocation = "{ \"type\": \"CLAIM\", \"data\": {\"claims\":{\"uid\":\"3035729288\"}," +
+                "\"issued_before\":" + (InstantTimestamp.FIVE_MINUTES_AFTER.seconds() + revocationProperties
+                .getTimestampThresold()) + "} }";
+
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
+                MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
+                claimRevocation));
+
+        result.andExpect(status().isBadRequest());
+
+        ApiGuildCompliance.isStandardProblem(result);
+    }
+
+    /**
+     * Tests that when {@code POST}ing revocations with a future {@code issued_before} field (but behind the
+     * threshold limit), a HTTP {@code CREATED} is returned.
+     */
+    @Test
+    public void testOkWhenPostingRevocationBehindTimeThreshold() throws Exception {
+        String claimRevocation = "{ \"type\": \"CLAIM\", \"data\": {\"claims\":{\"uid\":\"3035729288\"}," +
+                "\"issued_before\":" + (InstantTimestamp.NOW.seconds() + revocationProperties
+                .getTimestampThresold() - 1) + "} }";
+
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
+                MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
+                claimRevocation));
+
+        result.andExpect(status().isCreated());
     }
 }
