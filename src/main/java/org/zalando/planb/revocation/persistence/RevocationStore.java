@@ -11,7 +11,7 @@ import org.zalando.planb.revocation.domain.RevocationRequest;
  */
 public interface RevocationStore {
 
-    Collection<RevocationRequest> getRevocations(int from);
+    Collection<RevocationData> getRevocations(int from);
 
     /**
      * Stores the specified revocation data into the store.
@@ -19,7 +19,7 @@ public interface RevocationStore {
      * @param revocation    the revocation to store
      * @return  {@code true} if the opertion was successful, {@code false} otherwise
      */
-    boolean storeRevocation(RevocationData revocation);
+    void storeRevocation(RevocationRequest revocation);
 
     /**
      * Returns the latest refresh notification.
@@ -37,5 +37,5 @@ public interface RevocationStore {
      *
      * @return  {@code true} if the operation was successful, {@code false} otherwise.
      */
-    boolean storeRefresh(int from);
+    void storeRefresh(int from);
 }

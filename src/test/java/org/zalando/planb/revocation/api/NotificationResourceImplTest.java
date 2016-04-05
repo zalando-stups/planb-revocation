@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.zalando.planb.revocation.api.exception.SerializationException;
 import org.zalando.planb.revocation.api.impl.NotificationResourceImpl;
 import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.persistence.RevocationStore;
@@ -45,12 +46,10 @@ public class NotificationResourceImplTest {
         resource.post(NotificationType.REFRESH_FROM, "NotAnInteger");
     }
 
-    @Test
+    @Test(expected = SerializationException.class)
     public void storageUnableToStoreFromThrowsException() {
         NotificationResourceImpl resource = new NotificationResourceImpl(revocationStore);
-        Mockito.when(revocationStore.storeRefresh(Mockito.eq(12))).thenReturn(Boolean.FALSE);
-        ResponseEntity<String> response = (ResponseEntity) resource.post(NotificationType.REFRESH_FROM, "12");
-        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        Mockito.doThrow(new SerializationException()).when(revocationStore).storeRefresh(12);
+        resource.post(NotificationType.REFRESH_FROM, "12");
     }
-
 }

@@ -1,7 +1,6 @@
 package org.zalando.planb.revocation.api;
 
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,17 +10,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.zalando.planb.revocation.AbstractSpringIT;
-import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationList;
 import org.zalando.planb.revocation.domain.RevocationType;
@@ -29,7 +27,6 @@ import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
 import org.zalando.planb.revocation.domain.RevokedTokenInfo;
-import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
 import org.zalando.planb.revocation.util.InstantTimestamp;
@@ -77,7 +74,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
         RevokedTokenData revokedToken = new RevokedTokenData();
         revokedToken.setToken("abcdef");
-        RevocationRequest revocation = new RevocationRequest(RevocationType.TOKEN, revokedToken, InstantTimestamp.NOW.seconds());
+        RevocationData revocation = new RevocationData(RevocationType.TOKEN, revokedToken, InstantTimestamp.NOW.seconds());
 
         revocationStore.storeRevocation(revocation);
 
@@ -147,13 +144,13 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
     @Test
     public void testInsertRevocation() {
-        RevocationData requestBody = generateRevocation(RevocationType.GLOBAL);
+        RevocationRequest requestBody = generateRevocation(RevocationType.GLOBAL);
 
         ResponseEntity<RevocationInfo> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
                 .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-        Collection<RevocationRequest> storedRevocations = revocationStore.getRevocations(
+        Collection<RevocationData> storedRevocations = revocationStore.getRevocations(
                 InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
         assertThat(storedRevocations).isNotEmpty();
@@ -162,13 +159,13 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
     @Test
     public void testInsertClaimRevocation() {
-        RevocationData requestBody = generateRevocation(RevocationType.CLAIM);
+        RevocationRequest requestBody = generateRevocation(RevocationType.CLAIM);
 
         ResponseEntity<RevocationInfo> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
                 .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-        Collection<RevocationRequest> storedRevocations = revocationStore.getRevocations(
+        Collection<RevocationData> storedRevocations = revocationStore.getRevocations(
                 InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
         assertThat(storedRevocations).isNotEmpty();
@@ -181,7 +178,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     @Test
     public void testUnauthorizedWhenNoTokenInInsert() {
 
-        RevocationData requestBody = generateRevocation(RevocationType.GLOBAL);
+        RevocationRequest requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
             ResponseEntity<RevocationInfo> responseEntity = restTemplate.exchange(post(
@@ -205,7 +202,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     @Test
     public void testUnauthorizedWhenInvalidTokenInInsert() {
 
-        RevocationData requestBody = generateRevocation(RevocationType.GLOBAL);
+        RevocationRequest requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
             restTemplate.exchange(post(URI.create(basePath() + "/revocations")).header(HttpHeaders.AUTHORIZATION,
@@ -229,7 +226,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
      */
     @Test
     public void testServerErrorOnTokenInfo() {
-        RevocationData requestBody = generateRevocation(RevocationType.GLOBAL);
+        RevocationRequest requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
             restTemplate.exchange(post(URI.create(basePath() + "/revocations")).header(HttpHeaders.AUTHORIZATION,
@@ -261,7 +258,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     @Test
     @WithMockCustomUser
     public void testSHA256TokenHashing() {
-        RevocationData tokenRevocation = generateRevocation(RevocationType.TOKEN);
+        RevocationRequest tokenRevocation = generateRevocation(RevocationType.TOKEN);
         RevokedTokenData revocationData = (RevokedTokenData) tokenRevocation.getData();
         String unhashedToken = revocationData.getToken();
 
@@ -298,7 +295,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     @Test
     @WithMockCustomUser
     public void testClaimHashing() {
-        RevocationData claimRevocation = generateRevocation(RevocationType.CLAIM);
+        RevocationRequest claimRevocation = generateRevocation(RevocationType.CLAIM);
         revocationStore.storeRevocation(claimRevocation);
 
         // Get revocations. We should get the one we stored

@@ -17,7 +17,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import org.zalando.planb.revocation.config.HashingConfig;
+import org.zalando.planb.revocation.config.RevocationConfig;
 import org.zalando.planb.revocation.config.properties.HashingProperties;
 import org.zalando.planb.revocation.domain.RevocationType;
 
@@ -27,7 +27,7 @@ import org.zalando.planb.revocation.domain.RevocationType;
  * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = HashingConfig.class)
+@SpringApplicationConfiguration(classes = RevocationConfig.class)
 public class MessageHashTest {
 
     private static final String message = "A very secret Message";

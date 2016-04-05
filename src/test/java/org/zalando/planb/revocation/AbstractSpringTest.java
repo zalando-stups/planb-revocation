@@ -11,16 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
-import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
-import org.zalando.planb.revocation.domain.RevokedData;
 import org.zalando.planb.revocation.domain.RevokedGlobal;
-import org.zalando.planb.revocation.domain.RevocationInfo;
-import org.zalando.planb.revocation.domain.RevokedInfo;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
-import org.zalando.planb.revocation.domain.RevokedTokenInfo;
 import org.zalando.planb.revocation.util.InstantTimestamp;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -87,9 +82,9 @@ public abstract class AbstractSpringTest {
     }
 
     // Some utility methods
-    public static RevocationData generateRevocation(final RevocationType type) {
+    public static RevocationRequest generateRevocation(final RevocationType type) {
 
-        RevocationData generated = new RevocationData();
+        RevocationRequest generated = new RevocationRequest();
 
         switch (type) {
 

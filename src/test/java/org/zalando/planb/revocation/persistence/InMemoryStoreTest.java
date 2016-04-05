@@ -3,8 +3,8 @@ package org.zalando.planb.revocation.persistence;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
-import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
+import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedData;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
@@ -29,19 +29,18 @@ public class InMemoryStoreTest extends AbstractStoreTests {
     public void testInMemoryStore() throws InterruptedException {
         int timestamp = UnixTimestamp.now();
 
-        boolean result = revocationStore.storeRevocation(generateRevocation());
-        assertThat(result).isEqualTo(true);
+        revocationStore.storeRevocation(generateRevocation());
 
-        Collection<RevocationRequest> revocations = revocationStore.getRevocations(timestamp-100);
+        Collection<RevocationData> revocations = revocationStore.getRevocations(timestamp-100);
         assertThat(revocations.size()).isNotZero();
     }
 
-    private RevocationData generateRevocation(){
+    private RevocationRequest generateRevocation(){
         RevokedData revokedData = new RevokedTokenData();
-        RevocationData revocationData = new RevocationData();
-        revocationData.setData(revokedData);
-        revocationData.setType(RevocationType.TOKEN);
+        RevocationRequest revocationRequest = new RevocationRequest();
+        revocationRequest.setData(revokedData);
+        revocationRequest.setType(RevocationType.TOKEN);
 
-        return revocationData;
+        return revocationRequest;
     }
 }

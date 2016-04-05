@@ -19,15 +19,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zalando.planb.revocation.api.exception.SerializationException;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.CurrentUser;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.domain.RevokedData;
 import org.zalando.planb.revocation.domain.RevokedGlobal;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
-import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.util.LocalDateFormatter;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
@@ -184,9 +185,9 @@ public class CassandraStore implements RevocationStore {
     }
 
     @Override
-    public Collection<RevocationRequest> getRevocations(final int from) {
+    public Collection<RevocationData> getRevocations(final int from) {
 
-        Collection<RevocationRequest> revocations = new LinkedList<>();
+        Collection<RevocationData> revocations = new LinkedList<>();
 
         int currentTime = UnixTimestamp.now();
         if ((currentTime - from) > maxTimeDelta) {
@@ -206,7 +207,7 @@ public class CassandraStore implements RevocationStore {
                     String unmappedData = r.getString("revocation_data");
                     RevokedData data = dataMappers.get(type).get(unmappedData);
 
-                    RevocationRequest revocationData = new RevocationRequest();
+                    RevocationData revocationData = new RevocationData();
                     revocationData.setType(type);
                     revocationData.setRevokedAt(r.getInt("revoked_at"));
                     revocationData.setData(data);
@@ -227,7 +228,7 @@ public class CassandraStore implements RevocationStore {
     }
 
     @Override
-    public boolean storeRevocation(final RevocationData revocation) {
+    public void storeRevocation(final RevocationRequest revocation) {
         final Integer revokedAt = UnixTimestamp.now();
         final String date = LocalDateFormatter.get().format(new Date(((long) revokedAt) * 1000));
 
@@ -240,10 +241,8 @@ public class CassandraStore implements RevocationStore {
                     currentUser.get(), revokedAt);
 
             session.execute(bs);
-            return true;
         } catch (JsonProcessingException ex) {
-            log.error("Failed to serialize json", ex);
-            return false;
+            throw new SerializationException();
         }
     }
 
@@ -269,16 +268,12 @@ public class CassandraStore implements RevocationStore {
      * Stores a force refresh notification, specified by the provided timestamp.
      *
      * @param   from  UTC UNIX timestamp from when to refresh revocations.
-     *
-     * @return  {@code true} if the operation was successful.
      */
     @Override
-    public boolean storeRefresh(final int from) {
+    public void storeRefresh(final int from) {
 
         int yearBucket = LocalDate.now(ZoneId.of("UTC")).getYear();
         BoundStatement statement = storeRefresh.bind(yearBucket, UnixTimestamp.now(), from, currentUser.get());
         session.execute(statement);
-
-        return true;
     }
 }

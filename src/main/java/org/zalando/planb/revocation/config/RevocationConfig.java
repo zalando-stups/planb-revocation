@@ -10,14 +10,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.zalando.planb.revocation.config.properties.HashingProperties;
+import org.zalando.planb.revocation.config.properties.RevocationProperties;
 import org.zalando.planb.revocation.util.MessageHasher;
 
 import lombok.Getter;
 
 @Configuration
-@EnableConfigurationProperties({HashingProperties.class})
+@EnableConfigurationProperties({HashingProperties.class, RevocationProperties.class})
 @Getter
-public class HashingConfig {
+public class RevocationConfig {
 
     @Autowired
     private HashingProperties hashingProperties;
