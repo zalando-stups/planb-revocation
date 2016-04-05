@@ -70,12 +70,6 @@
             <version>${stups-spring-oauth2-support.version}</version>
         </dependency>
 
-        <!-- Why do we need this? -->
-        <dependency>
-            <groupId>org.zalando.stups</groupId>
-            <artifactId>tokens</artifactId>
-            <version>0.9.9</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
