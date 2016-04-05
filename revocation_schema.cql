@@ -21,3 +21,12 @@ CREATE TABLE revocation.refresh (
     PRIMARY KEY(refresh_year, refresh_ts)
 )
 WITH CLUSTERING ORDER BY (refresh_ts DESC);
+
+
+CREATE TABLE revocation.authorization_rules (
+    source_claim_name TEXT,
+    source_claim_value TEXT,
+    target_claim_name TEXT,
+    target_claim_value TEXT,
+    PRIMARY KEY(source_claim_name, source_claim_value, target_claim_name, target_claim_value)
+);

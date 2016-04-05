@@ -12,6 +12,7 @@ import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.*;
 import org.zalando.planb.revocation.persistence.CassandraStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
+import org.zalando.planb.revocation.service.RevocationAuthorizationService;
 import org.zalando.planb.revocation.util.MessageHasher;
 
 import java.time.ZoneId;
@@ -43,6 +44,9 @@ public class RevocationResourceImpl implements RevocationResource {
 
     @Autowired
     private CassandraProperties cassandraProperties;
+
+    @Autowired
+    private RevocationAuthorizationService revocationAuthorizationService;
 
     @Override
     @RequestMapping(method = RequestMethod.GET)
@@ -98,6 +102,9 @@ public class RevocationResourceImpl implements RevocationResource {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public HttpEntity<String> post(@RequestBody final RevocationData revocation) {
+
+       revocationAuthorizationService.checkAuthorization(revocation);
+
         // don't use revocation data here
         if (storage.storeRevocation(revocation)) {
 
