@@ -22,5 +22,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 public class RevocationProperties {
 
-    private Integer timestampThresold = 5;
+    private Integer timestampThreshold = 5;
 }

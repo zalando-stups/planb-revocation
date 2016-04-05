@@ -146,7 +146,7 @@ public class RevocationResourceImpl implements RevocationResource {
         }
 
         // Checks for future timestamps
-        if (timestamp > UnixTimestamp.now() + revocationProperties.getTimestampThresold()) {
+        if (timestamp > UnixTimestamp.now() + revocationProperties.getTimestampThreshold()) {
             throw new FutureRevocationException();
         }
 

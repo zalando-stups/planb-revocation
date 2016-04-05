@@ -20,9 +20,7 @@ public class RevocationData extends RevocationRequest {
     private Integer revokedAt = UnixTimestamp.now();
 
     public RevocationData(RevocationType type, RevokedData data, Integer revokedAt) {
-        this.setType(type);
-        this.setData(data);
-        this.revokedAt = revokedAt;
+        super(type, data);
+        this.setRevokedAt(revokedAt);
     }
-
 }

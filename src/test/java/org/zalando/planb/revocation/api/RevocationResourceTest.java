@@ -157,7 +157,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
     public void testBadRequestWhenPostingFutureRevocation() throws Exception {
         String claimRevocation = "{ \"type\": \"CLAIM\", \"data\": {\"claims\":{\"uid\":\"3035729288\"}," +
                 "\"issued_before\":" + (InstantTimestamp.FIVE_MINUTES_AFTER.seconds() + revocationProperties
-                .getTimestampThresold()) + "} }";
+                .getTimestampThreshold()) + "} }";
 
         ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
                 MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
@@ -176,7 +176,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
     public void testOkWhenPostingRevocationBehindTimeThreshold() throws Exception {
         String claimRevocation = "{ \"type\": \"CLAIM\", \"data\": {\"claims\":{\"uid\":\"3035729288\"}," +
                 "\"issued_before\":" + (InstantTimestamp.NOW.seconds() + revocationProperties
-                .getTimestampThresold() - 1) + "} }";
+                .getTimestampThreshold() - 1) + "} }";
 
         ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
                 MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
