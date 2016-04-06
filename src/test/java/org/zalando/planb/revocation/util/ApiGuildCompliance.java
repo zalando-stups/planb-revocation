@@ -54,19 +54,19 @@ public class ApiGuildCompliance {
         }
 
         // All fields must not be null
-        if (problem.getType() == null) {
+        if (problem.type() == null) {
             return false;
         }
 
-        if (problem.getTitle() == null) {
+        if (problem.title() == null) {
             return false;
         }
 
-        if (problem.getStatus() == null) {
+        if (problem.status() == null) {
             return false;
         }
 
-        if (problem.getDetail() == null) {
+        if (problem.detail() == null) {
             return false;
         }
 
