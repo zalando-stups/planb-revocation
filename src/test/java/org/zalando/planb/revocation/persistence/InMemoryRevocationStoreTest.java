@@ -20,7 +20,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @ActiveProfiles("test")
-public class InMemoryStoreTest extends AbstractStoreTests {
+public class InMemoryRevocationStoreTest extends AbstractStoreTests {
 
     @Autowired
     RevocationStore revocationStore;

@@ -1,20 +1,18 @@
 package org.zalando.planb.revocation.persistence;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.zalando.planb.revocation.domain.AuthorizationRule;
 import org.zalando.planb.revocation.domain.ImmutableRefresh;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
-public class InMemoryStore implements RevocationStore, AuthorizationRulesStore {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class InMemoryRevocationStore implements RevocationStore {
 
     private final List<RevocationData> revocations = new ArrayList<>();
 
@@ -42,13 +40,4 @@ public class InMemoryStore implements RevocationStore, AuthorizationRulesStore {
         refreshNotifications.offer(ImmutableRefresh.builder().refreshFrom(from).build());
     }
 
-    @Override
-    public Collection<AuthorizationRule> getAccessList(AuthorizationRule authorizationRule) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public boolean storeAccessRule(AuthorizationRule authorizationRule) {
-        return false;
-    }
 }

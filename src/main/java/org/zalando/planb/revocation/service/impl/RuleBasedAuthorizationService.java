@@ -9,8 +9,8 @@ import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.persistence.AuthorizationRulesStore;
 import org.zalando.planb.revocation.service.RevocationAuthorizationService;
 
-@Component
 @Slf4j
+@Component
 public class RuleBasedAuthorizationService implements RevocationAuthorizationService{
 
     @Autowired

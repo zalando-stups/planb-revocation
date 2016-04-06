@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.persistence.CassandraStore;
-import org.zalando.planb.revocation.persistence.InMemoryStore;
+import org.zalando.planb.revocation.persistence.InMemoryRevocationStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 
 @Configuration
@@ -42,7 +42,7 @@ public class StorageConfig {
 
         // Defaults to in-memory, when CassandraProperties are absent;
         if (StringUtils.isEmpty(cassandraProperties.getContactPoints())) {
-            return new InMemoryStore();
+            return new InMemoryRevocationStore();
         }
 
         return new CassandraStore(cassandraSession(), cassandraProperties.getReadConsistencyLevel(),
