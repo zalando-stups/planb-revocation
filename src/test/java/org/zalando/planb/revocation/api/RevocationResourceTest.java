@@ -152,15 +152,15 @@ public class RevocationResourceTest extends AbstractSpringTest {
     }
 
     /**
-     * Tests that when POSTing a {@code GLOBAL} revocation, returns {@code HTTP UNAUTHORIZED} and a problem description.
+     * Tests that when POSTing a {@code GLOBAL} revocation, returns {@code HTTP FORBIDDEN} and a problem description.
      */
     @Test
-    public void testUnauthorizedWhenPostingGlobal() throws Exception {
+    public void testForbiddenWhenPostingGlobal() throws Exception {
         ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
                 MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
                 GLOBAL_REVOCATION));
 
-        result.andExpect(status().isUnauthorized());
+        result.andExpect(status().isForbidden());
         ApiGuildCompliance.isStandardProblem(result);
     }
 

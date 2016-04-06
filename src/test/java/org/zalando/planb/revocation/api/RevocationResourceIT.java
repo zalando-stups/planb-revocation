@@ -186,7 +186,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     }
 
     /**
-     * Tests that when POSTing a {@code GLOBAL} revocation, returns {@code HTTP UNAUTHORIZED} and a problem description.
+     * Tests that when POSTing a {@code GLOBAL} revocation, returns {@code HTTP FORBIDDEN} and a problem description.
      */
     @Test
     public void testUnauthorizedWhenPostingGlobal() {
@@ -197,7 +197,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
                     .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN)
                     .body(requestBody), RevocationInfo.class);
         } catch (HttpClientErrorException e) {
-            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
             assertThat(ApiGuildCompliance.isStandardProblem(e.getResponseBodyAsString())).isTrue();
         }
 

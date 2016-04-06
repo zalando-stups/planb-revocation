@@ -99,10 +99,10 @@ public class ExceptionsResource {
      * @return a {@link Problem} reason for denying the access
      */
     @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
     public Problem accessDenied(final AccessDeniedException e) {
-        return Problem.fromException(e, HttpStatus.UNAUTHORIZED);
+        return Problem.fromException(e, HttpStatus.FORBIDDEN);
     }
 
     /**
