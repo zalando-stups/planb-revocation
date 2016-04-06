@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -144,8 +145,8 @@ public class RevocationResourceImpl implements RevocationResource {
                 timestamp = ((RevokedClaimsData) revocation.getData()).getIssuedBefore();
                 break;
             case GLOBAL:
-                timestamp = ((RevokedGlobal) revocation.getData()).getIssuedBefore();
-                break;
+                // We don't allow GLOBAL revocations
+                throw new AccessDeniedException("Permission denied to create global revocations.");
         }
 
         // Checks for future timestamps
