@@ -1,6 +1,6 @@
 package org.zalando.planb.revocation.util.security;
 
-import autovalue.shaded.com.google.common.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
