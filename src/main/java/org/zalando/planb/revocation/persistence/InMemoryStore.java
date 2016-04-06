@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.zalando.planb.revocation.domain.ImmutableRefresh;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
@@ -38,6 +39,7 @@ public class InMemoryStore implements RevocationStore {
 
     @Override
     public void storeRefresh(final int from) {
-        refreshNotifications.offer(Refresh.create(from));
+
+        refreshNotifications.offer(ImmutableRefresh.builder().refreshFrom(from).build());
     }
 }
