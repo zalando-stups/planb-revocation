@@ -19,7 +19,7 @@ import org.springframework.http.HttpStatus;
 public abstract class Problem {
 
     /**
-     * Returns a URI of this problem. Default is "about:blank".
+     * Returns a URI of this problem. Default is {@code about:blank}".
      *
      * @return the URI of this Problem
      */
