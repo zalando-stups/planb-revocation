@@ -1,25 +1,37 @@
 package org.zalando.planb.revocation.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
 
 /**
- * <ul>
- * <li>{@code tokenHash}: The revoked token hashed using hash_algorithm, in URL Base64 encoding;</li>
- * <li>{@code hashAlgorithm}: The algorithm used for hashing the Token.</li>
- * <li>{@code issuedBefore}: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked.</li>
- * </ul>
+ * Holds information about a revoked token.
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Team Greendale</a>
  */
-@Data
-public class RevokedTokenInfo implements RevokedInfo {
-    @JsonProperty("token_hash")
-    private String tokenHash;
+@Value.Immutable
+@JsonSerialize
+@JsonDeserialize(as = ImmutableRevokedTokenInfo.class)
+public interface RevokedTokenInfo extends RevokedInfo {
 
-    @JsonProperty("hash_algorithm")
-    private String hashAlgorithm;
+    /**
+     * Returns the revoked token, hashed using {@link RevokedTokenInfo#hashAlgorithm()}, in URL Base64 encoding.
+     *
+     * @return the revoked token, hashed
+     */
+    String tokenHash();
 
-    @JsonProperty("issued_before")
-    private Integer issuedBefore;
+    /**
+     * Returns the algorithm used for hashing the Token.
+     *
+     * @return the algorithm used for hashing the Token
+     */
+    String hashAlgorithm();
+
+    /**
+     * Returns a UNIX Timestamp (UTC), indicating that the token is revoked if issued before it.
+     *
+     * @return the UNIX Timestamp (UTC)
+     */
+    Integer issuedBefore();
 }

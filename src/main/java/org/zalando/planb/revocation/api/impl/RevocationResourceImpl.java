@@ -15,6 +15,7 @@ import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.api.exception.FutureRevocationException;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.config.properties.RevocationProperties;
+import org.zalando.planb.revocation.domain.ImmutableRevokedTokenInfo;
 import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
@@ -100,10 +101,12 @@ public class RevocationResourceImpl implements RevocationResource {
                 newRevocation.setData(revokedClaims);
 
             } else if (data instanceof RevokedTokenData) {
-                RevokedTokenInfo revokedToken = new RevokedTokenInfo();
-                revokedToken.setTokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
-                        ((RevokedTokenData) data).getToken()));
-                revokedToken.setHashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm());
+                RevokedTokenInfo revokedToken = ImmutableRevokedTokenInfo.builder()
+                        .tokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
+                                ((RevokedTokenData) data).getToken()))
+                        .hashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm())
+                        .issuedBefore(((RevokedTokenData) data).getIssuedBefore())
+                        .build();
                 newRevocation.setData(revokedToken);
             }
 

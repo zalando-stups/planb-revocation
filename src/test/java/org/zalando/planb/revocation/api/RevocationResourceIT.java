@@ -1,6 +1,8 @@
 package org.zalando.planb.revocation.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -19,9 +22,9 @@ import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.domain.RevocationData;
-import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationList;
+import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
@@ -62,10 +65,25 @@ public class RevocationResourceIT extends AbstractSpringIT {
     @Autowired
     private MessageHasher messageHasher;
 
-    private final RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private RestTemplate restTemplate;
 
     private String basePath() {
         return "http://localhost:" + port;
+    }
+
+    @Before
+    public void before() {
+        /*
+         * We need to use our object mapper so it reads lower case with underscores correctly.
+         */
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setObjectMapper(objectMapper);
+
+        restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+        restTemplate.getMessageConverters().add(0, converter);
     }
 
     @Test
@@ -271,11 +289,11 @@ public class RevocationResourceIT extends AbstractSpringIT {
                 .build(), RevocationList.class);
 
         RevokedTokenInfo fromService = (RevokedTokenInfo) response.getBody().getRevocations().get(0).getData();
-        assertThat(fromService.getHashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.TOKEN)
+        assertThat(fromService.hashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.TOKEN)
                 .getAlgorithm());
 
         String hashedToken = messageHasher.hashAndEncode(RevocationType.TOKEN, unhashedToken);
-        assertThat(fromService.getTokenHash()).isEqualTo(hashedToken);
+        assertThat(fromService.tokenHash()).isEqualTo(hashedToken);
     }
 
     /**
