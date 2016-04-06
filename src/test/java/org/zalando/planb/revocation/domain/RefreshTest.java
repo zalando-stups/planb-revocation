@@ -52,11 +52,9 @@ public class RefreshTest {
      */
     @Test
     public void testJsonSerialization() throws IOException {
-        Integer refreshFrom = InstantTimestamp.FIVE_MINUTES_AGO.seconds();
-        Integer refreshTimestamp = InstantTimestamp.NOW.seconds();
 
-        Refresh notification = ImmutableRefresh.builder().refreshFrom(refreshFrom)
-                .refreshTimestamp(refreshTimestamp).build();
+        Refresh notification = ImmutableRefresh.builder().refreshFrom(REFRESH_FROM).refreshTimestamp(REFRESH_TIMESTAMP)
+                .build();
 
         String serialized = objectMapper.writeValueAsString(notification);
         assertThat(serialized).isEqualTo(SERIALIZED_REFRESH);
