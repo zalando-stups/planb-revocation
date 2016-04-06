@@ -101,7 +101,7 @@ public class ExceptionsResource {
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
-    public Problem messageNotReadable(final AccessDeniedException e) {
+    public Problem accessDenied(final AccessDeniedException e) {
         return Problem.fromException(e, HttpStatus.UNAUTHORIZED);
     }
 
