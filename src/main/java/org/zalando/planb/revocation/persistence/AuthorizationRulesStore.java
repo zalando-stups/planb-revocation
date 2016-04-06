@@ -6,8 +6,10 @@ import java.util.Collection;
 
 public interface AuthorizationRulesStore {
 
-    Collection<AuthorizationRule> getAccessList(AuthorizationRule authorizationRule);
+    Collection<AuthorizationRule> withTargetClaims(AuthorizationRule authorizationRule);
 
-    boolean storeAccessRule(AuthorizationRule authorizationRule);
+    Collection<AuthorizationRule> withSourceClaims(AuthorizationRule authorizationRule);
+
+    void storeAccessRule(AuthorizationRule authorizationRule);
 
 }
