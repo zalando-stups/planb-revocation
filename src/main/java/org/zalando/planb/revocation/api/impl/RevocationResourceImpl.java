@@ -2,18 +2,38 @@ package org.zalando.planb.revocation.api.impl;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.zalando.planb.revocation.api.RevocationResource;
+import org.zalando.planb.revocation.api.exception.FutureRevocationException;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.domain.*;
+import org.zalando.planb.revocation.config.properties.RevocationProperties;
+import org.zalando.planb.revocation.domain.NotificationType;
+import org.zalando.planb.revocation.domain.Refresh;
+import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationInfo;
+import org.zalando.planb.revocation.domain.RevocationList;
+import org.zalando.planb.revocation.domain.RevocationRequest;
+import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.RevokedClaimsData;
+import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
+import org.zalando.planb.revocation.domain.RevokedData;
+import org.zalando.planb.revocation.domain.RevokedGlobal;
+import org.zalando.planb.revocation.domain.RevokedInfo;
+import org.zalando.planb.revocation.domain.RevokedTokenData;
+import org.zalando.planb.revocation.domain.RevokedTokenInfo;
 import org.zalando.planb.revocation.persistence.CassandraStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.service.RevocationAuthorizationService;
 import org.zalando.planb.revocation.util.MessageHasher;
+import org.zalando.planb.revocation.util.UnixTimestamp;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -26,7 +46,7 @@ import static java.time.Instant.ofEpochSecond;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * TODO: small javadoc
+ * Controller implementation for the revocations endpoint.
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
@@ -48,16 +68,19 @@ public class RevocationResourceImpl implements RevocationResource {
     @Autowired
     private RevocationAuthorizationService revocationAuthorizationService;
 
+    @Autowired
+    private RevocationProperties revocationProperties;
+
     @Override
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public RevocationList get(@RequestParam(required = true) final int from) {
+    public RevocationList get(@RequestParam final int from) {
         log.debug("GET revocations since {} ({})", from, ZonedDateTime.ofInstant(ofEpochSecond(from), ZoneId.systemDefault()));
-        Collection<RevocationRequest> revocations = storage.getRevocations(from);
+        Collection<RevocationData> revocations = storage.getRevocations(from);
 
         List<RevocationInfo> apiRevocations = new ArrayList<>(revocations.size());
-        for (RevocationRequest stored : revocations) {
+        for (RevocationData stored : revocations) {
             final RevokedData data = stored.getData();
 
             RevocationInfo newRevocation = new RevocationInfo();
@@ -98,21 +121,42 @@ public class RevocationResourceImpl implements RevocationResource {
         return responseBody;
     }
 
+    /**
+     * Posts the specified revocation to be stored.
+     * <p>
+     * <p>Revokes tokens associated with the specified revocation type.</p>
+     * <p>
+     * <p>If the field {@code issued_before} is a timestamp set in the future, returns {@link HttpStatus#BAD_REQUEST}.
+     * </p>
+     *
+     * @param revocation the revocation associated with the tokens to revoke
+     */
     @Override
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpEntity<String> post(@RequestBody final RevocationData revocation) {
+    public void post(@RequestBody final RevocationRequest revocation) {
 
-       revocationAuthorizationService.checkAuthorization(revocation);
+        revocationAuthorizationService.checkAuthorization(revocation);
 
-        // don't use revocation data here
-        if (storage.storeRevocation(revocation)) {
-
-            // TODO Refactor
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        Integer timestamp = null;
+        switch (revocation.getType()) {
+            case TOKEN:
+                timestamp = ((RevokedTokenData) revocation.getData()).getIssuedBefore();
+                break;
+            case CLAIM:
+                timestamp = ((RevokedClaimsData) revocation.getData()).getIssuedBefore();
+                break;
+            case GLOBAL:
+                timestamp = ((RevokedGlobal) revocation.getData()).getIssuedBefore();
+                break;
         }
+
+        // Checks for future timestamps
+        if (timestamp > UnixTimestamp.now() + revocationProperties.getTimestampThreshold()) {
+            throw new FutureRevocationException();
+        }
+
+        storage.storeRevocation(revocation);
     }
 
     private EnumMap<NotificationType, Object> metaInformation() {

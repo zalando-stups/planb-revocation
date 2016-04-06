@@ -30,7 +30,7 @@ public class CassandraStoreIT extends AbstractStoreTests {
      */
     @Test
     @WithMockCustomUser
-    public void testCreatedBySetWhenInsertRefresh() {
+    public void testCreatedByIsSetWhenInsertRefresh() {
 
         // Insert refresh
         revocationStore.storeRefresh(InstantTimestamp.ONE_HOUR_AGO.seconds());

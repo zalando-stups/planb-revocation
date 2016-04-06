@@ -1,8 +1,8 @@
 package org.zalando.planb.revocation.service;
 
-import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationRequest;
 
 public interface RevocationAuthorizationService {
 
-    void checkAuthorization(RevocationData revocationData);
+    void checkAuthorization(RevocationRequest revocationRequest);
 }

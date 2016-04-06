@@ -2,7 +2,7 @@ package org.zalando.planb.revocation.api;
 
 import org.springframework.http.HttpEntity;
 
-import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationList;
 
 /**
@@ -29,8 +29,6 @@ public interface RevocationResource {
      * <p>Revokes tokens associated with the specified revocation type.</p>
      *
      * @param   revocation  the revocation associated with the tokens to revoke
-     *
-     * @return  HTTP Status {@code CREATED}, if the revocation was successfully stored
      */
-    HttpEntity<String> post(RevocationData revocation);
+    void post(RevocationRequest revocation);
 }

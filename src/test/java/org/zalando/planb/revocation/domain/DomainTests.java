@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.zalando.planb.revocation.util.UnixTimestamp;
+import org.zalando.planb.revocation.util.security.WithMockCustomUser;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -23,52 +24,34 @@ public class DomainTests {
     private static final int ONE_MINUTE_BEFORE = 1457568706;
 
     /**
-     * Tests that when instantiating a {@link Refresh} all values are set, including defaults.
+     * Tests that a default timestamp is set in {@link RevokedClaimsData#issuedBefore} when creating a new instance.
      */
     @Test
-    public void testDefaultRefresh() {
+    public void testIssuedBeforeDefaultTimestampInClaim() {
+        RevokedClaimsData claimsData = new RevokedClaimsData();
 
-        Refresh r = Refresh.create(ONE_HOUR_BEFORE);
-        assertThat(r.refreshFrom()).isEqualTo(ONE_HOUR_BEFORE);
-        assertThat(r.refreshTimestamp()).isNotNull();
+        assertThat(claimsData.getIssuedBefore()).isNotNull();
     }
 
     /**
-     * Tests assigning a timestamp to a {@link Refresh} object.
+     * Tests that a default timestamp is set in {@link RevokedTokenData#issuedBefore} when creating a new instance.
      */
     @Test
-    public void testRefreshWithTimestamp() {
+    public void testIssuedBeforeDefaultTimestampInToken() {
+        RevokedTokenData claimsData = new RevokedTokenData();
 
-        Refresh r = Refresh.create(ONE_HOUR_BEFORE, ONE_MINUTE_BEFORE);
-        assertThat(r.refreshTimestamp()).isEqualTo(ONE_MINUTE_BEFORE);
+        assertThat(claimsData.getIssuedBefore()).isNotNull();
     }
 
     /**
-     * Tests JSON serialization of {@link Refresh} objects.
+     * Tests that a default timestamp is set in {@link RevokedGlobal#issuedBefore} when creating a new instance.
      */
     @Test
-    public void testRefreshJsonSerialization() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        String expected = "{\"refresh_from\":1458232925,\"refresh_timestamp\":1458232985}";
+    public void testIssuedBeforeDefaultTimestampInGlobal() {
+        RevokedGlobal globalData = new RevokedGlobal();
 
-        Refresh refresh = Refresh.create(1458232925, 1458232985);
-
-        String serialized = mapper.writeValueAsString(refresh);
-
-        assertThat(serialized).isEqualTo(expected);
+        assertThat(globalData.getIssuedBefore()).isNotNull();
     }
 
-    /**
-     * Tests JSON deserialization of {@link Refresh} objects.
-     */
-    @Test
-    public void testRefreshJsonDeserialization() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        String json = "{\"refresh_from\":1458232925,\"refresh_timestamp\":1458232985}";
 
-        Refresh deserialized = mapper.readValue(json, Refresh.class);
-
-        assertThat(deserialized.refreshFrom()).isEqualTo(1458232925);
-        assertThat(deserialized.refreshTimestamp()).isEqualTo(1458232985);
-    }
 }

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import org.zalando.planb.revocation.api.exception.FutureRevocationException;
+import org.zalando.planb.revocation.api.exception.SerializationException;
 import org.zalando.planb.revocation.domain.Problem;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,20 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping(produces = "application/x.problem+json")
 @Slf4j
 public class ExceptionsResource {
+
+    /**
+     * Handles revocations with an {@code issued_before} timestamp set in the future.
+     *
+     * @param   e  the exception triggering the error
+     *
+     * @return  a {@link Problem} with the error information from the exception.
+     */
+    @ExceptionHandler(FutureRevocationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public Problem futureRevocation(final FutureRevocationException e) {
+        return Problem.fromException(e, HttpStatus.BAD_REQUEST);
+    }
 
     /**
      * Handles missing parameters in requests.
@@ -82,6 +98,23 @@ public class ExceptionsResource {
     @ResponseBody
     public Problem messageNotReadable(final HttpMessageNotReadableException e) {
         return Problem.fromMessage("Invalid JSON, or invalid JSON structure.", HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles all exceptions related with serializing revocation data to the store.
+     *
+     * @param   e  the exception triggering the error
+     *
+     * @return  a {@link Problem} with the unexpected error information.
+     */
+    @ExceptionHandler(SerializationException.class)
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public Problem serializationException(final SerializationException e) {
+        log.error("A serialization exception occurred: {}", e.getMessage());
+        log.debug("Error details: ", e);
+
+        return Problem.fromException(e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**

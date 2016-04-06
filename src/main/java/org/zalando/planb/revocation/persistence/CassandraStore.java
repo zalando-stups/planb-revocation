@@ -1,36 +1,5 @@
 package org.zalando.planb.revocation.persistence;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.now;
-
-import java.io.IOException;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.zalando.planb.revocation.domain.Refresh;
-import org.zalando.planb.revocation.domain.RevocationData;
-import org.zalando.planb.revocation.domain.RevocationType;
-import org.zalando.planb.revocation.domain.CurrentUser;
-import org.zalando.planb.revocation.domain.RevokedClaimsData;
-import org.zalando.planb.revocation.domain.RevokedData;
-import org.zalando.planb.revocation.domain.RevokedGlobal;
-import org.zalando.planb.revocation.domain.RevokedTokenData;
-import org.zalando.planb.revocation.domain.RevocationRequest;
-import org.zalando.planb.revocation.util.LocalDateFormatter;
-import org.zalando.planb.revocation.util.UnixTimestamp;
-
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.PreparedStatement;
@@ -39,16 +8,44 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.zalando.planb.revocation.api.exception.SerializationException;
+import org.zalando.planb.revocation.domain.CurrentUser;
+import org.zalando.planb.revocation.domain.ImmutableRefresh;
+import org.zalando.planb.revocation.domain.Refresh;
+import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationRequest;
+import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.RevokedClaimsData;
+import org.zalando.planb.revocation.domain.RevokedData;
+import org.zalando.planb.revocation.domain.RevokedGlobal;
+import org.zalando.planb.revocation.domain.RevokedTokenData;
+import org.zalando.planb.revocation.util.LocalDateFormatter;
+import org.zalando.planb.revocation.util.UnixTimestamp;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.now;
 
 /**
  * Interface to Cassandra cluster.
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @Slf4j
 public class CassandraStore implements RevocationStore {
@@ -61,33 +58,33 @@ public class CassandraStore implements RevocationStore {
     private static final String REFRESH_TABLE = "refresh";
 
     private static final RegularStatement SELECT_REVOCATION = QueryBuilder.select().column("revocation_type")
-                                                                          .column("revocation_data")
-                                                                          .column("revoked_by").column("revoked_at")
-                                                                          .column("bucket_uuid").from(REVOCATION_TABLE)
-                                                                          .where(eq("bucket_date", bindMarker()))
-                                                                          .and(eq("bucket_interval", bindMarker())).and(
-                                                                              gt("revoked_at", bindMarker()));
+            .column("revocation_data")
+            .column("revoked_by").column("revoked_at")
+            .column("bucket_uuid").from(REVOCATION_TABLE)
+            .where(eq("bucket_date", bindMarker()))
+            .and(eq("bucket_interval", bindMarker())).and(
+                    gt("revoked_at", bindMarker()));
 
     private static final RegularStatement INSERT_REVOCATION = QueryBuilder.insertInto(REVOCATION_TABLE)
-                                                                          .value("bucket_date", bindMarker())
-                                                                          .value("bucket_interval", bindMarker())
-                                                                          .value("revocation_type", bindMarker())
-                                                                          .value("revocation_data", bindMarker())
-                                                                          .value("revoked_by", bindMarker())
-                                                                          .value("revoked_at", bindMarker()).value(
-                                                                              "bucket_uuid", now());
+            .value("bucket_date", bindMarker())
+            .value("bucket_interval", bindMarker())
+            .value("revocation_type", bindMarker())
+            .value("revocation_data", bindMarker())
+            .value("revoked_by", bindMarker())
+            .value("revoked_at", bindMarker()).value(
+                    "bucket_uuid", now());
 
     private static final RegularStatement INSERT_REFRESH = QueryBuilder.insertInto(REFRESH_TABLE)
-                                                                       .value("refresh_year", bindMarker())
-                                                                       .value("refresh_ts", bindMarker())
-                                                                       .value("refresh_from", bindMarker()).value(
-                                                                           "created_by", bindMarker());
+            .value("refresh_year", bindMarker())
+            .value("refresh_ts", bindMarker())
+            .value("refresh_from", bindMarker()).value(
+                    "created_by", bindMarker());
 
     private static final RegularStatement SELECT_REFRESH = QueryBuilder.select().column("refresh_from")
-                                                                       .column("refresh_ts").column("created_by")
-                                                                       .column("refresh_year").from(REFRESH_TABLE)
-                                                                       .where(eq("refresh_year", bindMarker())).limit(
-                                                                           1);
+            .column("refresh_ts").column("created_by")
+            .column("refresh_year").from(REFRESH_TABLE)
+            .where(eq("refresh_year", bindMarker())).limit(
+                    1);
 
     private final Session session;
 
@@ -130,13 +127,13 @@ public class CassandraStore implements RevocationStore {
     /**
      * Constructs a new instance configured with the provided {@code session} and {@code maxTimeDelta}.
      *
-     * @param  session       session configured to a Cassandra cluster
-     * @param  read          consistency level for SELECT queries
-     * @param  write         consistency level for INSERT queries
-     * @param  maxTimeDelta  maximum time span limit to get revocations, in seconds
+     * @param session      session configured to a Cassandra cluster
+     * @param read         consistency level for SELECT queries
+     * @param write        consistency level for INSERT queries
+     * @param maxTimeDelta maximum time span limit to get revocations, in seconds
      */
     public CassandraStore(final Session session, final ConsistencyLevel read, final ConsistencyLevel write,
-            final int maxTimeDelta) {
+                          final int maxTimeDelta) {
         this.session = session;
         this.maxTimeDelta = maxTimeDelta;
 
@@ -184,9 +181,9 @@ public class CassandraStore implements RevocationStore {
     }
 
     @Override
-    public Collection<RevocationRequest> getRevocations(final int from) {
+    public Collection<RevocationData> getRevocations(final int from) {
 
-        Collection<RevocationRequest> revocations = new LinkedList<>();
+        Collection<RevocationData> revocations = new LinkedList<>();
 
         int currentTime = UnixTimestamp.now();
         if ((currentTime - from) > maxTimeDelta) {
@@ -206,7 +203,7 @@ public class CassandraStore implements RevocationStore {
                     String unmappedData = r.getString("revocation_data");
                     RevokedData data = dataMappers.get(type).get(unmappedData);
 
-                    RevocationRequest revocationData = new RevocationRequest();
+                    RevocationData revocationData = new RevocationData();
                     revocationData.setType(type);
                     revocationData.setRevokedAt(r.getInt("revoked_at"));
                     revocationData.setData(data);
@@ -227,7 +224,7 @@ public class CassandraStore implements RevocationStore {
     }
 
     @Override
-    public boolean storeRevocation(final RevocationData revocation) {
+    public void storeRevocation(final RevocationRequest revocation) {
         final Integer revokedAt = UnixTimestamp.now();
         final String date = LocalDateFormatter.get().format(new Date(((long) revokedAt) * 1000));
 
@@ -240,10 +237,8 @@ public class CassandraStore implements RevocationStore {
                     currentUser.get(), revokedAt);
 
             session.execute(bs);
-            return true;
         } catch (JsonProcessingException ex) {
-            log.error("Failed to serialize json", ex);
-            return false;
+            throw new SerializationException();
         }
     }
 
@@ -262,23 +257,17 @@ public class CassandraStore implements RevocationStore {
         // Only the first, although the result set should be 1 already.
         Row first = rs.one();
 
-        return Refresh.create(first.getInt("refresh_from"), first.getInt("refresh_ts"));
+        return ImmutableRefresh.builder()
+                .refreshFrom(first.getInt("refresh_from"))
+                .refreshTimestamp(first.getInt("refresh_ts"))
+                .build();
     }
 
-    /**
-     * Stores a force refresh notification, specified by the provided timestamp.
-     *
-     * @param   from  UTC UNIX timestamp from when to refresh revocations.
-     *
-     * @return  {@code true} if the operation was successful.
-     */
     @Override
-    public boolean storeRefresh(final int from) {
+    public void storeRefresh(final int from) {
 
         int yearBucket = LocalDate.now(ZoneId.of("UTC")).getYear();
         BoundStatement statement = storeRefresh.bind(yearBucket, UnixTimestamp.now(), from, currentUser.get());
         session.execute(statement);
-
-        return true;
     }
 }
