@@ -105,9 +105,9 @@ public class RevocationResourceImpl implements RevocationResource {
             } else if (data instanceof RevokedTokenData) {
                 RevokedTokenInfo revokedToken = ImmutableRevokedTokenInfo.builder()
                         .tokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
-                                ((RevokedTokenData) data).getToken()))
+                                ((RevokedTokenData) data).token()))
                         .hashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm())
-                        .issuedBefore(((RevokedTokenData) data).getIssuedBefore())
+                        .issuedBefore(((RevokedTokenData) data).issuedBefore())
                         .build();
                 newRevocation.setData(revokedToken);
             }
@@ -140,7 +140,7 @@ public class RevocationResourceImpl implements RevocationResource {
         Integer timestamp = null;
         switch (revocation.getType()) {
             case TOKEN:
-                timestamp = ((RevokedTokenData) revocation.getData()).getIssuedBefore();
+                timestamp = ((RevokedTokenData) revocation.getData()).issuedBefore();
                 break;
             case CLAIM:
                 timestamp = ((RevokedClaimsData) revocation.getData()).getIssuedBefore();

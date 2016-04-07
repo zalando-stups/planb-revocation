@@ -24,14 +24,4 @@ public class DomainTests {
 
         assertThat(claimsData.getIssuedBefore()).isNotNull();
     }
-
-    /**
-     * Tests that a default timestamp is set in {@link RevokedTokenData#issuedBefore} when creating a new instance.
-     */
-    @Test
-    public void testIssuedBeforeDefaultTimestampInToken() {
-        RevokedTokenData claimsData = new RevokedTokenData();
-
-        assertThat(claimsData.getIssuedBefore()).isNotNull();
-    }
 }

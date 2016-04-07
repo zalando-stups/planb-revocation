@@ -94,11 +94,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     @WithMockCustomUser
     public void testJsonFieldsInSnakeCase() {
 
-        RevokedTokenData revokedToken = new RevokedTokenData();
-        revokedToken.setToken("abcdef");
-        RevocationData revocation = new RevocationData(RevocationType.TOKEN, revokedToken,
-                InstantTimestamp.NOW.seconds());
-
+        RevocationRequest revocation = generateRevocation(RevocationType.TOKEN);
         revocationStore.storeRevocation(revocation);
 
         ResponseEntity<String> response = restTemplate.exchange(get(
@@ -307,7 +303,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     public void testSHA256TokenHashing() {
         RevocationRequest tokenRevocation = generateRevocation(RevocationType.TOKEN);
         RevokedTokenData revocationData = (RevokedTokenData) tokenRevocation.getData();
-        String unhashedToken = revocationData.getToken();
+        String unhashedToken = revocationData.token();
 
         // Store in backend
         revocationStore.storeRevocation(tokenRevocation);

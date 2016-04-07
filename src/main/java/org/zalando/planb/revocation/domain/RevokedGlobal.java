@@ -18,7 +18,7 @@ public abstract class RevokedGlobal implements RevokedInfo, RevokedData {
     /**
      * Returns a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked.
      * <p>
-     * <p>When not set, defaults to to the current UNIX timestamp.</p>
+     * <p>When not set, defaults to the current UNIX timestamp.</p>
      *
      * @return the aforementioned UNIX Timestamp (UTC)
      */

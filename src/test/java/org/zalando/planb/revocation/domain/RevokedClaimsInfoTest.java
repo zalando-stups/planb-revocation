@@ -11,7 +11,6 @@ import org.zalando.planb.revocation.config.PlanBRevocationConfig;
 import org.zalando.planb.revocation.util.InstantTimestamp;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,17 +26,17 @@ public class RevokedClaimsInfoTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final static String[] NAMES = {"uid"};
+    private final static String[] NAMES = {"uid", "azp"};
 
-    private final static String[] JSON_NAMES;
+    private final static String JSON_NAMES;
 
     // Workaround to add double quotes around claim names (for JSON comparison)
     static {
-        JSON_NAMES = new String[NAMES.length];
-
-        for(int i = 0; i < NAMES.length; i++) {
-            JSON_NAMES[i] = "\"" + NAMES[i] + "\"";
+        StringBuilder jsonNamesBuilder = new StringBuilder();
+        for (int i = 0; i < NAMES.length; i++) {
+            jsonNamesBuilder.append("\"" + NAMES[i] + "\",");
         }
+        JSON_NAMES = "[" + jsonNamesBuilder.substring(0, jsonNamesBuilder.length() - 1) + "]";
     }
 
     private final static String VALUE_HASH = "CDUg1ANEiZnh5rGFNqUiU4d5TrbtwLNkOgtpjSu3B0s=";
@@ -49,7 +48,7 @@ public class RevokedClaimsInfoTest {
     private final static Integer ISSUED_BEFORE = InstantTimestamp.FIVE_MINUTES_AGO.seconds();
 
     private final static String SERIALIZED = "{" +
-            "\"names\":" + Arrays.toString(JSON_NAMES) + "," +
+            "\"names\":" + JSON_NAMES + "," +
             "\"value_hash\":\"" + VALUE_HASH + "\"," +
             "\"hash_algorithm\":\"" + HASH_ALGORITHM + "\"," +
             "\"separator\":\"" + SEPARATOR + "\"," +
@@ -57,7 +56,7 @@ public class RevokedClaimsInfoTest {
             "}";
 
     private final static String SERIALIZED_INCOMPLETE = "{" +
-            "\"names\":" + Arrays.toString(JSON_NAMES) + "," +
+            "\"names\":" + JSON_NAMES + "," +
             "\"value_hash\":\"" + VALUE_HASH + "\"," +
             "\"separator\":\"" + SEPARATOR + "\"," +
             "\"issued_before\":" + ISSUED_BEFORE + "" +
