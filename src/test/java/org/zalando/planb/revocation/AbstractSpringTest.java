@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
+import org.zalando.planb.revocation.domain.ImmutableRevokedGlobal;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.domain.RevokedGlobal;
@@ -110,8 +111,7 @@ public abstract class AbstractSpringTest {
             case GLOBAL :
                 generated.setType(RevocationType.GLOBAL);
 
-                RevokedGlobal revokedGlobal = new RevokedGlobal();
-                revokedGlobal.setIssuedBefore(InstantTimestamp.NOW.seconds());
+                RevokedGlobal revokedGlobal = ImmutableRevokedGlobal.builder().build();
 
                 generated.setData(revokedGlobal);
                 break;

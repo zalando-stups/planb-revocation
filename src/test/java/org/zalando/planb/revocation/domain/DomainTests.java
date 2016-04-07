@@ -42,16 +42,4 @@ public class DomainTests {
 
         assertThat(claimsData.getIssuedBefore()).isNotNull();
     }
-
-    /**
-     * Tests that a default timestamp is set in {@link RevokedGlobal#issuedBefore} when creating a new instance.
-     */
-    @Test
-    public void testIssuedBeforeDefaultTimestampInGlobal() {
-        RevokedGlobal globalData = new RevokedGlobal();
-
-        assertThat(globalData.getIssuedBefore()).isNotNull();
-    }
-
-
 }
