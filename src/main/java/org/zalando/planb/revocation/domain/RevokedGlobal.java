@@ -6,12 +6,7 @@ import org.immutables.value.Value;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
- * <ul>
- * <li>{@code issuedBefore}: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked.</li>
- * </ul>
- * <p>
- * <p>When posting Global revocations, if {@code issuedBefore} is not set, it will default to the current UNIX
- * timestamp (UTC).</p>
+ * Holds information about a global revocation.
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Team Greendale</a>
  */
