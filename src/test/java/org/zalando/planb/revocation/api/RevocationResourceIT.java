@@ -1,6 +1,8 @@
 package org.zalando.planb.revocation.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -68,10 +71,29 @@ public class RevocationResourceIT extends AbstractSpringIT {
     @Autowired
     private MessageHasher messageHasher;
 
-    private final RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private RestTemplate restTemplate;
 
     private String basePath() {
         return "http://localhost:" + port;
+    }
+
+    @Before
+    public void before() {
+
+        restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+
+        /*
+         * We need to replace the default object mapper with ours object mapper so it reads lower case with
+         * underscores correctly.
+         */
+        for (int i = 0; i < restTemplate.getMessageConverters().size(); i++) {
+            if (restTemplate.getMessageConverters().get(i) instanceof MappingJackson2HttpMessageConverter) {
+                restTemplate.getMessageConverters().set(i, new MappingJackson2HttpMessageConverter(objectMapper));
+            }
+        }
     }
 
     @Test
@@ -80,7 +102,8 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
         RevokedTokenData revokedToken = new RevokedTokenData();
         revokedToken.setToken("abcdef");
-        RevocationData revocation = new RevocationData(RevocationType.TOKEN, revokedToken, InstantTimestamp.NOW.seconds());
+        RevocationData revocation = new RevocationData(RevocationType.TOKEN, revokedToken,
+                InstantTimestamp.NOW.seconds());
 
         revocationStore.storeRevocation(revocation);
 
@@ -148,19 +171,43 @@ public class RevocationResourceIT extends AbstractSpringIT {
         assertThat(refreshFromRetrieved).isEqualTo(InstantTimestamp.FIVE_MINUTES_AGO.seconds());
     }
 
+    /**
+     * Verifies that a revocation is properly inserted.
+     */
     @Test
-    public void testInsertRevocation() {
-        RevocationRequest requestBody = generateRevocation(RevocationType.GLOBAL);
+    public void testPostRevocation() {
+        RevocationRequest requestBody = generateRevocation(RevocationType.TOKEN);
 
-        ResponseEntity<RevocationInfo> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
-                .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
+        ResponseEntity<RevocationInfo> responseEntity = restTemplate
+                .exchange(post(URI.create(basePath() + "/revocations"))
+                        .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN)
+                        .body(requestBody), RevocationInfo.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         Collection<RevocationData> storedRevocations = revocationStore.getRevocations(
                 InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
-        assertThat(storedRevocations).isNotEmpty();
-        // TODO Check storage
+        assertThat(storedRevocations.size()).isEqualTo(1);
+        assertThat(storedRevocations.iterator().next().getType()).isEqualTo(RevocationType.TOKEN);
+    }
+
+    /**
+     * Tests that when POSTing a {@code GLOBAL} revocation, returns {@code HTTP FORBIDDEN} and a problem description.
+     */
+    @Test
+    public void testUnauthorizedWhenPostingGlobal() {
+        RevocationRequest requestBody = generateRevocation(RevocationType.GLOBAL);
+
+        try {
+            restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
+                    .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN)
+                    .body(requestBody), RevocationInfo.class);
+        } catch (HttpClientErrorException e) {
+            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+            assertThat(ApiGuildCompliance.isStandardProblem(e.getResponseBodyAsString())).isTrue();
+        }
+
+        assertThat(revocationStore.getRevocations(InstantTimestamp.FIVE_MINUTES_AFTER.seconds())).isEmpty();
     }
 
     @Test
@@ -282,11 +329,11 @@ public class RevocationResourceIT extends AbstractSpringIT {
                 .build(), RevocationList.class);
 
         RevokedTokenInfo fromService = (RevokedTokenInfo) response.getBody().getRevocations().get(0).getData();
-        assertThat(fromService.getHashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.TOKEN)
+        assertThat(fromService.hashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.TOKEN)
                 .getAlgorithm());
 
         String hashedToken = messageHasher.hashAndEncode(RevocationType.TOKEN, unhashedToken);
-        assertThat(fromService.getTokenHash()).isEqualTo(hashedToken);
+        assertThat(fromService.tokenHash()).isEqualTo(hashedToken);
     }
 
     /**

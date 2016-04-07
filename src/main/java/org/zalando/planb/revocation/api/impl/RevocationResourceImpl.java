@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,6 +16,7 @@ import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.api.exception.FutureRevocationException;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.config.properties.RevocationProperties;
+import org.zalando.planb.revocation.domain.ImmutableRevokedTokenInfo;
 import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
@@ -104,10 +106,12 @@ public class RevocationResourceImpl implements RevocationResource {
                 newRevocation.setData(revokedClaims);
 
             } else if (data instanceof RevokedTokenData) {
-                RevokedTokenInfo revokedToken = new RevokedTokenInfo();
-                revokedToken.setTokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
-                        ((RevokedTokenData) data).getToken()));
-                revokedToken.setHashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm());
+                RevokedTokenInfo revokedToken = ImmutableRevokedTokenInfo.builder()
+                        .tokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
+                                ((RevokedTokenData) data).getToken()))
+                        .hashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm())
+                        .issuedBefore(((RevokedTokenData) data).getIssuedBefore())
+                        .build();
                 newRevocation.setData(revokedToken);
             }
 
@@ -147,8 +151,8 @@ public class RevocationResourceImpl implements RevocationResource {
                 timestamp = ((RevokedClaimsData) revocation.getData()).getIssuedBefore();
                 break;
             case GLOBAL:
-                timestamp = ((RevokedGlobal) revocation.getData()).getIssuedBefore();
-                break;
+                // We don't allow GLOBAL revocations
+                throw new AccessDeniedException("Permission denied to create global revocations.");
         }
 
         // Checks for future timestamps

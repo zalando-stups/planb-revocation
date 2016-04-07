@@ -33,6 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class RevocationResourceTest extends AbstractSpringTest {
 
+    private static final String GLOBAL_REVOCATION = "{ " +
+            "\"type\": \"GLOBAL\", " +
+            "\"data\": {\"issued_before\":1459939746} }";
+
     @Autowired
     private WebApplicationContext context;
 
@@ -139,6 +143,19 @@ public class RevocationResourceTest extends AbstractSpringTest {
 
         result.andExpect(status().isBadRequest());
 
+        ApiGuildCompliance.isStandardProblem(result);
+    }
+
+    /**
+     * Tests that when POSTing a {@code GLOBAL} revocation, returns {@code HTTP FORBIDDEN} and a problem description.
+     */
+    @Test
+    public void testForbiddenWhenPostingGlobal() throws Exception {
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
+                MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
+                GLOBAL_REVOCATION));
+
+        result.andExpect(status().isForbidden());
         ApiGuildCompliance.isStandardProblem(result);
     }
 

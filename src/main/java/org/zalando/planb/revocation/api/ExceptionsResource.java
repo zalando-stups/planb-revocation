@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -98,6 +99,19 @@ public class ExceptionsResource {
     @ResponseBody
     public Problem messageNotReadable(final HttpMessageNotReadableException e) {
         return Problem.fromMessage("Invalid JSON, or invalid JSON structure.", HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles access denied requests.
+     *
+     * @param e the exception triggering the error
+     * @return a {@link Problem} reason for denying the access
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public Problem accessDenied(final AccessDeniedException e) {
+        return Problem.fromException(e, HttpStatus.FORBIDDEN);
     }
 
     /**
