@@ -16,6 +16,7 @@ import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.api.exception.FutureRevocationException;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.config.properties.RevocationProperties;
+import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenInfo;
 import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.domain.Refresh;
@@ -90,14 +91,14 @@ public class RevocationResourceImpl implements RevocationResource {
                 newRevocation.setData((RevokedInfo) data);
 
             } else if (data instanceof RevokedClaimsData) {
-                RevokedClaimsInfo revokedClaims = new RevokedClaimsInfo();
-
-                revokedClaims.setNames(((RevokedClaimsData) data).getClaims().keySet());
-                revokedClaims.setValueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
-                        ((RevokedClaimsData) data).getClaims().values()));
-                revokedClaims.setHashAlgorithm(messageHasher.getHashers().get(RevocationType.CLAIM).getAlgorithm());
-                revokedClaims.setIssuedBefore(((RevokedClaimsData) data).getIssuedBefore());
-                revokedClaims.setSeparator(messageHasher.getSeparator());
+                RevokedClaimsInfo revokedClaims = ImmutableRevokedClaimsInfo.builder()
+                        .names(((RevokedClaimsData) data).getClaims().keySet())
+                        .valueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
+                                ((RevokedClaimsData) data).getClaims().values()))
+                        .hashAlgorithm(messageHasher.getHashers().get(RevocationType.CLAIM).getAlgorithm())
+                        .issuedBefore(((RevokedClaimsData) data).getIssuedBefore())
+                        .separator(messageHasher.getSeparator())
+                        .build();
 
                 newRevocation.setData(revokedClaims);
 

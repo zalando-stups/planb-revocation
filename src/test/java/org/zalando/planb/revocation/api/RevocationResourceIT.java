@@ -352,18 +352,17 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
         // Assert that it contains revocation
         RevokedClaimsInfo fromService = (RevokedClaimsInfo) response.getBody().getRevocations().get(0).getData();
-        assertThat(fromService.getHashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.CLAIM)
+        assertThat(fromService.hashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.CLAIM)
                 .getAlgorithm());
 
         String hashedValue = messageHasher.hashAndEncode(RevocationType.CLAIM, ((RevokedClaimsData) claimRevocation
                 .getData()).getClaims().values());
-        assertThat(fromService.getValueHash()).isEqualTo(hashedValue);
+        assertThat(fromService.valueHash()).isEqualTo(hashedValue);
     }
 
     /**
      * Tests that when {@code GET}ing revocations with a timestamp too old - according to {@link CassandraProperties} -,
      * returns an error.
-     * <p>
      * <p>
      * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
      */
