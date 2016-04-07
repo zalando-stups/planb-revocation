@@ -36,8 +36,9 @@ public class InMemoryRevocationStore implements RevocationStore {
 
     @Override
     public void storeRefresh(final int from) {
-
         refreshNotifications.offer(ImmutableRefresh.builder().refreshFrom(from).build());
     }
+
+
 
 }

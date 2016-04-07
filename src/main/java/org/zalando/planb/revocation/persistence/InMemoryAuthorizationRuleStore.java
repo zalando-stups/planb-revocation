@@ -27,4 +27,8 @@ public class InMemoryAuthorizationRuleStore implements AuthorizationRulesStore {
     public void storeAccessRule(AuthorizationRule authorizationRule) {
         claims.add(authorizationRule);
     }
+
+    public void cleanup() {
+        claims.clear();
+    }
 }

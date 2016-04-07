@@ -1,7 +1,7 @@
 package org.zalando.planb.revocation.api;
 
 
-import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +21,6 @@ import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.persistence.AuthorizationRulesStore;
-import org.zalando.planb.revocation.persistence.InMemoryAuthorizationRuleStore;
 
 import java.net.URI;
 import java.util.Map;
@@ -33,14 +32,15 @@ import static org.springframework.http.RequestEntity.post;
 
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
-@ActiveProfiles("test")
-public class AuthorizationRulesTest extends AbstractSpringTest {
+@ActiveProfiles("it")
+@Ignore
+public class AuthorizationRulesIT extends AbstractSpringTest {
 
     @Value("${local.server.port}")
     private int port;
 
     @Autowired
-    private InMemoryAuthorizationRuleStore authorizationRulesStore;
+    private AuthorizationRulesStore authorizationRulesStore;
 
     private final RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
@@ -48,10 +48,6 @@ public class AuthorizationRulesTest extends AbstractSpringTest {
         return "http://localhost:" + port;
     }
 
-    @Before
-    public void setUp() {
-        authorizationRulesStore.cleanup();
-    }
 
     @Test
     public void testRevocationByClaimIsUnauthorized() {

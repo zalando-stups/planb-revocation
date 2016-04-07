@@ -31,3 +31,4 @@ CREATE TABLE revocation.authorization_rules (
     last_modified_by TEXT,
     PRIMARY KEY(uuid)
 );
+CREATE INDEX ON revocation.authorization_rules (target_claims);
