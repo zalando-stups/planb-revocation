@@ -1,23 +1,29 @@
 package org.zalando.planb.revocation.domain;
 
-import lombok.Builder;
-import lombok.Value;
 
+import org.immutables.value.Value;
+
+import java.util.Collections;
 import java.util.Map;
 
-@Value
-@Builder
-public class AuthorizationRule {
+@Value.Immutable
+public abstract class AuthorizationRule {
 
-    private Map<String, String> sourceClaims;
+    @Value.Default
+    public Map<String, String> requiredUserClaims() {
+        return Collections.EMPTY_MAP;
+    }
 
-    private Map<String, String> targetClaims;
+    @Value.Default
+    public Map<String, String> allowedRevocationClaims() {
+        return Collections.EMPTY_MAP;
+    }
 
     public boolean containsSourceClaims(AuthorizationRule rule) {
-        return getSourceClaims().entrySet().containsAll(rule.getSourceClaims().entrySet());
+        return requiredUserClaims().entrySet().containsAll(rule.requiredUserClaims().entrySet());
     }
 
     public boolean containsTargetClaims(AuthorizationRule rule) {
-        return getTargetClaims().entrySet().containsAll(rule.getTargetClaims().entrySet());
+        return allowedRevocationClaims().entrySet().containsAll(rule.allowedRevocationClaims().entrySet());
     }
 }

@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
+import org.zalando.planb.revocation.persistence.CassandraAuthorizationRuleStore;
+import org.zalando.planb.revocation.persistence.CassandraRevocationStore;
 import org.zalando.planb.revocation.util.persistence.CassandraSupportStore;
 
 /**
@@ -29,5 +31,11 @@ public class SupportCassandraConfig {
         return new CassandraSupportStore(storageConfig.cassandraSession(),
                 cassandraProperties.getReadConsistencyLevel(), cassandraProperties.getWriteConsistencyLevel(),
                 cassandraProperties.getMaxTimeDelta());
+    }
+
+    @Bean
+    public CassandraAuthorizationRuleStore cassandraAuthorizationRuleStore() {
+        return new CassandraAuthorizationRuleStore(storageConfig.cassandraSession(), cassandraProperties.getReadConsistencyLevel(),
+                cassandraProperties.getWriteConsistencyLevel());
     }
 }

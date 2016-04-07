@@ -23,12 +23,11 @@ CREATE TABLE revocation.refresh (
 WITH CLUSTERING ORDER BY (refresh_ts DESC);
 
 
-CREATE TABLE revocation.authorization_rules (
+CREATE TABLE revocation.authorization_rule (
     uuid TIMEUUID,
-    source_claims Map<TEXT, TEXT>,
-    target_claims Map<TEXT, TEXT>,
+    required_user_claims Map<TEXT, TEXT>,
+    allowed_revocation_claims Map<TEXT, TEXT>,
     created_by TEXT,
     last_modified_by TEXT,
     PRIMARY KEY(uuid)
 );
-CREATE INDEX ON revocation.authorization_rules (target_claims);

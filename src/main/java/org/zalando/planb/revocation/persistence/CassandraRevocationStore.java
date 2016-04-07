@@ -48,7 +48,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.now;
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @Slf4j
-public class CassandraStore implements RevocationStore {
+public class CassandraRevocationStore implements RevocationStore {
 
     /*
      * Tables and queries for revocation_schema.cql
@@ -71,8 +71,8 @@ public class CassandraStore implements RevocationStore {
             .value("revocation_type", bindMarker())
             .value("revocation_data", bindMarker())
             .value("revoked_by", bindMarker())
-            .value("revoked_at", bindMarker()).value(
-                    "bucket_uuid", now());
+            .value("revoked_at", bindMarker())
+            .value("bucket_uuid", now());
 
     private static final RegularStatement INSERT_REFRESH = QueryBuilder.insertInto(REFRESH_TABLE)
             .value("refresh_year", bindMarker())
@@ -132,8 +132,8 @@ public class CassandraStore implements RevocationStore {
      * @param write        consistency level for INSERT queries
      * @param maxTimeDelta maximum time span limit to get revocations, in seconds
      */
-    public CassandraStore(final Session session, final ConsistencyLevel read, final ConsistencyLevel write,
-                          final int maxTimeDelta) {
+    public CassandraRevocationStore(final Session session, final ConsistencyLevel read, final ConsistencyLevel write,
+                                    final int maxTimeDelta) {
         this.session = session;
         this.maxTimeDelta = maxTimeDelta;
 

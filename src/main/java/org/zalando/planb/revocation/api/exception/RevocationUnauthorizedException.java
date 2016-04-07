@@ -10,6 +10,6 @@ public class RevocationUnauthorizedException extends RuntimeException{
     private static final String MESSAGE = "The requested revocation with claims {0} is not authorized";
 
     public RevocationUnauthorizedException(AuthorizationRule rule) {
-        super(MessageFormat.format(MESSAGE, rule.getTargetClaims()));
+        super(MessageFormat.format(MESSAGE, rule.allowedRevocationClaims()));
     }
 }

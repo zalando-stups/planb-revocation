@@ -19,18 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import org.zalando.planb.revocation.AbstractSpringIT;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.domain.AuthorizationRule;
-import org.zalando.planb.revocation.domain.NotificationType;
-import org.zalando.planb.revocation.domain.Problem;
-import org.zalando.planb.revocation.domain.RevocationData;
-import org.zalando.planb.revocation.domain.RevocationInfo;
-import org.zalando.planb.revocation.domain.RevocationList;
-import org.zalando.planb.revocation.domain.RevocationRequest;
-import org.zalando.planb.revocation.domain.RevocationType;
-import org.zalando.planb.revocation.domain.RevokedClaimsData;
-import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
-import org.zalando.planb.revocation.domain.RevokedTokenData;
-import org.zalando.planb.revocation.domain.RevokedTokenInfo;
+import org.zalando.planb.revocation.domain.*;
 import org.zalando.planb.revocation.persistence.AuthorizationRulesStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
@@ -212,9 +201,9 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
     @Test
     public void testInsertClaimRevocation() {
-        authorizationRulesStore.storeAccessRule(AuthorizationRule.builder()
-                .sourceClaims(of("sub", "test0"))
-                .targetClaims(of("realm", "/services"))
+        authorizationRulesStore.storeAccessRule(ImmutableAuthorizationRule.builder()
+                .requiredUserClaims(of("sub", "test0"))
+                .allowedRevocationClaims(of("realm", "/services"))
                 .build());
 
         RevocationRequest requestBody = generateClaimBasedRevocation(of("realm", "/services"));

@@ -9,10 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Component;
 import org.zalando.planb.revocation.api.exception.RevocationUnauthorizedException;
-import org.zalando.planb.revocation.domain.AuthorizationRule;
-import org.zalando.planb.revocation.domain.RevocationRequest;
-import org.zalando.planb.revocation.domain.RevokedClaimsData;
-import org.zalando.planb.revocation.domain.RevokedData;
+import org.zalando.planb.revocation.domain.*;
 import org.zalando.planb.revocation.persistence.AuthorizationRulesStore;
 import org.zalando.planb.revocation.service.RevocationAuthorizationService;
 
@@ -35,10 +32,11 @@ public class RuleBasedAuthorizationService implements RevocationAuthorizationSer
         if (data instanceof RevokedClaimsData) {
 
             RevokedClaimsData claimsData = (RevokedClaimsData)data;
-            AuthorizationRule sourceRule = AuthorizationRule.builder().sourceClaims(getSourceClaims()).build();
-            AuthorizationRule targetRule = AuthorizationRule.builder().targetClaims(claimsData.getClaims()).build();
+            AuthorizationRule sourceRule = ImmutableAuthorizationRule.builder().requiredUserClaims(getSourceClaims()).build();
+            AuthorizationRule targetRule = ImmutableAuthorizationRule.builder().allowedRevocationClaims(claimsData.getClaims()).build();
 
             Collection<AuthorizationRule> sourceRules = authorizationRulesStore.withTargetClaims(targetRule);
+            log.info("checking if contained...");
             sourceRules.stream().filter(sourceRule::containsSourceClaims).findAny().orElseThrow(() -> new RevocationUnauthorizedException(targetRule));
         }
 

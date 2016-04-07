@@ -31,7 +31,7 @@ import org.zalando.planb.revocation.domain.RevokedGlobal;
 import org.zalando.planb.revocation.domain.RevokedInfo;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
 import org.zalando.planb.revocation.domain.RevokedTokenInfo;
-import org.zalando.planb.revocation.persistence.CassandraStore;
+import org.zalando.planb.revocation.persistence.CassandraRevocationStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.service.RevocationAuthorizationService;
 import org.zalando.planb.revocation.util.MessageHasher;
@@ -166,7 +166,7 @@ public class RevocationResourceImpl implements RevocationResource {
     private EnumMap<NotificationType, Object> metaInformation() {
         EnumMap<NotificationType, Object> metaInfo = new EnumMap<>(NotificationType.class);
 
-        if (storage instanceof CassandraStore) {
+        if (storage instanceof CassandraRevocationStore) {
             metaInfo.put(NotificationType.MAX_TIME_DELTA, cassandraProperties.getMaxTimeDelta());
         }
 
