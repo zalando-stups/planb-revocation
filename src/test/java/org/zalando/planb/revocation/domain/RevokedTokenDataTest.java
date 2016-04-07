@@ -51,7 +51,7 @@ public class RevokedTokenDataTest {
      */
     @Test(expected = IllegalStateException.class)
     public void testExceptionWhenNullValues() {
-        ImmutableRevokedTokenInfo.builder().build();
+        ImmutableRevokedTokenData.builder().build();
     }
 
     /**
@@ -104,7 +104,7 @@ public class RevokedTokenDataTest {
 
     /**
      * Tests JSON deserialization of a {@link RevokedTokenData} object when the serialized string does not have values
-     * that should be set by default.
+     * that are set by default.
      */
     @Test
     public void testJsonDeserializationSetsDefaults() throws IOException {

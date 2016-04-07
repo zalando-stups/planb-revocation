@@ -92,11 +92,11 @@ public class RevocationResourceImpl implements RevocationResource {
 
             } else if (data instanceof RevokedClaimsData) {
                 RevokedClaimsInfo revokedClaims = ImmutableRevokedClaimsInfo.builder()
-                        .names(((RevokedClaimsData) data).getClaims().keySet())
+                        .names(((RevokedClaimsData) data).claims().keySet())
                         .valueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
-                                ((RevokedClaimsData) data).getClaims().values()))
+                                ((RevokedClaimsData) data).claims().values()))
                         .hashAlgorithm(messageHasher.getHashers().get(RevocationType.CLAIM).getAlgorithm())
-                        .issuedBefore(((RevokedClaimsData) data).getIssuedBefore())
+                        .issuedBefore(((RevokedClaimsData) data).issuedBefore())
                         .separator(messageHasher.getSeparator())
                         .build();
 
@@ -143,7 +143,7 @@ public class RevocationResourceImpl implements RevocationResource {
                 timestamp = ((RevokedTokenData) revocation.getData()).issuedBefore();
                 break;
             case CLAIM:
-                timestamp = ((RevokedClaimsData) revocation.getData()).getIssuedBefore();
+                timestamp = ((RevokedClaimsData) revocation.getData()).issuedBefore();
                 break;
             case GLOBAL:
                 // We don't allow GLOBAL revocations

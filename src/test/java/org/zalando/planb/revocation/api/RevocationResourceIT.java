@@ -352,7 +352,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
                 .getAlgorithm());
 
         String hashedValue = messageHasher.hashAndEncode(RevocationType.CLAIM, ((RevokedClaimsData) claimRevocation
-                .getData()).getClaims().values());
+                .getData()).claims().values());
         assertThat(fromService.valueHash()).isEqualTo(hashedValue);
     }
 
