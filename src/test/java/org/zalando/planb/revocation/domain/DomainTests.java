@@ -1,21 +1,13 @@
 package org.zalando.planb.revocation.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.zalando.planb.revocation.util.UnixTimestamp;
-import org.zalando.planb.revocation.util.security.WithMockCustomUser;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for domain objects.
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 public class DomainTests {
 

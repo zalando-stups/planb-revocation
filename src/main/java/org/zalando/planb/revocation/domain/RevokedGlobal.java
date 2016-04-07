@@ -8,7 +8,7 @@ import org.zalando.planb.revocation.util.UnixTimestamp;
 /**
  * Holds information about a global revocation.
  *
- * @author <a href="mailto:rodrigo.reis@zalando.de">Team Greendale</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @Value.Immutable
 @JsonSerialize
