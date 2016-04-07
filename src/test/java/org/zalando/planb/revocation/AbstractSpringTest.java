@@ -12,11 +12,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.zalando.planb.revocation.domain.RevocationRequest;
+import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.domain.RevokedGlobal;
-import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
 import org.zalando.planb.revocation.util.InstantTimestamp;
+
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -29,7 +31,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
  */
 public abstract class AbstractSpringTest {
 
-    public static final String VALID_ACCESS_TOKEN = "Bearer 123456789";
+
+    public static final String SAMPLE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+            + ".eyJzdWIiOiIxIiwibmFtZSI6InJyZWlzIiwiYWRtaW4iOnRydWV9.UlZhyvrY9e7tRU88l8sfRb37oWGiL2t4insnO9Nsn1c";
+    public static final String SAMPLE_TOKEN_2 = "eyJraWQiOiJ0ZXN0a2V5LWVzMjU2IiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJ0ZXN0MCIsInNjb3BlIjpbInVpZCIsImNuIl0sImlzcyI6IkIiLCJyZWFsbSI6Ii9zZXJ2aWNlcyIsImV4cCI6MTQ1OTk3MzMyOSwiaWF0IjoxNDU5OTQ0NTI5fQ.Vo8_jbqCET31ej1iLAlcQFc2FzArzQrQwDY3c34keKhpJoDQoHVOX-pqjiM5J_Tp0p13HNZbB3-O4o0U2d2LzA";
+    public static final String VALID_ACCESS_TOKEN = "Bearer " + SAMPLE_TOKEN_2;
     public static final String INVALID_ACCESS_TOKEN = "Bearer 987654321";
     public static final String INSUFFICIENT_SCOPES_ACCESS_TOKEN = "Bearer 123456";
     public static final String SERVER_ERROR_ACCESS_TOKEN = "Bearer 500";
@@ -37,7 +43,7 @@ public abstract class AbstractSpringTest {
     public static final String TOKENINFO_RESPONSE = "{\n" + "    \"uid\": \"testapp\",\n" + "    \"scope\": [\n"
             + "        \"uid\",\n" + "        \"token.revoke\"\n" + "    ],\n" + "    \"hello\": \"World\",\n"
             + "    \"expires_in\": 99999,\n" + "    \"token_type\": \"Bearer\",\n"
-            + "    \"access_token\": \"987654321\",\n" + "    \"realm\": \"/services\"\n" + "}";
+            + "    \"access_token\": \"" + SAMPLE_TOKEN_2 + "\",\n" + "    \"realm\": \"/services\"\n" + "}";
 
     public static final String TOKENINFO_RESPONSE_INSUFFICIENT_SCOPES = "{\n" + "    \"uid\": \"testapp\",\n"
             + "    \"scope\": [\n" + "        \"uid\"\n" + "    ],\n" + "    \"expires_in\": 99999,\n"
@@ -46,9 +52,6 @@ public abstract class AbstractSpringTest {
 
     public static final String EXPIRED_ACCESS_TOKEN_RESPONSE = "{\n" + "    \"error\": \"invalid_request\",\n"
             + "    \"error_description\": \"Access Token not valid\"\n" + "}";
-
-    public static final String SAMPLE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-            + ".eyJzdWIiOiIxIiwibmFtZSI6InJyZWlzIiwiYWRtaW4iOnRydWV9.UlZhyvrY9e7tRU88l8sfRb37oWGiL2t4insnO9Nsn1c";
 
     @Rule
     public WireMockRule wireMock = new WireMockRule(Integer.valueOf(System.getProperty("wiremock.port", "10080")));
@@ -82,6 +85,16 @@ public abstract class AbstractSpringTest {
     }
 
     // Some utility methods
+    public static RevocationRequest generateClaimBasedRevocation(Map<String, String> claims) {
+        RevocationRequest generated = new RevocationRequest();
+        generated.setType(RevocationType.CLAIM);
+        RevokedClaimsData revokedClaims = new RevokedClaimsData();
+        revokedClaims.setClaims(claims);
+        revokedClaims.setIssuedBefore(InstantTimestamp.NOW.seconds());
+        generated.setData(revokedClaims);
+        return generated;
+    }
+
     public static RevocationRequest generateRevocation(final RevocationType type) {
 
         RevocationRequest generated = new RevocationRequest();
@@ -98,14 +111,7 @@ public abstract class AbstractSpringTest {
                 break;
 
             case CLAIM :
-                generated.setType(RevocationType.CLAIM);
-
-                RevokedClaimsData revokedClaims = new RevokedClaimsData();
-                revokedClaims.setClaims(ImmutableMap.of("uid", "rreis", "sub", "abcd"));
-                revokedClaims.setIssuedBefore(InstantTimestamp.NOW.seconds());
-
-                generated.setData(revokedClaims);
-                break;
+                return generateClaimBasedRevocation(ImmutableMap.of("uid", "rreis", "sub", "abcd"));
 
             case GLOBAL :
                 generated.setType(RevocationType.GLOBAL);
