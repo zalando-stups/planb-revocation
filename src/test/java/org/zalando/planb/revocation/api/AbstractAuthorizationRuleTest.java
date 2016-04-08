@@ -116,7 +116,7 @@ public abstract class AbstractAuthorizationRuleTest extends AbstractSpringTest {
     }
 
     private void addAuthorizationRule(Map<String, String> source, Map<String, String> target) {
-        authorizationRulesStore.storeAccessRule(ImmutableAuthorizationRule.builder()
+        authorizationRulesStore.store(ImmutableAuthorizationRule.builder()
                 .requiredUserClaims(source)
                 .allowedRevocationClaims(target)
                 .build());

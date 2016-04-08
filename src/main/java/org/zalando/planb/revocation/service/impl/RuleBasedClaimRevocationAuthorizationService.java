@@ -9,9 +9,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Component;
 import org.zalando.planb.revocation.api.exception.RevocationUnauthorizedException;
-import org.zalando.planb.revocation.domain.*;
+import org.zalando.planb.revocation.domain.AuthorizationRule;
+import org.zalando.planb.revocation.domain.ImmutableAuthorizationRule;
+import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.persistence.AuthorizationRulesStore;
-import org.zalando.planb.revocation.service.RevocationAuthorizationService;
 
 import java.text.ParseException;
 import java.util.Collection;
@@ -21,25 +22,23 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class RuleBasedAuthorizationService implements RevocationAuthorizationService {
+public class RuleBasedClaimRevocationAuthorizationService extends AbstractAuthorizationService {
 
     @Autowired
     private AuthorizationRulesStore authorizationRulesStore;
 
-    @Override
-    public void checkAuthorization(final RevocationRequest revocationRequest) {
-        final RevokedData data = revocationRequest.getData();
-        if (data instanceof RevokedClaimsData) {
-
-            RevokedClaimsData claimsData = (RevokedClaimsData)data;
-            AuthorizationRule sourceRule = ImmutableAuthorizationRule.builder().requiredUserClaims(getSourceClaims()).build();
-            AuthorizationRule targetRule = ImmutableAuthorizationRule.builder().allowedRevocationClaims(claimsData.getClaims()).build();
-
-            Collection<AuthorizationRule> sourceRules = authorizationRulesStore.withTargetClaims(targetRule);
-            log.info("checking if contained...");
-            sourceRules.stream().filter(sourceRule::containsSourceClaims).findAny().orElseThrow(() -> new RevocationUnauthorizedException(targetRule));
-        }
-
+    protected void checkClaimBasedRevocation(final RevokedClaimsData claimsData) {
+        final AuthorizationRule sourceRule = ImmutableAuthorizationRule
+                .builder()
+                .requiredUserClaims(getSourceClaims()).build();
+        final AuthorizationRule targetRule = ImmutableAuthorizationRule
+                .builder()
+                .allowedRevocationClaims(claimsData.getClaims()).build();
+        final Collection<AuthorizationRule> sourceRules = authorizationRulesStore.retrieveByMatchingAllowedClaims(targetRule);
+        sourceRules.stream()
+                .filter(sourceRule::matchesRequiredUserClaims)
+                .findAny()
+                .orElseThrow(() -> new RevocationUnauthorizedException(targetRule));
     }
 
     private Map<String, String> getSourceClaims() {

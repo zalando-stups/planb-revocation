@@ -201,7 +201,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
     @Test
     public void testInsertClaimRevocation() {
-        authorizationRulesStore.storeAccessRule(ImmutableAuthorizationRule.builder()
+        authorizationRulesStore.store(ImmutableAuthorizationRule.builder()
                 .requiredUserClaims(of("sub", "test0"))
                 .allowedRevocationClaims(of("realm", "/services"))
                 .build());

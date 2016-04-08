@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,9 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.planb.revocation.api.RevocationResource;
-import org.zalando.planb.revocation.api.exception.FutureRevocationException;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.config.properties.RevocationProperties;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenInfo;
 import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.domain.Refresh;
@@ -35,7 +32,6 @@ import org.zalando.planb.revocation.persistence.CassandraRevocationStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.service.RevocationAuthorizationService;
 import org.zalando.planb.revocation.util.MessageHasher;
-import org.zalando.planb.revocation.util.UnixTimestamp;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -69,9 +65,6 @@ public class RevocationResourceImpl implements RevocationResource {
 
     @Autowired
     private RevocationAuthorizationService revocationAuthorizationService;
-
-    @Autowired
-    private RevocationProperties revocationProperties;
 
     @Override
     @RequestMapping(method = RequestMethod.GET)
@@ -139,27 +132,7 @@ public class RevocationResourceImpl implements RevocationResource {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void post(@RequestBody final RevocationRequest revocation) {
-
         revocationAuthorizationService.checkAuthorization(revocation);
-
-        Integer timestamp = null;
-        switch (revocation.getType()) {
-            case TOKEN:
-                timestamp = ((RevokedTokenData) revocation.getData()).getIssuedBefore();
-                break;
-            case CLAIM:
-                timestamp = ((RevokedClaimsData) revocation.getData()).getIssuedBefore();
-                break;
-            case GLOBAL:
-                // We don't allow GLOBAL revocations
-                throw new AccessDeniedException("Permission denied to create global revocations.");
-        }
-
-        // Checks for future timestamps
-        if (timestamp > UnixTimestamp.now() + revocationProperties.getTimestampThreshold()) {
-            throw new FutureRevocationException();
-        }
-
         storage.storeRevocation(revocation);
     }
 

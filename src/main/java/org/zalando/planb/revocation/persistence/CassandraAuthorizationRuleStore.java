@@ -8,10 +8,14 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.zalando.planb.revocation.domain.AuthorizationRule;
 import org.zalando.planb.revocation.domain.ImmutableAuthorizationRule;
 
+import javax.annotation.PostConstruct;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,7 +23,13 @@ import java.util.stream.Collectors;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.now;
 
+@Slf4j
 public class CassandraAuthorizationRuleStore implements AuthorizationRulesStore.Internal {
+
+    private static final long RELOAD_IN_MS =  1000 * 60 * 10; // 10 minutes
+
+    private List<AuthorizationRule> inMemoryRuleStore = Collections.emptyList();
+
     private final Session session;
 
     private final PreparedStatement getRules;
@@ -40,7 +50,8 @@ public class CassandraAuthorizationRuleStore implements AuthorizationRulesStore.
             .value(CREATED_BY, bindMarker())
             .value(LAST_MODIFIED_BY, bindMarker());
     private static final RegularStatement SELECT_AUTHORIZATION = QueryBuilder.select()
-            .all()
+            .column(REQUIRED_USER_CLAIMS)
+            .column(ALLOWED_REVOCATION_CLAIMS)
             .from(AUTHORIZATION_TABLE);
     private static final RegularStatement CLEANUP_AUTHORIZATION = QueryBuilder.truncate(AUTHORIZATION_TABLE);
 
@@ -50,28 +61,35 @@ public class CassandraAuthorizationRuleStore implements AuthorizationRulesStore.
         insertRule = session.prepare(INSERT_AUTHORIZATION).setConsistencyLevel(write);
     }
 
-    @Override
-    public Collection<AuthorizationRule> withTargetClaims(AuthorizationRule authorizationRule) {
+    @PostConstruct
+    void initializeAuthorizationRuleStore() throws Exception {
+        loadAuthorizationRuleStore();
+        log.debug("Authorization rule store initialized");
+    }
 
-        List<AuthorizationRule> result = Optional.ofNullable(getRules.bind())
+    @Scheduled(fixedDelay = RELOAD_IN_MS, initialDelay = RELOAD_IN_MS)
+    void loadAuthorizationRuleStore() {
+        inMemoryRuleStore = Optional.ofNullable(getRules.bind())
                 .map(session::execute)
                 .map(ResultSet::all)
                 .map(this::toAuthorizationRules)
-                .get();
-
-        return result.stream().filter(authorizationRule::containsTargetClaims).collect(Collectors.toSet());
-
+                .orElse(Collections.emptyList());
     }
 
     @Override
-    public void storeAccessRule(AuthorizationRule authorizationRule) {
-        final String createdBy = "TODO";
+    public Collection<AuthorizationRule> retrieveByMatchingAllowedClaims(AuthorizationRule authorizationRule) {
+        return findMatchingRulesByAllowedClaims(inMemoryRuleStore, authorizationRule);
+    }
+
+    @Override
+    public void store(AuthorizationRule authorizationRule) {
         final BoundStatement insert = insertRule.bind()
                                     .setMap(REQUIRED_USER_CLAIMS, authorizationRule.requiredUserClaims())
                                     .setMap(ALLOWED_REVOCATION_CLAIMS, authorizationRule.allowedRevocationClaims())
-                                    .setString(CREATED_BY, createdBy)
-                                    .setString(LAST_MODIFIED_BY, createdBy);
+                                    .setString(CREATED_BY, null)
+                                    .setString(LAST_MODIFIED_BY, null);
         session.execute(insert);
+        loadAuthorizationRuleStore();
     }
 
     private List<AuthorizationRule> toAuthorizationRules(List<Row> rows) {
@@ -88,6 +106,7 @@ public class CassandraAuthorizationRuleStore implements AuthorizationRulesStore.
 
     @Override
     public void cleanup() {
+        inMemoryRuleStore = Collections.emptyList();
         session.execute(CLEANUP_AUTHORIZATION);
     }
 }
