@@ -26,8 +26,6 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.now;
 @Slf4j
 public class CassandraAuthorizationRuleStore implements AuthorizationRulesStore.Internal {
 
-    private static final long RELOAD_IN_MS =  1000 * 60 * 10; // 10 minutes
-
     private List<AuthorizationRule> inMemoryRuleStore = Collections.emptyList();
 
     private final Session session;
@@ -62,13 +60,13 @@ public class CassandraAuthorizationRuleStore implements AuthorizationRulesStore.
     }
 
     @PostConstruct
-    void initializeAuthorizationRuleStore() throws Exception {
+    private void initializeAuthorizationRuleStore() {
         loadAuthorizationRuleStore();
         log.debug("Authorization rule store initialized");
     }
 
-    @Scheduled(fixedDelay = RELOAD_IN_MS, initialDelay = RELOAD_IN_MS)
-    void loadAuthorizationRuleStore() {
+    @Scheduled(fixedDelayString = "${revocation.authorization.reload}", initialDelayString = "${revocation.authorization.reload}")
+    private void loadAuthorizationRuleStore() {
         inMemoryRuleStore = Optional.ofNullable(getRules.bind())
                 .map(session::execute)
                 .map(ResultSet::all)

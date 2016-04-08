@@ -19,6 +19,8 @@ server:
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
 
 revocation:
+  authorization:
+    reload: 600000
   hashing:
     algorithms:
       TOKEN: SHA-256
