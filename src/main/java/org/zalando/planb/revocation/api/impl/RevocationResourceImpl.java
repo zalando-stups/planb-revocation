@@ -16,6 +16,7 @@ import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.api.exception.FutureRevocationException;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.config.properties.RevocationProperties;
+import org.zalando.planb.revocation.domain.ImmutableRevocationInfo;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenInfo;
 import org.zalando.planb.revocation.domain.NotificationType;
@@ -26,12 +27,10 @@ import org.zalando.planb.revocation.domain.RevocationList;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
-import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.RevokedData;
 import org.zalando.planb.revocation.domain.RevokedGlobal;
 import org.zalando.planb.revocation.domain.RevokedInfo;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
-import org.zalando.planb.revocation.domain.RevokedTokenInfo;
 import org.zalando.planb.revocation.persistence.CassandraStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.util.MessageHasher;
@@ -80,18 +79,15 @@ public class RevocationResourceImpl implements RevocationResource {
 
         List<RevocationInfo> apiRevocations = new ArrayList<>(revocations.size());
         for (RevocationData stored : revocations) {
-            final RevokedData data = stored.getData();
+            final RevokedData data = stored.revocationRequest().data();
 
-            RevocationInfo newRevocation = new RevocationInfo();
-            newRevocation.setRevokedAt(stored.getRevokedAt());
-            newRevocation.setType(stored.getType());
-
+            RevokedInfo revokedInfo = null;
             if (data instanceof RevokedGlobal) {
                 // No transformation necessary
-                newRevocation.setData((RevokedInfo) data);
+                revokedInfo = (RevokedInfo) data;
 
             } else if (data instanceof RevokedClaimsData) {
-                RevokedClaimsInfo revokedClaims = ImmutableRevokedClaimsInfo.builder()
+                revokedInfo = ImmutableRevokedClaimsInfo.builder()
                         .names(((RevokedClaimsData) data).claims().keySet())
                         .valueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
                                 ((RevokedClaimsData) data).claims().values()))
@@ -100,19 +96,19 @@ public class RevocationResourceImpl implements RevocationResource {
                         .separator(messageHasher.getSeparator())
                         .build();
 
-                newRevocation.setData(revokedClaims);
-
             } else if (data instanceof RevokedTokenData) {
-                RevokedTokenInfo revokedToken = ImmutableRevokedTokenInfo.builder()
-                        .tokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
-                                ((RevokedTokenData) data).token()))
+                revokedInfo = ImmutableRevokedTokenInfo.builder()
+                        .tokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN, ((RevokedTokenData) data).token()))
                         .hashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm())
                         .issuedBefore(((RevokedTokenData) data).issuedBefore())
                         .build();
-                newRevocation.setData(revokedToken);
             }
 
-            apiRevocations.add(newRevocation);
+            apiRevocations.add(ImmutableRevocationInfo.builder()
+                    .type(stored.revocationRequest().type())
+                    .revokedAt(stored.revokedAt())
+                    .data(revokedInfo)
+                    .build());
         }
 
         RevocationList responseBody = new RevocationList();
@@ -138,12 +134,12 @@ public class RevocationResourceImpl implements RevocationResource {
     public void post(@RequestBody final RevocationRequest revocation) {
 
         Integer timestamp = null;
-        switch (revocation.getType()) {
+        switch (revocation.type()) {
             case TOKEN:
-                timestamp = ((RevokedTokenData) revocation.getData()).issuedBefore();
+                timestamp = ((RevokedTokenData) revocation.data()).issuedBefore();
                 break;
             case CLAIM:
-                timestamp = ((RevokedClaimsData) revocation.getData()).issuedBefore();
+                timestamp = ((RevokedClaimsData) revocation.data()).issuedBefore();
                 break;
             case GLOBAL:
                 // We don't allow GLOBAL revocations

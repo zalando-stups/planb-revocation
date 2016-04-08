@@ -2,6 +2,7 @@ package org.zalando.planb.revocation.persistence;
 
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
+import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 
 import java.util.Collection;
