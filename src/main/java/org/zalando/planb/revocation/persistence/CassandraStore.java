@@ -21,7 +21,6 @@ import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.domain.RevokedData;
-import org.zalando.planb.revocation.domain.RevokedGlobal;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
 import org.zalando.planb.revocation.util.LocalDateFormatter;
 import org.zalando.planb.revocation.util.UnixTimestamp;
@@ -103,26 +102,8 @@ public class CassandraStore implements RevocationStore {
     @Autowired
     private CurrentUser currentUser;
 
-    private static class GlobalMapper implements RevocationDataMapper {
-        @Override
-        public RevokedData get(final String data) throws IOException {
-            return MAPPER.readValue(data, RevokedGlobal.class);
-        }
-    }
-
-    private static class ClaimMapper implements RevocationDataMapper {
-        @Override
-        public RevokedData get(final String data) throws IOException {
-            return MAPPER.readValue(data, RevokedClaimsData.class);
-        }
-    }
-
-    private static class TokenMapper implements RevocationDataMapper {
-        @Override
-        public RevokedData get(final String data) throws IOException {
-            return MAPPER.readValue(data, RevokedTokenData.class);
-        }
-    }
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * Constructs a new instance configured with the provided {@code session} and {@code maxTimeDelta}.
@@ -137,17 +118,11 @@ public class CassandraStore implements RevocationStore {
         this.session = session;
         this.maxTimeDelta = maxTimeDelta;
 
-        dataMappers.put(RevocationType.TOKEN, new TokenMapper());
-        dataMappers.put(RevocationType.GLOBAL, new GlobalMapper());
-        dataMappers.put(RevocationType.CLAIM, new ClaimMapper());
-
         getFrom = session.prepare(SELECT_REVOCATION).setConsistencyLevel(read);
         insertRevocation = session.prepare(INSERT_REVOCATION).setConsistencyLevel(write);
         getRefresh = session.prepare(SELECT_REFRESH).setConsistencyLevel(read);
         storeRefresh = session.prepare(INSERT_REFRESH).setConsistencyLevel(write);
     }
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     static class Bucket {
         public String date;
@@ -201,7 +176,19 @@ public class CassandraStore implements RevocationStore {
                 try {
                     RevocationType type = RevocationType.valueOf(r.getString("revocation_type").toUpperCase());
                     String unmappedData = r.getString("revocation_data");
-                    RevokedData data = dataMappers.get(type).get(unmappedData);
+
+                    RevokedData data = null;
+                    switch (type) {
+                        case TOKEN:
+                            data = objectMapper.readValue(unmappedData, RevokedTokenData.class);
+                            break;
+                        case CLAIM:
+                            data = objectMapper.readValue(unmappedData, RevokedClaimsData.class);
+                            break;
+                        case GLOBAL:
+                            data = objectMapper.readValue(unmappedData, RevokedTokenData.class);
+                            break;
+                    }
 
                     RevocationData revocationData = new RevocationData();
                     revocationData.setType(type);
@@ -230,7 +217,7 @@ public class CassandraStore implements RevocationStore {
 
         int interval = getInterval(revokedAt);
         try {
-            String data = MAPPER.writeValueAsString(revocation.getData());
+            String data = objectMapper.writeValueAsString(revocation.getData());
             log.debug("Storing in bucket: {} {} {}", date, interval, data);
 
             final BoundStatement bs = insertRevocation.bind(date, interval, revocation.getType().name(), data,

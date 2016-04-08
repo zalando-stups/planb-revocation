@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**

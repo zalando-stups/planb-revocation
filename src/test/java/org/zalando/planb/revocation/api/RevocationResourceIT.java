@@ -203,6 +203,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     @Test
     public void testInsertClaimRevocation() {
         RevocationRequest requestBody = generateRevocation(RevocationType.CLAIM);
+        System.out.println("REQUEST BODY!!!!" + requestBody);
 
         ResponseEntity<RevocationInfo> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
                 .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
@@ -210,6 +211,8 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
         Collection<RevocationData> storedRevocations = revocationStore.getRevocations(
                 InstantTimestamp.FIVE_MINUTES_AGO.seconds());
+
+        System.out.println("STORED!!!!" + storedRevocations);
 
         assertThat(storedRevocations).isNotEmpty();
         assertThat(storedRevocations.stream().filter(r -> r.getType() == RevocationType.CLAIM).count()).isGreaterThan(0);
