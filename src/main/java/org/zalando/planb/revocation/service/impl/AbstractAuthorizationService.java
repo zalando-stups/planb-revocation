@@ -49,13 +49,13 @@ public abstract class AbstractAuthorizationService implements RevocationAuthoriz
         Integer timestamp = null;
         switch (revocation.getType()) {
             case TOKEN:
-                timestamp = ((RevokedTokenData) revocation.getData()).getIssuedBefore();
+                timestamp = ((RevokedTokenData) revocation.getData()).issuedBefore();
                 break;
             case CLAIM:
-                timestamp = ((RevokedClaimsData) revocation.getData()).getIssuedBefore();
+                timestamp = ((RevokedClaimsData) revocation.getData()).issuedBefore();
                 break;
             case GLOBAL:
-                timestamp = ((RevokedGlobal) revocation.getData()).getIssuedBefore();
+                timestamp = ((RevokedGlobal) revocation.getData()).issuedBefore();
                 break;
         }
         return timestamp;

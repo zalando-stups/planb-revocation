@@ -83,7 +83,7 @@ public class RevokedTokenInfoTest {
      * Tests that JSON deserialization of a {@link RevokedTokenInfo} object fails when not all values are set.
      */
     @Test(expected = JsonMappingException.class)
-    public void testJsonDeserializationSFails() throws IOException {
+    public void testJsonDeserializationFails() throws IOException {
 
         objectMapper.readValue(SERIALIZED_INCOMPLETE, RevokedTokenInfo.class);
     }

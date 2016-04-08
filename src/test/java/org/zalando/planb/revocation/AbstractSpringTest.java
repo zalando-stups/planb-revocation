@@ -1,22 +1,28 @@
 package org.zalando.planb.revocation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.http.ContentTypeHeader;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
+import org.springframework.web.client.RestTemplate;
+import org.zalando.planb.revocation.config.PlanBRevocationConfig;
+import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsData;
+import org.zalando.planb.revocation.domain.ImmutableRevokedGlobal;
+import org.zalando.planb.revocation.domain.ImmutableRevokedTokenData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
-import org.zalando.planb.revocation.domain.RevokedClaimsData;
-import org.zalando.planb.revocation.domain.RevokedGlobal;
-import org.zalando.planb.revocation.domain.RevokedTokenData;
-import org.zalando.planb.revocation.util.InstantTimestamp;
 
 import java.util.Map;
 
@@ -29,8 +35,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 /**
  * @author  jbellmann
  */
+@ContextConfiguration(classes = PlanBRevocationConfig.class)
 public abstract class AbstractSpringTest {
-
 
     public static final String SAMPLE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
             + ".eyJzdWIiOiIxIiwibmFtZSI6InJyZWlzIiwiYWRtaW4iOnRydWV9.UlZhyvrY9e7tRU88l8sfRb37oWGiL2t4insnO9Nsn1c";
@@ -53,6 +59,12 @@ public abstract class AbstractSpringTest {
     public static final String EXPIRED_ACCESS_TOKEN_RESPONSE = "{\n" + "    \"error\": \"invalid_request\",\n"
             + "    \"error_description\": \"Access Token not valid\"\n" + "}";
 
+
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Rule
     public WireMockRule wireMock = new WireMockRule(Integer.valueOf(System.getProperty("wiremock.port", "10080")));
 
@@ -63,7 +75,12 @@ public abstract class AbstractSpringTest {
     public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
     @Before
-    public void setupMockTokenInfo() {
+    public void setUpTest() {
+        prepareTokenInfoMock();
+        prepareRestTemplate();
+    }
+
+    private void prepareTokenInfoMock() {
         stubFor(get(urlEqualTo("/tokeninfo")).withHeader(HttpHeaders.AUTHORIZATION, equalTo(VALID_ACCESS_TOKEN))
                 .willReturn(
                     aResponse().withStatus(HttpStatus.OK.value()).withHeader(ContentTypeHeader.KEY,
@@ -84,42 +101,48 @@ public abstract class AbstractSpringTest {
                 aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
     }
 
+    private void prepareRestTemplate() {
+        restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+
+        /*
+         * We need to replace the default object mapper with ours object mapper so it reads lower case with
+         * underscores correctly.
+         */
+        for (int i = 0; i < restTemplate.getMessageConverters().size(); i++) {
+            if (restTemplate.getMessageConverters().get(i) instanceof MappingJackson2HttpMessageConverter) {
+                restTemplate.getMessageConverters().set(i, new MappingJackson2HttpMessageConverter(objectMapper));
+            }
+        }
+    }
+
+    protected RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
+
     // Some utility methods
     public static RevocationRequest generateClaimBasedRevocation(Map<String, String> claims) {
         RevocationRequest generated = new RevocationRequest();
         generated.setType(RevocationType.CLAIM);
-        RevokedClaimsData revokedClaims = new RevokedClaimsData();
-        revokedClaims.setClaims(claims);
-        revokedClaims.setIssuedBefore(InstantTimestamp.NOW.seconds());
-        generated.setData(revokedClaims);
+        generated.setData(ImmutableRevokedClaimsData.builder().putAllClaims(claims).build());
         return generated;
     }
 
     public static RevocationRequest generateRevocation(final RevocationType type) {
 
         RevocationRequest generated = new RevocationRequest();
+        generated.setType(type);
 
         switch (type) {
 
-            case TOKEN :
-                generated.setType(RevocationType.TOKEN);
-
-                RevokedTokenData revokedToken = new RevokedTokenData();
-                revokedToken.setToken(SAMPLE_TOKEN);
-
-                generated.setData(revokedToken);
+            case TOKEN:
+                generated.setData(ImmutableRevokedTokenData.builder().token(SAMPLE_TOKEN).build());
                 break;
 
             case CLAIM :
                 return generateClaimBasedRevocation(ImmutableMap.of("uid", "rreis", "sub", "abcd"));
 
-            case GLOBAL :
-                generated.setType(RevocationType.GLOBAL);
-
-                RevokedGlobal revokedGlobal = new RevokedGlobal();
-                revokedGlobal.setIssuedBefore(InstantTimestamp.NOW.seconds());
-
-                generated.setData(revokedGlobal);
+            case GLOBAL:
+                generated.setData(ImmutableRevokedGlobal.builder().build());
                 break;
         }
 

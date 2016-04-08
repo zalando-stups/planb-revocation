@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import org.zalando.planb.revocation.config.properties.ApiGuildProperties;
 
@@ -65,8 +64,7 @@ public class EndpointsTest extends AbstractSpringTest {
 
     @Test
     public void testHealthEndpoint() {
-        RestTemplate rest = new RestTemplate();
-        ResponseEntity<String> response = rest.getForEntity(URI.create("http://localhost:" + mgmtPort + "/health"),
+        ResponseEntity<String> response = getRestTemplate().getForEntity(URI.create("http://localhost:" + mgmtPort + "/health"),
                 String.class);
         JSONObject jsonBody = new JSONObject(response.getBody());
 
@@ -76,8 +74,7 @@ public class EndpointsTest extends AbstractSpringTest {
 
     @Test
     public void testMetricsEndpoint() {
-        RestTemplate rest = new RestTemplate();
-        ResponseEntity<String> response = rest.getForEntity(URI.create("http://localhost:" + mgmtPort + "/metrics"),
+        ResponseEntity<String> response = getRestTemplate().getForEntity(URI.create("http://localhost:" + mgmtPort + "/metrics"),
                 String.class);
         JSONObject jsonBody = new JSONObject(response.getBody());
 

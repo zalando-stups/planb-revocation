@@ -1,17 +1,19 @@
 package org.zalando.planb.revocation.api;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import org.apache.http.entity.ContentType;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.domain.ImmutableAuthorizationRule;
@@ -38,8 +40,6 @@ public abstract class AbstractAuthorizationRuleTest extends AbstractSpringTest {
     @Autowired
     private AuthorizationRulesStore.Internal authorizationRulesStore;
 
-    private final RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-
     private String basePath() {
         return "http://localhost:" + port;
     }
@@ -47,6 +47,13 @@ public abstract class AbstractAuthorizationRuleTest extends AbstractSpringTest {
     @Before
     public void startUp() {
         authorizationRulesStore.cleanup();
+    }
+
+    @Bean
+    public Jackson2ObjectMapperBuilder jacksonBuilder() {
+        Jackson2ObjectMapperBuilder b = new Jackson2ObjectMapperBuilder();
+        b.propertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+        return b;
     }
 
     @Test
@@ -105,14 +112,15 @@ public abstract class AbstractAuthorizationRuleTest extends AbstractSpringTest {
 
     private ResponseEntity<RevocationInfo> performRevocationWithToken(String token) {
         final RevocationRequest requestBody = generateRevocation(RevocationType.CLAIM);
-        return restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
+        return getRestTemplate().exchange(post(URI.create(basePath() + "/revocations"))
                 .header(HttpHeaders.AUTHORIZATION, token).body(requestBody), RevocationInfo.class);
     }
 
     private ResponseEntity<HttpStatus> performRevocationWithClaims(String token, Map<String, String> claims) {
         final RevocationRequest requestBody = generateClaimBasedRevocation(claims);
-        return restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
-                .header(HttpHeaders.AUTHORIZATION, token).body(requestBody), HttpStatus.class);
+        return getRestTemplate().exchange(post(URI.create(basePath() + "/revocations"))
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()).body(requestBody), HttpStatus.class);
     }
 
     private void addAuthorizationRule(Map<String, String> source, Map<String, String> target) {

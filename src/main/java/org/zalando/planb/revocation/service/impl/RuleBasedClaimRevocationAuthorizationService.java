@@ -33,7 +33,7 @@ public class RuleBasedClaimRevocationAuthorizationService extends AbstractAuthor
                 .requiredUserClaims(getSourceClaims()).build();
         final AuthorizationRule targetRule = ImmutableAuthorizationRule
                 .builder()
-                .allowedRevocationClaims(claimsData.getClaims()).build();
+                .allowedRevocationClaims(claimsData.claims()).build();
         final Collection<AuthorizationRule> sourceRules = authorizationRulesStore.retrieveByMatchingAllowedClaims(targetRule);
         sourceRules.stream()
                 .filter(sourceRule::matchesRequiredUserClaims)
