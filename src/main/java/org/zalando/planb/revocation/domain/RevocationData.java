@@ -1,26 +1,24 @@
 package org.zalando.planb.revocation.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
  * TODO: small javadoc
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Setter
-@Getter
-@NoArgsConstructor
-public class RevocationData extends RevocationRequest {
+@Value.Immutable
+@JsonSerialize
+@JsonDeserialize(as = ImmutableRevocationData.class)
+public abstract class RevocationData {
 
-    @JsonProperty("revoked_at")
-    private Integer revokedAt = UnixTimestamp.now();
+    public abstract RevocationRequest revocationRequest();
 
-    public RevocationData(RevocationType type, RevokedData data, Integer revokedAt) {
-        super(type, data);
-        this.setRevokedAt(revokedAt);
+    @Value.Default
+    public Integer revokedAt() {
+        return UnixTimestamp.now();
     }
 }

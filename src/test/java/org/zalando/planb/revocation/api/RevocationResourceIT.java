@@ -158,7 +158,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
                 InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
         assertThat(storedRevocations.size()).isEqualTo(1);
-        assertThat(storedRevocations.iterator().next().getType()).isEqualTo(RevocationType.TOKEN);
+        assertThat(storedRevocations.iterator().next().revocationRequest().type()).isEqualTo(RevocationType.TOKEN);
     }
 
     /**
@@ -197,7 +197,9 @@ public class RevocationResourceIT extends AbstractSpringIT {
                 InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
         assertThat(storedRevocations).isNotEmpty();
-        assertThat(storedRevocations.stream().filter(r -> r.getType() == RevocationType.CLAIM).count()).isGreaterThan(0);
+        assertThat(storedRevocations.stream().filter(r -> r.revocationRequest().type() == RevocationType.CLAIM)
+                .count()).isGreaterThan
+                (0);
     }
 
     /**
@@ -287,7 +289,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     @WithMockCustomUser
     public void testSHA256TokenHashing() {
         RevocationRequest tokenRevocation = generateRevocation(RevocationType.TOKEN);
-        RevokedTokenData revocationData = (RevokedTokenData) tokenRevocation.getData();
+        RevokedTokenData revocationData = (RevokedTokenData) tokenRevocation.data();
         String unhashedToken = revocationData.token();
 
         // Store in backend
@@ -298,7 +300,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
                 URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
                 .build(), RevocationList.class);
 
-        RevokedTokenInfo fromService = (RevokedTokenInfo) response.getBody().getRevocations().get(0).getData();
+        RevokedTokenInfo fromService = (RevokedTokenInfo) response.getBody().getRevocations().get(0).data();
         assertThat(fromService.hashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.TOKEN)
                 .getAlgorithm());
 
@@ -332,12 +334,12 @@ public class RevocationResourceIT extends AbstractSpringIT {
                 .build(), RevocationList.class);
 
         // Assert that it contains revocation
-        RevokedClaimsInfo fromService = (RevokedClaimsInfo) response.getBody().getRevocations().get(0).getData();
+        RevokedClaimsInfo fromService = (RevokedClaimsInfo) response.getBody().getRevocations().get(0).data();
         assertThat(fromService.hashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.CLAIM)
                 .getAlgorithm());
 
         String hashedValue = messageHasher.hashAndEncode(RevocationType.CLAIM, ((RevokedClaimsData) claimRevocation
-                .getData()).claims().values());
+                .data()).claims().values());
         assertThat(fromService.valueHash()).isEqualTo(hashedValue);
     }
 

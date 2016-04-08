@@ -77,18 +77,15 @@ public class RevocationResourceImpl implements RevocationResource {
 
         List<RevocationInfo> apiRevocations = new ArrayList<>(revocations.size());
         for (RevocationData stored : revocations) {
-            final RevokedData data = stored.getData();
+            final RevokedData data = stored.revocationRequest().data();
 
-            RevocationInfo newRevocation = new RevocationInfo();
-            newRevocation.setRevokedAt(stored.getRevokedAt());
-            newRevocation.setType(stored.getType());
-
+            RevokedInfo revokedInfo = null;
             if (data instanceof RevokedGlobal) {
                 // No transformation necessary
-                newRevocation.setData((RevokedInfo) data);
+                revokedInfo = (RevokedInfo) data;
 
             } else if (data instanceof RevokedClaimsData) {
-                RevokedClaimsInfo revokedClaims = ImmutableRevokedClaimsInfo.builder()
+                revokedInfo = ImmutableRevokedClaimsInfo.builder()
                         .names(((RevokedClaimsData) data).claims().keySet())
                         .valueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
                                 ((RevokedClaimsData) data).claims().values()))
@@ -97,19 +94,19 @@ public class RevocationResourceImpl implements RevocationResource {
                         .separator(messageHasher.getSeparator())
                         .build();
 
-                newRevocation.setData(revokedClaims);
-
             } else if (data instanceof RevokedTokenData) {
-                RevokedTokenInfo revokedToken = ImmutableRevokedTokenInfo.builder()
-                        .tokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN,
-                                ((RevokedTokenData) data).token()))
+                revokedInfo = ImmutableRevokedTokenInfo.builder()
+                        .tokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN, ((RevokedTokenData) data).token()))
                         .hashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm())
                         .issuedBefore(((RevokedTokenData) data).issuedBefore())
                         .build();
-                newRevocation.setData(revokedToken);
             }
 
-            apiRevocations.add(newRevocation);
+            apiRevocations.add(ImmutableRevocationInfo.builder()
+                    .type(stored.revocationRequest().type())
+                    .revokedAt(stored.revokedAt())
+                    .data(revokedInfo)
+                    .build());
         }
 
         RevocationList responseBody = new RevocationList();

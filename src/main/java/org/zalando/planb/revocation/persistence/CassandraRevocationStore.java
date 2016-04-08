@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zalando.planb.revocation.api.exception.SerializationException;
 import org.zalando.planb.revocation.domain.CurrentUser;
 import org.zalando.planb.revocation.domain.ImmutableRefresh;
+import org.zalando.planb.revocation.domain.ImmutableRevocationData;
+import org.zalando.planb.revocation.domain.ImmutableRevocationRequest;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
@@ -190,10 +192,13 @@ public class CassandraRevocationStore implements RevocationStore {
                             break;
                     }
 
-                    RevocationData revocationData = new RevocationData();
-                    revocationData.setType(type);
-                    revocationData.setRevokedAt(r.getInt("revoked_at"));
-                    revocationData.setData(data);
+                    RevocationData revocationData = ImmutableRevocationData.builder()
+                            .revocationRequest(ImmutableRevocationRequest.builder()
+                                    .type(type)
+                                    .data(data)
+                                    .build())
+                            .revokedAt(r.getInt("revoked_at"))
+                            .build();
 
                     revocations.add(revocationData);
                 } catch (IOException ex) {
@@ -217,10 +222,10 @@ public class CassandraRevocationStore implements RevocationStore {
 
         int interval = getInterval(revokedAt);
         try {
-            String data = objectMapper.writeValueAsString(revocation.getData());
+            String data = objectMapper.writeValueAsString(revocation.data());
             log.debug("Storing in bucket: {} {} {}", date, interval, data);
 
-            final BoundStatement bs = insertRevocation.bind(date, interval, revocation.getType().name(), data,
+            final BoundStatement bs = insertRevocation.bind(date, interval, revocation.type().name(), data,
                     currentUser.get(), revokedAt);
 
             session.execute(bs);

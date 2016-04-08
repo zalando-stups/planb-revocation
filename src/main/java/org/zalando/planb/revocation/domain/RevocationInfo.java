@@ -1,33 +1,32 @@
 package org.zalando.planb.revocation.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
 
 /**
  * TODO: small javadoc
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Data
-@NoArgsConstructor
-public class RevocationInfo {
+@Value.Immutable
+@JsonSerialize
+@JsonDeserialize(as = ImmutableRevocationInfo.class)
+public interface RevocationInfo {
 
-    private RevocationType type;
+    RevocationType type();
 
-    @JsonProperty("revoked_at")
-    private Integer revokedAt;
+    Integer revokedAt();
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes(
-        {
-            @JsonSubTypes.Type(value = RevokedTokenInfo.class, name = "TOKEN"),
-            @JsonSubTypes.Type(value = RevokedClaimsInfo.class, name = "CLAIM"),
-            @JsonSubTypes.Type(value = RevokedGlobal.class, name = "GLOBAL"),
-        }
+            {
+                    @JsonSubTypes.Type(value = RevokedTokenInfo.class, name = "TOKEN"),
+                    @JsonSubTypes.Type(value = RevokedClaimsInfo.class, name = "CLAIM"),
+                    @JsonSubTypes.Type(value = RevokedGlobal.class, name = "GLOBAL"),
+            }
     )
-    private RevokedInfo data;
+    RevokedInfo data();
 }

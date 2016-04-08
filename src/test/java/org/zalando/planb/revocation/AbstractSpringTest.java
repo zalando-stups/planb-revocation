@@ -33,7 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 /**
- * @author  jbellmann
+ * @author jbellmann
  */
 @ContextConfiguration(classes = PlanBRevocationConfig.class)
 public abstract class AbstractSpringTest {
@@ -129,23 +129,24 @@ public abstract class AbstractSpringTest {
 
     public static RevocationRequest generateRevocation(final RevocationType type) {
 
-        RevocationRequest generated = new RevocationRequest();
-        generated.setType(type);
-
+        RevokedData data = null;
         switch (type) {
 
             case TOKEN:
-                generated.setData(ImmutableRevokedTokenData.builder().token(SAMPLE_TOKEN).build());
+                data = ImmutableRevokedTokenData.builder().token(SAMPLE_TOKEN).build();
                 break;
 
             case CLAIM :
                 return generateClaimBasedRevocation(ImmutableMap.of("uid", "rreis", "sub", "abcd"));
 
             case GLOBAL:
-                generated.setData(ImmutableRevokedGlobal.builder().build());
+                data = ImmutableRevokedGlobal.builder().build();
                 break;
         }
 
-        return generated;
+        return ImmutableRevocationRequest.builder()
+                .type(type)
+                .data(data)
+                .build();
     }
 }
