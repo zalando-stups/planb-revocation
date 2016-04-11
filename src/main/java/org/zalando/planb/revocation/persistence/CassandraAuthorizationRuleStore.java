@@ -65,7 +65,7 @@ public class CassandraAuthorizationRuleStore implements AuthorizationRulesStore.
         log.debug("Authorization rule store initialized");
     }
 
-    @Scheduled(fixedDelayString = "${revocation.authorization.reload}", initialDelayString = "${revocation.authorization.reload}")
+    @Scheduled(fixedDelayString = "${revocation.authorization.reloadInMilliseconds}", initialDelayString = "${revocation.authorization.reloadInMilliseconds}")
     private void loadAuthorizationRuleStore() {
         inMemoryRuleStore = Optional.ofNullable(getRules.bind())
                 .map(session::execute)
