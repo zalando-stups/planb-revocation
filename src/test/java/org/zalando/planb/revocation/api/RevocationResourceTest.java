@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
+import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.config.properties.RevocationProperties;
 import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
@@ -36,13 +37,15 @@ public class RevocationResourceTest extends AbstractSpringTest {
     private static final String GLOBAL_REVOCATION = "{ " +
             "\"type\": \"GLOBAL\", " +
             "\"data\": {\"issued_before\":1459939746} }";
-    private static final int ONE_YEAR_IN_SECONDS = 365 * 30 * 24 * 60 * 60;
 
     @Autowired
     private WebApplicationContext context;
 
     @Autowired
     private RevocationProperties revocationProperties;
+
+    @Autowired
+    private CassandraProperties cassandraProperties;
 
     private MockMvc mvc;
 
@@ -190,7 +193,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
     @Test
     public void testBadRequestWhenPostingAncientRevocation() throws Exception {
         String claimRevocation = "{ \"type\": \"CLAIM\", \"data\": {\"claims\":{\"uid\":\"3035729288\"}," +
-                "\"issued_before\":" + (InstantTimestamp.NOW.seconds() - ONE_YEAR_IN_SECONDS ) + "} }";
+                "\"issued_before\":" + (InstantTimestamp.ONE_HOUR_AGO.seconds() - cassandraProperties.getMaxTimeDelta() ) + "} }";
 
         ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
                 MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
