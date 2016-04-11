@@ -10,7 +10,6 @@ security:
       tokenInfoUri: ${TOKENINFO_URL}
 
 management:
-  port: 7979
   security:
     enabled: false
 
@@ -21,7 +20,7 @@ server:
 
 revocation:
   authorization:
-    reloadInMilliseconds: 60000
+    reload: 600000
   hashing:
     algorithms:
       TOKEN: SHA-256
