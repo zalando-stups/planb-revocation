@@ -36,6 +36,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
     private static final String GLOBAL_REVOCATION = "{ " +
             "\"type\": \"GLOBAL\", " +
             "\"data\": {\"issued_before\":1459939746} }";
+    private static final int ONE_YEAR_IN_SECONDS = 365 * 30 * 24 * 60 * 60;
 
     @Autowired
     private WebApplicationContext context;
@@ -170,6 +171,26 @@ public class RevocationResourceTest extends AbstractSpringTest {
         String claimRevocation = "{ \"type\": \"CLAIM\", \"data\": {\"claims\":{\"uid\":\"3035729288\"}," +
                 "\"issued_before\":" + (InstantTimestamp.FIVE_MINUTES_AFTER.seconds() + revocationProperties
                 .getTimestampThreshold()) + "} }";
+
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
+                MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
+                claimRevocation));
+
+        result.andExpect(status().isBadRequest());
+
+        ApiGuildCompliance.isStandardProblem(result);
+    }
+
+    /**
+     * Tests that when {@code POST}ing revocations with an ancient {@code issued_before} field, a HTTP {@code BAD_REQUEST}
+     * is returned.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
+     */
+    @Test
+    public void testBadRequestWhenPostingAncientRevocation() throws Exception {
+        String claimRevocation = "{ \"type\": \"CLAIM\", \"data\": {\"claims\":{\"uid\":\"3035729288\"}," +
+                "\"issued_before\":" + (InstantTimestamp.NOW.seconds() - ONE_YEAR_IN_SECONDS ) + "} }";
 
         ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
                 MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
