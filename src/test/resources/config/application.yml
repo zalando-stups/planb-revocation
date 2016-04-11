@@ -20,7 +20,7 @@ server:
 
 revocation:
   authorization:
-    reload: 600000
+    reloadInMilliseconds: 60000
   hashing:
     algorithms:
       TOKEN: SHA-256
