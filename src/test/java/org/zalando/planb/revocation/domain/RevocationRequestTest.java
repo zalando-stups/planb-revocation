@@ -9,6 +9,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.zalando.planb.revocation.config.PlanBRevocationConfig;
 import org.zalando.planb.revocation.util.InstantTimestamp;
+import org.zalando.planb.revocation.util.domain.DomainUtils;
 
 import java.io.IOException;
 
@@ -26,21 +27,15 @@ public class RevocationRequestTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final static String TOKEN_HASH = "cgWc1EpFBvg31Qxr0lpviEkhAwp64Z-9MhaIIv94RiM=";
-
-    private final static String HASH_ALGORITHM = "SHA-256";
-
-    private final static Integer ISSUED_BEFORE = InstantTimestamp.FIVE_MINUTES_AGO.seconds();
+    private final static RevocationType TYPE = RevocationType.TOKEN;
 
     private final static String SERIALIZED = "{" +
-            "\"token_hash\":\"" + TOKEN_HASH + "\"," +
-            "\"hash_algorithm\":\"" + HASH_ALGORITHM + "\"," +
-            "\"issued_before\":" + ISSUED_BEFORE +
+            "\"type\":\"" + TYPE + "\"," +
+            "\"data\":" + DomainUtils.revokedDataJson(RevocationType.TOKEN) +
             "}";
 
     private final static String SERIALIZED_INCOMPLETE = "{" +
-            "\"token_hash\":\"" + TOKEN_HASH + "\"," +
-            "\"hash_algorithm\":\"" + HASH_ALGORITHM + "\"" +
+            "\"data\":" + DomainUtils.revokedDataJson(RevocationType.TOKEN) +
             "}";
 
     /**
@@ -52,39 +47,37 @@ public class RevocationRequestTest {
     }
 
     /**
-     * Tests JSON serialization of a {@link RevokedTokenInfo} object.
+     * Tests JSON serialization of a {@link RevocationRequest} object.
      */
     @Test
     public void testJsonSerialization() throws IOException {
-        RevokedTokenInfo rti = ImmutableRevokedTokenInfo.builder()
-                .hashAlgorithm(HASH_ALGORITHM)
-                .issuedBefore(ISSUED_BEFORE)
-                .tokenHash(TOKEN_HASH)
+        RevocationRequest testObject = ImmutableRevocationRequest.builder()
+                .type(TYPE)
+                .data(DomainUtils.revokedData(TYPE))
                 .build();
 
-        String serialized = objectMapper.writeValueAsString(rti);
+        String serialized = objectMapper.writeValueAsString(testObject);
         assertThat(serialized).isEqualTo(SERIALIZED);
     }
 
     /**
-     * Tests JSON deserialization of a {@link RevokedTokenInfo} object.
+     * Tests JSON deserialization of a {@link RevocationRequest} object.
      */
     @Test
     public void testJsonDeserialization() throws IOException {
 
-        RevokedTokenInfo rti = objectMapper.readValue(SERIALIZED, RevokedTokenInfo.class);
+        RevocationRequest testObject = objectMapper.readValue(SERIALIZED, RevocationRequest.class);
 
-        assertThat(rti.hashAlgorithm()).isEqualTo(HASH_ALGORITHM);
-        assertThat(rti.issuedBefore()).isEqualTo(ISSUED_BEFORE);
-        assertThat(rti.tokenHash()).isEqualTo(TOKEN_HASH);
+        assertThat(testObject.type()).isEqualTo(TYPE);
+        assertThat(testObject.data()).isEqualTo(DomainUtils.revokedData(TYPE));
     }
 
     /**
-     * Tests that JSON deserialization of a {@link RevokedTokenInfo} object fails when not all values are set.
+     * Tests that JSON deserialization of a {@link RevocationRequest} object fails when not all values are set.
      */
     @Test(expected = JsonMappingException.class)
     public void testJsonDeserializationFails() throws IOException {
 
-        objectMapper.readValue(SERIALIZED_INCOMPLETE, RevokedTokenInfo.class);
+        objectMapper.readValue(SERIALIZED_INCOMPLETE, RevocationRequest.class);
     }
 }

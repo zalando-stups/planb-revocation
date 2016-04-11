@@ -5,7 +5,6 @@ import org.zalando.planb.revocation.domain.ImmutableRevocationData;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
-import org.zalando.planb.revocation.util.UnixTimestamp;
 
 import java.util.ArrayList;
 import java.util.Collection;
