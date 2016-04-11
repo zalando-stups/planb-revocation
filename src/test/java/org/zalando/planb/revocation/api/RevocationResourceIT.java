@@ -1,8 +1,6 @@
 package org.zalando.planb.revocation.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,14 +9,12 @@ import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 import org.zalando.planb.revocation.AbstractSpringIT;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
+import org.zalando.planb.revocation.domain.ImmutableAuthorizationRule;
 import org.zalando.planb.revocation.domain.NotificationType;
 import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.domain.RevocationData;
@@ -30,6 +26,7 @@ import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
 import org.zalando.planb.revocation.domain.RevokedTokenInfo;
+import org.zalando.planb.revocation.persistence.AuthorizationRulesStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
 import org.zalando.planb.revocation.util.InstantTimestamp;
@@ -39,6 +36,7 @@ import org.zalando.planb.revocation.util.security.WithMockCustomUser;
 import java.net.URI;
 import java.util.Collection;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.springframework.http.RequestEntity.get;
@@ -60,34 +58,16 @@ public class RevocationResourceIT extends AbstractSpringIT {
     private RevocationStore revocationStore;
 
     @Autowired
+    private AuthorizationRulesStore authorizationRulesStore;
+
+    @Autowired
     private CassandraProperties cassandraProperties;
 
     @Autowired
     private MessageHasher messageHasher;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private RestTemplate restTemplate;
-
     private String basePath() {
         return "http://localhost:" + port;
-    }
-
-    @Before
-    public void before() {
-
-        restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-
-        /*
-         * We need to replace the default object mapper with ours object mapper so it reads lower case with
-         * underscores correctly.
-         */
-        for (int i = 0; i < restTemplate.getMessageConverters().size(); i++) {
-            if (restTemplate.getMessageConverters().get(i) instanceof MappingJackson2HttpMessageConverter) {
-                restTemplate.getMessageConverters().set(i, new MappingJackson2HttpMessageConverter(objectMapper));
-            }
-        }
     }
 
     @Test
@@ -97,7 +77,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
         RevocationRequest revocation = generateRevocation(RevocationType.TOKEN);
         revocationStore.storeRevocation(revocation);
 
-        ResponseEntity<String> response = restTemplate.exchange(get(
+        ResponseEntity<String> response = getRestTemplate().exchange(get(
                 URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
                 .header("X-Forwarded-For", "0.0.8.15") // to test the request ip logging when forwarded from a load balancer
                 .build(), String.class);
@@ -114,7 +94,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
      */
     @Test
     public void testGetEmptyRevocations() {
-        ResponseEntity<RevocationList> response = restTemplate.exchange(get(
+        ResponseEntity<RevocationList> response = getRestTemplate().exchange(get(
                 URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
                 .build(), RevocationList.class);
         RevocationList responseBody = response.getBody();
@@ -142,7 +122,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     public void testGetRefreshFromInMeta() {
         revocationStore.storeRefresh(InstantTimestamp.FIVE_MINUTES_AGO.seconds());
 
-        ResponseEntity<RevocationList> response = restTemplate.exchange(get(
+        ResponseEntity<RevocationList> response = getRestTemplate().exchange(get(
                 URI.create(basePath() + "/revocations?from=" + (InstantTimestamp.FIVE_MINUTES_AGO.seconds())))
                 .build(), RevocationList.class);
         RevocationList responseBody = response.getBody();
@@ -168,7 +148,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
     public void testPostRevocation() {
         RevocationRequest requestBody = generateRevocation(RevocationType.TOKEN);
 
-        ResponseEntity<RevocationInfo> responseEntity = restTemplate
+        ResponseEntity<RevocationInfo> responseEntity = getRestTemplate()
                 .exchange(post(URI.create(basePath() + "/revocations"))
                         .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN)
                         .body(requestBody), RevocationInfo.class);
@@ -189,7 +169,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
         RevocationRequest requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
-            restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
+            getRestTemplate().exchange(post(URI.create(basePath() + "/revocations"))
                     .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN)
                     .body(requestBody), RevocationInfo.class);
         } catch (HttpClientErrorException e) {
@@ -202,9 +182,14 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
     @Test
     public void testInsertClaimRevocation() {
-        RevocationRequest requestBody = generateRevocation(RevocationType.CLAIM);
+        authorizationRulesStore.store(ImmutableAuthorizationRule.builder()
+                .requiredUserClaims(of("sub", "test0"))
+                .allowedRevocationClaims(of("realm", "/services"))
+                .build());
 
-        ResponseEntity<RevocationInfo> responseEntity = restTemplate.exchange(post(URI.create(basePath() + "/revocations"))
+        RevocationRequest requestBody = generateClaimBasedRevocation(of("realm", "/services"));
+
+        ResponseEntity<RevocationInfo> responseEntity = getRestTemplate().exchange(post(URI.create(basePath() + "/revocations"))
                 .header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
@@ -224,7 +209,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
         RevocationRequest requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
-            ResponseEntity<RevocationInfo> responseEntity = restTemplate.exchange(post(
+            ResponseEntity<RevocationInfo> responseEntity = getRestTemplate().exchange(post(
                     URI.create(basePath() + "/revocations")).body(requestBody), RevocationInfo.class);
             failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
         } catch (HttpClientErrorException e) {
@@ -248,7 +233,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
         RevocationRequest requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
-            restTemplate.exchange(post(URI.create(basePath() + "/revocations")).header(HttpHeaders.AUTHORIZATION,
+            getRestTemplate().exchange(post(URI.create(basePath() + "/revocations")).header(HttpHeaders.AUTHORIZATION,
                     INVALID_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
             failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
         } catch (HttpClientErrorException e) {
@@ -272,7 +257,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
         RevocationRequest requestBody = generateRevocation(RevocationType.GLOBAL);
 
         try {
-            restTemplate.exchange(post(URI.create(basePath() + "/revocations")).header(HttpHeaders.AUTHORIZATION,
+            getRestTemplate().exchange(post(URI.create(basePath() + "/revocations")).header(HttpHeaders.AUTHORIZATION,
                     SERVER_ERROR_ACCESS_TOKEN).body(requestBody), RevocationInfo.class);
             failBecauseExceptionWasNotThrown(HttpServerErrorException.class);
         } catch (HttpServerErrorException e) {
@@ -309,7 +294,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
         revocationStore.storeRevocation(tokenRevocation);
 
         // Get revocations. We should get the one we stored
-        ResponseEntity<RevocationList> response = restTemplate.exchange(get(
+        ResponseEntity<RevocationList> response = getRestTemplate().exchange(get(
                 URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
                 .build(), RevocationList.class);
 
@@ -342,7 +327,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
         revocationStore.storeRevocation(claimRevocation);
 
         // Get revocations. We should get the one we stored
-        ResponseEntity<RevocationList> response = restTemplate.exchange(get(
+        ResponseEntity<RevocationList> response = getRestTemplate().exchange(get(
                 URI.create(basePath() + "/revocations?from=" + InstantTimestamp.FIVE_MINUTES_AGO.seconds()))
                 .build(), RevocationList.class);
 
@@ -368,7 +353,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
         int tooOldTimeStamp = InstantTimestamp.FIVE_MINUTES_AGO.seconds() - cassandraProperties.getMaxTimeDelta();
 
         try {
-            restTemplate.exchange(get(URI.create(basePath() + "/revocations?from=" + tooOldTimeStamp)).build(),
+            getRestTemplate().exchange(get(URI.create(basePath() + "/revocations?from=" + tooOldTimeStamp)).build(),
                     String.class);
             failBecauseExceptionWasNotThrown(HttpClientErrorException.class);
         } catch (HttpClientErrorException e) {
@@ -386,7 +371,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
         int notTooOldTimeStamp = InstantTimestamp.NOW.seconds() - cassandraProperties.getMaxTimeDelta() + 60;
 
-        ResponseEntity<String> response = restTemplate.exchange(get(
+        ResponseEntity<String> response = getRestTemplate().exchange(get(
                 URI.create(basePath() + "/revocations?from=" + notTooOldTimeStamp)).build(), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

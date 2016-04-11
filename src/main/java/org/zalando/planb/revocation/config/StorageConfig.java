@@ -3,20 +3,21 @@ package org.zalando.planb.revocation.config;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.policies.AddressTranslator;
-
 import lombok.Getter;
-
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
-import org.zalando.planb.revocation.persistence.CassandraStore;
-import org.zalando.planb.revocation.persistence.InMemoryStore;
+import org.zalando.planb.revocation.persistence.AuthorizationRulesStore;
+import org.zalando.planb.revocation.persistence.CassandraAuthorizationRuleStore;
+import org.zalando.planb.revocation.persistence.CassandraRevocationStore;
+import org.zalando.planb.revocation.persistence.InMemoryAuthorizationRuleStore;
+import org.zalando.planb.revocation.persistence.InMemoryRevocationStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
+
+import java.util.Optional;
 
 @Configuration
 @EnableConfigurationProperties(CassandraProperties.class)
@@ -42,11 +43,23 @@ public class StorageConfig {
 
         // Defaults to in-memory, when CassandraProperties are absent;
         if (StringUtils.isEmpty(cassandraProperties.getContactPoints())) {
-            return new InMemoryStore();
+            return new InMemoryRevocationStore();
         }
 
-        return new CassandraStore(cassandraSession(), cassandraProperties.getReadConsistencyLevel(),
+        return new CassandraRevocationStore(cassandraSession(), cassandraProperties.getReadConsistencyLevel(),
                 cassandraProperties.getWriteConsistencyLevel(), cassandraProperties.getMaxTimeDelta());
+    }
+
+    @Bean
+    public AuthorizationRulesStore authorizationRulesStore() {
+
+        // Defaults to in-memory, when CassandraProperties are absent;
+        if (StringUtils.isEmpty(cassandraProperties.getContactPoints())) {
+            return new InMemoryAuthorizationRuleStore();
+        }
+
+        return new CassandraAuthorizationRuleStore(cassandraSession(), cassandraProperties.getReadConsistencyLevel(),
+                cassandraProperties.getWriteConsistencyLevel());
     }
 
     public Session cassandraSession() {

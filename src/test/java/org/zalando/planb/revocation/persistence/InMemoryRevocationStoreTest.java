@@ -3,11 +3,8 @@ package org.zalando.planb.revocation.persistence;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
-import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationType;
-import org.zalando.planb.revocation.domain.RevokedData;
-import org.zalando.planb.revocation.domain.RevokedTokenData;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
 import java.util.Collection;
@@ -20,7 +17,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @ActiveProfiles("test")
-public class InMemoryStoreTest extends AbstractStoreTests {
+public class InMemoryRevocationStoreTest extends AbstractStoreTests {
 
     @Autowired
     RevocationStore revocationStore;

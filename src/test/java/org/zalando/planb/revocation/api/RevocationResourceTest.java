@@ -1,26 +1,19 @@
 package org.zalando.planb.revocation.api;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import exclude.from.componentscan.NoopRevocationAuthorizationConfig;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import org.springframework.web.context.WebApplicationContext;
-
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.config.properties.RevocationProperties;
@@ -28,12 +21,14 @@ import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
 import org.zalando.planb.revocation.util.InstantTimestamp;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 /**
  * Unit tests for endpoint {@code /revocations}.
  *
  * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@SpringApplicationConfiguration(classes = {Main.class})
+@SpringApplicationConfiguration(classes = {Main.class, NoopRevocationAuthorizationConfig.class})
 @WebIntegrationTest(randomPort = true)
 @ActiveProfiles("test")
 public class RevocationResourceTest extends AbstractSpringTest {

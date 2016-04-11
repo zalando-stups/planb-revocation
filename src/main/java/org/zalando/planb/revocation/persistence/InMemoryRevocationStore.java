@@ -1,21 +1,18 @@
 package org.zalando.planb.revocation.persistence;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.zalando.planb.revocation.domain.ImmutableRefresh;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
-/**
- * Created by jmussler on 12.02.16.
- */
-public class InMemoryStore implements RevocationStore {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class InMemoryRevocationStore implements RevocationStore {
 
     private final List<RevocationData> revocations = new ArrayList<>();
 
@@ -39,7 +36,9 @@ public class InMemoryStore implements RevocationStore {
 
     @Override
     public void storeRefresh(final int from) {
-
         refreshNotifications.offer(ImmutableRefresh.builder().refreshFrom(from).build());
     }
+
+
+
 }

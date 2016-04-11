@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.zalando.planb.revocation.api.exception.FutureRevocationException;
+import org.zalando.planb.revocation.api.exception.RevocationUnauthorizedException;
 import org.zalando.planb.revocation.api.exception.SerializationException;
 import org.zalando.planb.revocation.domain.Problem;
 
@@ -24,6 +25,14 @@ import org.zalando.planb.revocation.domain.Problem;
 @RequestMapping(produces = "application/x.problem+json")
 @Slf4j
 public class ExceptionsResource {
+
+    @ExceptionHandler(RevocationUnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public Problem revocationUnauthorized(final RevocationUnauthorizedException e) {
+        log.debug("Revocation request was unauthorized", e);
+        return Problem.fromException(e, HttpStatus.UNAUTHORIZED);
+    }
 
     /**
      * Handles revocations with an {@code issued_before} timestamp set in the future.
