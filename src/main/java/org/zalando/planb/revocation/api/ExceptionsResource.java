@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.zalando.planb.revocation.api.exception.AncientRevocationException;
 import org.zalando.planb.revocation.api.exception.FutureRevocationException;
 import org.zalando.planb.revocation.api.exception.RevocationUnauthorizedException;
 import org.zalando.planb.revocation.api.exception.SerializationException;
@@ -44,6 +45,20 @@ public class ExceptionsResource {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public Problem futureRevocation(final FutureRevocationException e) {
+        return Problem.fromException(e, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles revocations with an {@code issued_before} timestamp set in the ancient past.
+     * {@code issued_before} < now() - {@code cassandra.maxTimeDelta}
+     *
+     * @param e the exception triggering the error
+     * @return a {@link Problem} with the error information from the exception.
+     */
+    @ExceptionHandler(AncientRevocationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public Problem ancientRevocation(final AncientRevocationException e) {
         return Problem.fromException(e, HttpStatus.BAD_REQUEST);
     }
 

@@ -3,7 +3,9 @@ package org.zalando.planb.revocation.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.zalando.planb.revocation.api.exception.AncientRevocationException;
 import org.zalando.planb.revocation.api.exception.FutureRevocationException;
+import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.config.properties.RevocationProperties;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
@@ -18,9 +20,13 @@ public abstract class AbstractAuthorizationService implements RevocationAuthoriz
     @Autowired
     private RevocationProperties revocationProperties;
 
+    @Autowired
+    private CassandraProperties cassandraProperties;
+
     @Override
     public void checkAuthorization(final RevocationRequest revocationRequest) {
         checkFutureRevocations(revocationRequest);
+        checkAncientRevocation(revocationRequest);
         doCheckAuthorization(revocationRequest);
     }
 
@@ -42,6 +48,12 @@ public abstract class AbstractAuthorizationService implements RevocationAuthoriz
     private void checkFutureRevocations(@RequestBody RevocationRequest revocation) {
         if (getIssuedBeforeFromData(revocation) > UnixTimestamp.now() + revocationProperties.getTimestampThreshold()) {
             throw new FutureRevocationException();
+        }
+    }
+
+    private void checkAncientRevocation(@RequestBody RevocationRequest revocation) {
+        if (getIssuedBeforeFromData(revocation) < UnixTimestamp.now() - cassandraProperties.getMaxTimeDelta()) {
+            throw new AncientRevocationException();
         }
     }
 
