@@ -10,7 +10,6 @@ security:
       tokenInfoUri: ${TOKENINFO_URL}
 
 management:
-  port: 7979
   security:
     enabled: false
 
