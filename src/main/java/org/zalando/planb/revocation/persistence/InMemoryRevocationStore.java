@@ -1,6 +1,7 @@
 package org.zalando.planb.revocation.persistence;
 
 import org.zalando.planb.revocation.domain.ImmutableRefresh;
+import org.zalando.planb.revocation.domain.ImmutableRevocationData;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
@@ -20,12 +21,12 @@ public class InMemoryRevocationStore implements RevocationStore {
 
     @Override
     public Collection<RevocationData> getRevocations(final int from) {
-        return revocations.stream().filter(x -> x.getRevokedAt() > from).collect(Collectors.toList());
+        return revocations.stream().filter(x -> x.revokedAt() > from).collect(Collectors.toList());
     }
 
     @Override
     public void storeRevocation(final RevocationRequest revocation) {
-        revocationList.add(ImmutableRevocationData.builder().revocationRequest(revocation).build());
+        revocations.add(ImmutableRevocationData.builder().revocationRequest(revocation).build());
     }
 
     @Override

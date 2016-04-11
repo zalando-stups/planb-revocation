@@ -18,11 +18,13 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.web.client.RestTemplate;
 import org.zalando.planb.revocation.config.PlanBRevocationConfig;
+import org.zalando.planb.revocation.domain.ImmutableRevocationRequest;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsData;
 import org.zalando.planb.revocation.domain.ImmutableRevokedGlobal;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.RevokedData;
 
 import java.util.Map;
 
@@ -121,10 +123,10 @@ public abstract class AbstractSpringTest {
 
     // Some utility methods
     public static RevocationRequest generateClaimBasedRevocation(Map<String, String> claims) {
-        RevocationRequest generated = new RevocationRequest();
-        generated.setType(RevocationType.CLAIM);
-        generated.setData(ImmutableRevokedClaimsData.builder().putAllClaims(claims).build());
-        return generated;
+        return ImmutableRevocationRequest.builder()
+                .type(RevocationType.CLAIM)
+                .data(ImmutableRevokedClaimsData.builder().putAllClaims(claims).build())
+                .build();
     }
 
     public static RevocationRequest generateRevocation(final RevocationType type) {

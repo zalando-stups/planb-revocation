@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
+import org.zalando.planb.revocation.domain.ImmutableRevocationInfo;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenInfo;
 import org.zalando.planb.revocation.domain.NotificationType;

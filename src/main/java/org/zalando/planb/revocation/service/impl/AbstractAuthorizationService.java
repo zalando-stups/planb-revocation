@@ -25,8 +25,8 @@ public abstract class AbstractAuthorizationService implements RevocationAuthoriz
     }
 
     private void doCheckAuthorization(RevocationRequest revocationRequest) {
-        final RevokedData data = revocationRequest.getData();
-        switch (revocationRequest.getType()) {
+        final RevokedData data = revocationRequest.data();
+        switch (revocationRequest.type()) {
             case TOKEN:
                 // Token revocations are generally allowed, as it implies a scope at least
                 break;
@@ -47,15 +47,15 @@ public abstract class AbstractAuthorizationService implements RevocationAuthoriz
 
     private Integer getIssuedBeforeFromData(@RequestBody RevocationRequest revocation) {
         Integer timestamp = null;
-        switch (revocation.getType()) {
+        switch (revocation.type()) {
             case TOKEN:
-                timestamp = ((RevokedTokenData) revocation.getData()).issuedBefore();
+                timestamp = ((RevokedTokenData) revocation.data()).issuedBefore();
                 break;
             case CLAIM:
-                timestamp = ((RevokedClaimsData) revocation.getData()).issuedBefore();
+                timestamp = ((RevokedClaimsData) revocation.data()).issuedBefore();
                 break;
             case GLOBAL:
-                timestamp = ((RevokedGlobal) revocation.getData()).issuedBefore();
+                timestamp = ((RevokedGlobal) revocation.data()).issuedBefore();
                 break;
         }
         return timestamp;
