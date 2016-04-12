@@ -1,10 +1,12 @@
 package org.zalando.planb.revocation.util.domain;
 
+import org.zalando.planb.revocation.domain.ImmutableRevocationRequest;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsData;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.ImmutableRevokedGlobal;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenData;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenInfo;
+import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedData;
 import org.zalando.planb.revocation.domain.RevokedInfo;
@@ -128,6 +130,36 @@ public class DomainUtils {
                     "}"
     };
 
+    /*
+     * Revocation Request
+     */
+    public final static RevocationRequest REVOCATION_REQUEST[];
+
+    static {
+        REVOCATION_REQUEST = new RevocationRequest[REVOKED_DATA.length];
+
+        for (int i = 0; i < REVOKED_DATA.length; i++) {
+            REVOCATION_REQUEST[i] = ImmutableRevocationRequest.builder()
+                    .type(RevocationType.values()[i])
+                    .data(REVOKED_DATA[i])
+                    .build();
+        }
+    }
+
+    public final static String SERIALIZED_REVOCATION_REQUEST[];
+
+    static {
+        SERIALIZED_REVOCATION_REQUEST = new String[SERIALIZED_REVOKED_DATA.length];
+
+        for (int i = 0; i < SERIALIZED_REVOKED_DATA.length; i++) {
+            SERIALIZED_REVOCATION_REQUEST[i] =
+                    "{" +
+                            "\"type\":\"" + RevocationType.values()[i] + "\"," +
+                            "\"data\":" + SERIALIZED_REVOKED_DATA[i] +
+                            "}";
+        }
+    }
+
     public static RevokedData revokedData(RevocationType type) {
         return REVOKED_DATA[type.ordinal()];
     }
@@ -142,5 +174,13 @@ public class DomainUtils {
 
     public static String revokedInfoJson(RevocationType type) {
         return SERIALIZED_REVOKED_INFO[type.ordinal()];
+    }
+
+    public static RevocationRequest revocationRequest(RevocationType type) {
+        return REVOCATION_REQUEST[type.ordinal()];
+    }
+
+    public static String revocationRequestJson(RevocationType type) {
+        return SERIALIZED_REVOCATION_REQUEST[type.ordinal()];
     }
 }
