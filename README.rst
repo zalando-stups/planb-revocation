@@ -97,6 +97,8 @@ Configuration
     Cassandra cluster name.
 ``API_SECURITY_REVOKE_EXPR``
     Spring security expression, e.g. "#oauth2.hasScope('planb-revocation.write')"
+``REVOCATION_HASHING_SALT``
+    Shared salt with Token Info. Used for hasing tokens for the Plan B Token Info.
 
 .. _Plan B OpenID Connect Provider: https://github.com/zalando/planb-provider
 .. _Plan B Agent: https://github.com/zalando/planb-agent
