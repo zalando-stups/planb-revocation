@@ -5,6 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
+
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 /**
  * Created by rreis on 17/02/16.
@@ -13,5 +16,5 @@ import java.util.Map;
 @Data
 public class ApiSecurityProperties {
 
-    private Map<String, String> oauth2Scopes = new HashMap<>(0);
+    private String revokeExpr;
 }

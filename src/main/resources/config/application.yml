@@ -1,7 +1,6 @@
 api:
   security:
-    oauth2-scopes:
-      revokeStandard: "#oauth2.hasScope('uid') && (#oauth2.hasRealm('/services') || #oauth2.hasRealm('/employees'))"
+    revokeExpr: "#oauth2.hasScope('uid') && (#oauth2.hasRealm('/services') || #oauth2.hasRealm('/employees'))"
 
 security:
   oauth2:
