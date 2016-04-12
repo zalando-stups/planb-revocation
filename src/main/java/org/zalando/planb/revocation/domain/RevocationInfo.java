@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 
 /**
- * TODO: small javadoc
+ * Holds information about a single revocation.
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
@@ -16,10 +16,25 @@ import org.immutables.value.Value;
 @JsonDeserialize(as = ImmutableRevocationInfo.class)
 public interface RevocationInfo {
 
+    /**
+     * Returns the type of the revocation.
+     *
+     * @return the type of the revocation
+     */
     RevocationType type();
 
+    /**
+     * Returns the instant when the revocation was submitted.
+     *
+     * @return the instant when the revocation was submitted, in UTC Unix Timestamp format
+     */
     Integer revokedAt();
 
+    /**
+     * Returns information about the revocation.
+     *
+     * @return information about the revocation
+     */
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes(
             {
