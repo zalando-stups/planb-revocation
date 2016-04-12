@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.planb.revocation.api.RevocationResource;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.domain.ImmutableRevocationInfo;
+import org.zalando.planb.revocation.domain.ImmutableRevocationList;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenInfo;
 import org.zalando.planb.revocation.domain.NotificationType;
@@ -110,9 +111,10 @@ public class RevocationResourceImpl implements RevocationResource {
                     .build());
         }
 
-        RevocationList responseBody = new RevocationList();
-        responseBody.setMeta(metaInformation());
-        responseBody.setRevocations(apiRevocations);
+        RevocationList responseBody = ImmutableRevocationList.builder()
+                .meta(metaInformation())
+                .revocations(apiRevocations)
+                .build();
 
         return responseBody;
     }

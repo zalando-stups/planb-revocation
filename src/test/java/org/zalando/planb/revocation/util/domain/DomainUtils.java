@@ -1,11 +1,13 @@
 package org.zalando.planb.revocation.util.domain;
 
+import org.zalando.planb.revocation.domain.ImmutableRevocationInfo;
 import org.zalando.planb.revocation.domain.ImmutableRevocationRequest;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsData;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.ImmutableRevokedGlobal;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenData;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenInfo;
+import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedData;
@@ -20,7 +22,7 @@ import java.util.Arrays;
 public class DomainUtils {
 
     /*
-     * Revoked Data
+     * Revoked Data fields
      */
     private final static String TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
             "eyJzdWIiOiIxIiwibmFtZSI6InJyZWlzIiwiYWRtaW4iOnRydWV9." +
@@ -34,7 +36,7 @@ public class DomainUtils {
     };
 
     /*
-     * Revoked Info
+     * Revoked Info fields
      */
     private final static String TOKEN_HASH = "cgWc1EpFBvg31Qxr0lpviEkhAwp64Z-9MhaIIv94RiM=";
 
@@ -65,6 +67,16 @@ public class DomainUtils {
 
     private final static Character SEPARATOR = '|';
 
+    /*
+     * Revocation Info fields
+     */
+    private final static Integer REVOKED_AT = InstantTimestamp.FIVE_MINUTES_AGO.seconds();
+
+    /*
+     * Sample Domain Objects
+     */
+
+    // Revoked Data
     public final static RevokedData REVOKED_DATA[] = new RevokedData[]{
             ImmutableRevokedTokenData.builder()
                     .issuedBefore(ISSUED_BEFORE)
@@ -94,6 +106,7 @@ public class DomainUtils {
                     "}"
     };
 
+    // Revoked Info
     public final static RevokedInfo REVOKED_INFO[] = new RevokedInfo[]{
             ImmutableRevokedTokenInfo.builder()
                     .tokenHash(TOKEN_HASH)
@@ -130,9 +143,7 @@ public class DomainUtils {
                     "}"
     };
 
-    /*
-     * Revocation Request
-     */
+    // Revocation Request
     public final static RevocationRequest REVOCATION_REQUEST[];
 
     static {
@@ -160,6 +171,37 @@ public class DomainUtils {
         }
     }
 
+    // Revocation Info
+    public final static RevocationInfo REVOCATION_INFO[];
+
+    static {
+        REVOCATION_INFO = new RevocationInfo[REVOKED_INFO.length];
+
+        for (int i = 0; i < REVOKED_INFO.length; i++) {
+            REVOCATION_INFO[i] = ImmutableRevocationInfo.builder()
+                    .type(RevocationType.values()[i])
+                    .revokedAt(REVOKED_AT)
+                    .data(REVOKED_INFO[i])
+                    .build();
+        }
+    }
+
+    public final static String SERIALIZED_REVOCATION_INFO[];
+
+    static {
+        SERIALIZED_REVOCATION_INFO = new String[SERIALIZED_REVOKED_INFO.length];
+
+        for (int i = 0; i < SERIALIZED_REVOKED_INFO.length; i++) {
+            SERIALIZED_REVOCATION_INFO[i] =
+                    "{" +
+                            "\"type\":\"" + RevocationType.values()[i] + "\"," +
+                            "\"revoked_at\":" + REVOKED_AT + "," +
+                            "\"data\":" + SERIALIZED_REVOKED_INFO[i] +
+                            "}";
+        }
+    }
+
+
     public static RevokedData revokedData(RevocationType type) {
         return REVOKED_DATA[type.ordinal()];
     }
@@ -182,5 +224,13 @@ public class DomainUtils {
 
     public static String revocationRequestJson(RevocationType type) {
         return SERIALIZED_REVOCATION_REQUEST[type.ordinal()];
+    }
+
+    public static RevocationInfo revocationInfo(RevocationType type) {
+        return REVOCATION_INFO[type.ordinal()];
+    }
+
+    public static String revocationInfoJson(RevocationType type) {
+        return SERIALIZED_REVOCATION_INFO[type.ordinal()];
     }
 }
