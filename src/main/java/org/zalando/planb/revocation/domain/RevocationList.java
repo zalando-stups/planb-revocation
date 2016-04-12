@@ -27,7 +27,21 @@ import org.immutables.value.Value;
 @JsonDeserialize(as = ImmutableRevocationList.class)
 public interface RevocationList {
 
+    /**
+     * Returns a map with meta information related to the revocation service.
+     *
+     * <p>When there is no meta information, defaults to an empty map.</p>
+     *
+     * @return the aforementioned map
+     */
     ImmutableMap<NotificationType, Object> meta();
 
+    /**
+     * Returns a list with revocations.
+     *
+     * <p>Defaults to an empty list, when there are no revocations.</p>
+     *
+     * @return
+     */
     ImmutableList<RevocationInfo> revocations();
 }
