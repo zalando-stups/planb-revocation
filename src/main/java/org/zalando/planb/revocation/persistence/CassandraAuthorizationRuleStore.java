@@ -8,7 +8,6 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.zalando.planb.revocation.domain.AuthorizationRule;
@@ -85,10 +84,10 @@ public class CassandraAuthorizationRuleStore implements AuthorizationRulesStore.
     @Override
     public void store(AuthorizationRule authorizationRule) {
         final BoundStatement insert = insertRule.bind()
-                                    .setMap(REQUIRED_USER_CLAIMS, authorizationRule.requiredUserClaims())
-                                    .setMap(ALLOWED_REVOCATION_CLAIMS, authorizationRule.allowedRevocationClaims())
-                                    .setString(CREATED_BY, null)
-                                    .setString(LAST_MODIFIED_BY, null);
+                .setMap(REQUIRED_USER_CLAIMS, authorizationRule.requiredUserClaims())
+                .setMap(ALLOWED_REVOCATION_CLAIMS, authorizationRule.allowedRevocationClaims())
+                .setString(CREATED_BY, null)
+                .setString(LAST_MODIFIED_BY, null);
         session.execute(insert);
         loadAuthorizationRuleStore();
     }
@@ -99,9 +98,9 @@ public class CassandraAuthorizationRuleStore implements AuthorizationRulesStore.
 
     private AuthorizationRule toAuthorizationRule(Row row) {
         return ImmutableAuthorizationRule.builder()
-                    .requiredUserClaims(row.getMap(REQUIRED_USER_CLAIMS, String.class, String.class))
-                    .allowedRevocationClaims(row.getMap(ALLOWED_REVOCATION_CLAIMS, String.class, String.class))
-                    .build();
+                .requiredUserClaims(row.getMap(REQUIRED_USER_CLAIMS, String.class, String.class))
+                .allowedRevocationClaims(row.getMap(ALLOWED_REVOCATION_CLAIMS, String.class, String.class))
+                .build();
     }
 
 

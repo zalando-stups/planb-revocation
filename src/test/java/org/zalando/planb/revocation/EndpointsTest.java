@@ -1,6 +1,5 @@
 package org.zalando.planb.revocation;
 
-import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;

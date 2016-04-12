@@ -3,7 +3,6 @@ package org.zalando.planb.revocation.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +15,6 @@ import org.zalando.planb.revocation.service.impl.SwaggerFromYamlFileService;
 
 @Configuration
 @EnableConfigurationProperties(ApiGuildProperties.class)
-@Getter
 public class PlanBRevocationConfig {
 
     @Autowired
