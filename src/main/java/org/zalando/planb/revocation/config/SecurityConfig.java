@@ -36,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @EnableResourceServer
 @EnableConfigurationProperties(ApiSecurityProperties.class)
-@Slf4j
 public class SecurityConfig extends WebSecurityConfigurerAdapter implements ResourceServerConfigurer {
 
     @Autowired

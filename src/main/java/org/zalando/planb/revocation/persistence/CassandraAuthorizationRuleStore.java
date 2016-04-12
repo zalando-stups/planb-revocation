@@ -9,6 +9,7 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.zalando.planb.revocation.domain.AuthorizationRule;
 import org.zalando.planb.revocation.domain.ImmutableAuthorizationRule;
@@ -22,9 +23,11 @@ import java.util.stream.Collectors;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.now;
+import static org.slf4j.LoggerFactory.getLogger;
 
-@Slf4j
 public class CassandraAuthorizationRuleStore implements AuthorizationRulesStore.Internal {
+
+    private final Logger log = getLogger(getClass());
 
     private List<AuthorizationRule> inMemoryRuleStore = Collections.emptyList();
 

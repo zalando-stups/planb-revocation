@@ -26,12 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Created by rreis on 2/20/16.
+ * Contains generic tests for endpoints.
+ *
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
 @ActiveProfiles("test")
-@Slf4j
 public class EndpointsTest extends AbstractSpringTest {
 
     @Value("${local.management.port}")
@@ -52,20 +53,22 @@ public class EndpointsTest extends AbstractSpringTest {
 
     @Test
     public void testSwaggerEndpoint() throws Exception {
-        mvc.perform(get("/swagger.json").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(
-            jsonPath("$.swagger", is("2.0")));
+        mvc.perform(get("/swagger.json").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.swagger", is("2.0")));
     }
 
     @Test
     public void testSchemaDiscoveryEndpoint() throws Exception {
-        mvc.perform(get("/.well-known/schema-discovery").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-           .andExpect(jsonPath("$.schema_url", is("/swagger.json")));
+        mvc.perform(get("/.well-known/schema-discovery").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.schema_url", is("/swagger.json")));
     }
 
     @Test
     public void testHealthEndpoint() {
-        ResponseEntity<String> response = getRestTemplate().getForEntity(URI.create("http://localhost:" + mgmtPort + "/health"),
-                String.class);
+        ResponseEntity<String> response = getRestTemplate()
+                .getForEntity(URI.create("http://localhost:" + mgmtPort + "/health"), String.class);
         JSONObject jsonBody = new JSONObject(response.getBody());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -74,8 +77,8 @@ public class EndpointsTest extends AbstractSpringTest {
 
     @Test
     public void testMetricsEndpoint() {
-        ResponseEntity<String> response = getRestTemplate().getForEntity(URI.create("http://localhost:" + mgmtPort + "/metrics"),
-                String.class);
+        ResponseEntity<String> response = getRestTemplate()
+                .getForEntity(URI.create("http://localhost:" + mgmtPort + "/metrics"), String.class);
         JSONObject jsonBody = new JSONObject(response.getBody());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
