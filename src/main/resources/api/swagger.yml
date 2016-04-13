@@ -41,10 +41,6 @@ paths:
           description: Type mismatch. When the parameter 'from' is missing or not an integer
           schema:
             $ref: '#/definitions/Problem'
-        401:
-          description: Unauthorized request
-          schema:
-            $ref: '#/definitions/Problem'
     post:
       summary: Posts the specified revocation to be stored.
       description: |
