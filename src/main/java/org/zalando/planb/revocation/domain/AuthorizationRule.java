@@ -3,7 +3,6 @@ package org.zalando.planb.revocation.domain;
 
 import org.immutables.value.Value;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -24,10 +23,7 @@ public abstract class AuthorizationRule {
      *
      * @return required claims of the user to authorize token revocation.
      */
-    @Value.Default
-    public Map<String, String> requiredUserClaims() {
-        return Collections.EMPTY_MAP;
-    }
+    public abstract Map<String, String> requiredUserClaims();
 
     /**
      * Returns a map of claim names to claim values that represent the authorized claims
@@ -35,10 +31,7 @@ public abstract class AuthorizationRule {
      *
      * @return
      */
-    @Value.Default
-    public Map<String, String> allowedRevocationClaims() {
-        return Collections.EMPTY_MAP;
-    }
+    public abstract Map<String, String> allowedRevocationClaims();
 
     public boolean matchesRequiredUserClaims(AuthorizationRule rule) {
         return requiredUserClaims().entrySet().containsAll(rule.requiredUserClaims().entrySet());
