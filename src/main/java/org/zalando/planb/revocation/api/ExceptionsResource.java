@@ -1,6 +1,6 @@
 package org.zalando.planb.revocation.api;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,6 +17,8 @@ import org.zalando.planb.revocation.api.exception.RevocationUnauthorizedExceptio
 import org.zalando.planb.revocation.api.exception.SerializationException;
 import org.zalando.planb.revocation.domain.Problem;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * Provides global exception handling for all controllers.
  *
@@ -24,8 +26,9 @@ import org.zalando.planb.revocation.domain.Problem;
  */
 @ControllerAdvice
 @RequestMapping(produces = "application/x.problem+json")
-@Slf4j
 public class ExceptionsResource {
+
+    private final Logger log = getLogger(getClass());
 
     @ExceptionHandler(RevocationUnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)

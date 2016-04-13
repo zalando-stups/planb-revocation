@@ -3,7 +3,6 @@ package org.zalando.planb.revocation.config;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.policies.AddressTranslator;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +20,6 @@ import java.util.Optional;
 
 @Configuration
 @EnableConfigurationProperties(CassandraProperties.class)
-@Getter
 public class StorageConfig {
 
     @Autowired

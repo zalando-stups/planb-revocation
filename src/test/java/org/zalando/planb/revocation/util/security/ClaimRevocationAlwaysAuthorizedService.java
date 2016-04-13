@@ -1,4 +1,4 @@
-package org.zalando.planb.revocation.api;
+package org.zalando.planb.revocation.util.security;
 
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.service.impl.AbstractAuthorizationService;

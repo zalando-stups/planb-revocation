@@ -1,21 +1,38 @@
 package org.zalando.planb.revocation.domain;
 
-import java.util.EnumMap;
-import java.util.List;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.immutables.value.Value;
 
 /**
- * TODO: small javadoc
+ * Holds a list of revocations.
+ * <p>
+ * <p>Additionally, contains meta-information to inform requesting parties of important notifications.</p>
  *
- * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Data
-@NoArgsConstructor
-public class RevocationList {
+@Value.Immutable
+@JsonSerialize
+@JsonDeserialize(as = ImmutableRevocationList.class)
+public interface RevocationList {
 
-    private EnumMap<NotificationType, Object> meta;
+    /**
+     * Returns a map with meta information related to the revocation service.
+     * <p>
+     * <p>When there is no meta information, defaults to an empty map.</p>
+     *
+     * @return the aforementioned map
+     */
+    ImmutableMap<NotificationType, Object> meta();
 
-    private List<RevocationInfo> revocations;
+    /**
+     * Returns a list with revocations.
+     * <p>
+     * <p>Defaults to an empty list, when there are no revocations.</p>
+     *
+     * @return
+     */
+    ImmutableList<RevocationInfo> revocations();
 }

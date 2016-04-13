@@ -10,11 +10,13 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zalando.planb.revocation.api.exception.SerializationException;
 import org.zalando.planb.revocation.domain.CurrentUser;
 import org.zalando.planb.revocation.domain.ImmutableRefresh;
+import org.zalando.planb.revocation.domain.ImmutableRevocationData;
+import org.zalando.planb.revocation.domain.ImmutableRevocationRequest;
 import org.zalando.planb.revocation.domain.Refresh;
 import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
@@ -40,14 +42,16 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.now;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Interface to Cassandra cluster.
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Slf4j
 public class CassandraRevocationStore implements RevocationStore {
+
+    private static final Logger LOG = getLogger(CassandraRevocationStore.class);
 
     /*
      * Tables and queries for revocation_schema.cql
@@ -140,7 +144,7 @@ public class CassandraRevocationStore implements RevocationStore {
         List<Bucket> buckets = new ArrayList<>();
 
         final int maxTime = ((currentTime / BUCKET_LENGTH) * BUCKET_LENGTH) + BUCKET_LENGTH;
-        log.debug("{} {}", currentTime, maxTime);
+        LOG.debug("{} {}", currentTime, maxTime);
 
         do {
             String bucketDate = LocalDateFormatter.get().format(new Date(((long) from) * 1000));
@@ -190,14 +194,17 @@ public class CassandraRevocationStore implements RevocationStore {
                             break;
                     }
 
-                    RevocationData revocationData = new RevocationData();
-                    revocationData.setType(type);
-                    revocationData.setRevokedAt(r.getInt("revoked_at"));
-                    revocationData.setData(data);
+                    RevocationData revocationData = ImmutableRevocationData.builder()
+                            .revocationRequest(ImmutableRevocationRequest.builder()
+                                    .type(type)
+                                    .data(data)
+                                    .build())
+                            .revokedAt(r.getInt("revoked_at"))
+                            .build();
 
                     revocations.add(revocationData);
                 } catch (IOException ex) {
-                    log.error("Failed to read revocation", ex);
+                    LOG.error("Failed to read revocation", ex);
                 }
             }
         }
@@ -217,10 +224,10 @@ public class CassandraRevocationStore implements RevocationStore {
 
         int interval = getInterval(revokedAt);
         try {
-            String data = objectMapper.writeValueAsString(revocation.getData());
-            log.debug("Storing in bucket: {} {} {}", date, interval, data);
+            String data = objectMapper.writeValueAsString(revocation.data());
+            LOG.debug("Storing in bucket: {} {} {}", date, interval, data);
 
-            final BoundStatement bs = insertRevocation.bind(date, interval, revocation.getType().name(), data,
+            final BoundStatement bs = insertRevocation.bind(date, interval, revocation.type().name(), data,
                     currentUser.get(), revokedAt);
 
             session.execute(bs);

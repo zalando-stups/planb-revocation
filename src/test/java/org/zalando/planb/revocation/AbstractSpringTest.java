@@ -24,11 +24,13 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.web.client.RestTemplate;
 import org.zalando.planb.revocation.config.PlanBRevocationConfig;
+import org.zalando.planb.revocation.domain.ImmutableRevocationRequest;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsData;
 import org.zalando.planb.revocation.domain.ImmutableRevokedGlobal;
 import org.zalando.planb.revocation.domain.ImmutableRevokedTokenData;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
+import org.zalando.planb.revocation.domain.RevokedData;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -41,7 +43,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 /**
- * @author  jbellmann
+ * @author jbellmann
  */
 @ContextConfiguration(classes = PlanBRevocationConfig.class)
 public abstract class AbstractSpringTest {
@@ -156,31 +158,32 @@ public abstract class AbstractSpringTest {
 
     // Some utility methods
     public static RevocationRequest generateClaimBasedRevocation(Map<String, String> claims) {
-        RevocationRequest generated = new RevocationRequest();
-        generated.setType(RevocationType.CLAIM);
-        generated.setData(ImmutableRevokedClaimsData.builder().putAllClaims(claims).build());
-        return generated;
+        return ImmutableRevocationRequest.builder()
+                .type(RevocationType.CLAIM)
+                .data(ImmutableRevokedClaimsData.builder().putAllClaims(claims).build())
+                .build();
     }
 
     public static RevocationRequest generateRevocation(final RevocationType type) {
 
-        RevocationRequest generated = new RevocationRequest();
-        generated.setType(type);
-
+        RevokedData data = null;
         switch (type) {
 
             case TOKEN:
-                generated.setData(ImmutableRevokedTokenData.builder().token(SAMPLE_TOKEN).build());
+                data = ImmutableRevokedTokenData.builder().token(SAMPLE_TOKEN).build();
                 break;
 
             case CLAIM :
                 return generateClaimBasedRevocation(ImmutableMap.of("uid", "rreis", "sub", "abcd"));
 
             case GLOBAL:
-                generated.setData(ImmutableRevokedGlobal.builder().build());
+                data = ImmutableRevokedGlobal.builder().build();
                 break;
         }
 
-        return generated;
+        return ImmutableRevocationRequest.builder()
+                .type(type)
+                .data(data)
+                .build();
     }
 }
