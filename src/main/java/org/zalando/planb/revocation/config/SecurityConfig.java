@@ -61,10 +61,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Reso
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().httpBasic().disable()
                 .anonymous().disable().authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/revocations")
-                .access(apiSecurityProperties.getOauth2Scopes().get("revokeStandard"))
+                    .access(apiSecurityProperties.getRevokeExpr())
                 .antMatchers(HttpMethod.GET, "/revocations").permitAll()
                 .antMatchers(HttpMethod.POST, "/notifications/**")
-                .access(apiSecurityProperties.getOauth2Scopes().get("revokeStandard"))
+                .access(apiSecurityProperties.getRevokeExpr())
                 .anyRequest().denyAll();
     }
 

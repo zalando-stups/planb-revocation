@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.Main;
+import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.config.properties.RevocationProperties;
 import org.zalando.planb.revocation.domain.Problem;
 import org.zalando.planb.revocation.util.ApiGuildCompliance;
@@ -42,6 +43,9 @@ public class RevocationResourceTest extends AbstractSpringTest {
 
     @Autowired
     private RevocationProperties revocationProperties;
+
+    @Autowired
+    private CassandraProperties cassandraProperties;
 
     private MockMvc mvc;
 
@@ -170,6 +174,26 @@ public class RevocationResourceTest extends AbstractSpringTest {
         String claimRevocation = "{ \"type\": \"CLAIM\", \"data\": {\"claims\":{\"uid\":\"3035729288\"}," +
                 "\"issued_before\":" + (InstantTimestamp.FIVE_MINUTES_AFTER.seconds() + revocationProperties
                 .getTimestampThreshold()) + "} }";
+
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
+                MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
+                claimRevocation));
+
+        result.andExpect(status().isBadRequest());
+
+        ApiGuildCompliance.isStandardProblem(result);
+    }
+
+    /**
+     * Tests that when {@code POST}ing revocations with an ancient {@code issued_before} field, a HTTP {@code BAD_REQUEST}
+     * is returned.
+     *
+     * <p>Furthermore asserts that a standard {@link Problem} is returned.</p>
+     */
+    @Test
+    public void testBadRequestWhenPostingAncientRevocation() throws Exception {
+        String claimRevocation = "{ \"type\": \"CLAIM\", \"data\": {\"claims\":{\"uid\":\"3035729288\"}," +
+                "\"issued_before\":" + (InstantTimestamp.ONE_HOUR_AGO.seconds() - cassandraProperties.getMaxTimeDelta() ) + "} }";
 
         ResultActions result = mvc.perform(MockMvcRequestBuilders.post("/revocations").contentType(
                 MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, VALID_ACCESS_TOKEN).content(
