@@ -6,6 +6,7 @@ import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.RevokedTokenInfo;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 /**
  * Properties used to configure Hashing of revocation values.
@@ -27,13 +28,13 @@ import java.util.EnumMap;
 @ConfigurationProperties(prefix = "revocation.hashing")
 public class HashingProperties {
 
-    private EnumMap<RevocationType, String> algorithms;
+    private Map<RevocationType, String> algorithms;
 
     private String salt;
 
     private Character separator = Character.valueOf('|');
 
-    public EnumMap<RevocationType, String> getAlgorithms() {
+    public Map<RevocationType, String> getAlgorithms() {
         return algorithms;
     }
 

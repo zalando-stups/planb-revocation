@@ -1,14 +1,7 @@
 package org.zalando.planb.revocation.config.properties;
 
 import com.datastax.driver.core.ConsistencyLevel;
-import com.datastax.driver.core.ProtocolOptions;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.zalando.planb.revocation.config.PlanBRevocationConfig;
-import org.zalando.planb.revocation.config.StorageConfig;
 
 import java.util.Optional;
 
@@ -19,15 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = StorageConfig.class)
 public class CassandraPropertiesTest {
-
-    @Autowired
-    private CassandraProperties properties;
 
     @Test
     public void testSetters() {
+        CassandraProperties properties = new CassandraProperties();
+
         String keyspace = "revocation_v2";
         String contactPoints = "127.0.0.1";
         String clusterName = "Live Cluster";

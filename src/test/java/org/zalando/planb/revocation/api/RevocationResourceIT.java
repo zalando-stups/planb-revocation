@@ -35,7 +35,6 @@ import org.zalando.planb.revocation.util.security.WithMockCustomUser;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Optional;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -301,8 +300,8 @@ public class RevocationResourceIT extends AbstractSpringIT {
                 .build(), RevocationList.class);
 
         RevokedTokenInfo fromService = (RevokedTokenInfo) response.getBody().revocations().get(0).data();
-        assertThat(fromService.hashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.TOKEN)
-                .getAlgorithm());
+        assertThat(fromService.hashAlgorithm())
+                .isEqualTo(messageHasher.hashingAlgorithms().get(RevocationType.TOKEN).getAlgorithm());
 
         String hashedToken = messageHasher.hashAndEncode(RevocationType.TOKEN, unhashedToken);
         assertThat(fromService.tokenHash()).isEqualTo(hashedToken);
@@ -335,8 +334,8 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
         // Assert that it contains revocation
         RevokedClaimsInfo fromService = (RevokedClaimsInfo) response.getBody().revocations().get(0).data();
-        assertThat(fromService.hashAlgorithm()).isEqualTo(messageHasher.getHashers().get(RevocationType.CLAIM)
-                .getAlgorithm());
+        assertThat(fromService.hashAlgorithm())
+                .isEqualTo(messageHasher.hashingAlgorithms().get(RevocationType.CLAIM).getAlgorithm());
 
         String hashedValue = messageHasher.hashAndEncode(RevocationType.CLAIM, ((RevokedClaimsData) claimRevocation
                 .data()).claims().values());

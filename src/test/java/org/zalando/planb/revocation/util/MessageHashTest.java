@@ -9,15 +9,15 @@ import java.util.Base64;
 
 import org.junit.Test;
 
-import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.SpringApplicationConfiguration;
 
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import org.zalando.planb.revocation.config.RevocationConfig;
+import org.zalando.planb.revocation.AbstractSpringTest;
+import org.zalando.planb.revocation.Main;
 import org.zalando.planb.revocation.config.properties.HashingProperties;
 import org.zalando.planb.revocation.domain.RevocationType;
 
@@ -26,11 +26,13 @@ import org.zalando.planb.revocation.domain.RevocationType;
  *
  * @author  <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = RevocationConfig.class)
-public class MessageHashTest {
+@SpringApplicationConfiguration(classes = {Main.class})
+@WebIntegrationTest(randomPort = true)
+@ActiveProfiles("test")
+public class MessageHashTest extends AbstractSpringTest {
 
-    private static final String message = "A very secret Message";
+    private static final String MESSAGE = "A very secret Message";
+    private static final String MESSAGE2 = "Another very secret Message";
 
     @Autowired
     MessageHasher messageHasher;
@@ -39,34 +41,38 @@ public class MessageHashTest {
     HashingProperties hashingProperties;
 
     /**
-     * Asserts that a {@link MessageHasher} properly hashes and encodes a message.
+     * Asserts that a {@link MessageHasher} properly hashes and encodes a MESSAGE.
      *
      * @throws  NoSuchAlgorithmException
      */
     @Test
     public void testMessageHashing() throws NoSuchAlgorithmException {
         MessageDigest hasher = MessageDigest.getInstance(hashingProperties.getAlgorithms().get(RevocationType.TOKEN));
-        hasher.update((hashingProperties.getSalt() + message).getBytes());
+        hasher.update((hashingProperties.getSalt() + MESSAGE).getBytes());
 
         String expected = Base64.getUrlEncoder().encodeToString(hasher.digest());
-        String base64sha256Hashed = messageHasher.hashAndEncode(RevocationType.TOKEN, message);
+
+        String base64sha256Hashed = messageHasher.hashAndEncode(RevocationType.TOKEN, MESSAGE);
+        String base64sha256HashedSame = messageHasher.hashAndEncode(RevocationType.TOKEN, MESSAGE);
 
         assertEquals(expected, base64sha256Hashed);
+        assertEquals(expected, base64sha256HashedSame);
     }
 
     /**
-     * Asserts that a {@link MessageHasher} properly hashes and encodes concatenated a message.
+     * Asserts that a {@link MessageHasher} properly hashes and encodes concatenated a MESSAGE.
      *
      * @throws NoSuchAlgorithmException
      */
     @Test
     public void testConcatenatedHashing() throws NoSuchAlgorithmException {
-        String concatenatedMessage = message + hashingProperties.getSeparator() + message;
+        String concatenatedMessage = MESSAGE + hashingProperties.getSeparator() + MESSAGE2;
         MessageDigest hasher = MessageDigest.getInstance(hashingProperties.getAlgorithms().get(RevocationType.CLAIM));
         hasher.update((hashingProperties.getSalt() + concatenatedMessage).getBytes());
 
         String expected = Base64.getUrlEncoder().encodeToString(hasher.digest());
-        String base64sha256Hashed = messageHasher.hashAndEncode(RevocationType.TOKEN, concatenatedMessage);
+        String base64sha256Hashed = messageHasher.hashAndEncode(RevocationType.CLAIM, MESSAGE, MESSAGE2);
+
 
         assertEquals(expected, base64sha256Hashed);
     }
@@ -79,9 +85,9 @@ public class MessageHashTest {
      */
     @Test
     public void testNullHashing() throws NoSuchAlgorithmException {
-        MessageHasher nullHasher = new MessageHasher(null, null, null);
+        MessageHasher nullHasher = ImmutableMessageHasher.builder().separator('|').build();
 
-        assertEquals(Base64.getEncoder().encodeToString(message.getBytes()),
-            nullHasher.hashAndEncode(RevocationType.TOKEN, message));
+        assertEquals(Base64.getEncoder().encodeToString(MESSAGE.getBytes()),
+            nullHasher.hashAndEncode(RevocationType.TOKEN, MESSAGE));
     }
 }

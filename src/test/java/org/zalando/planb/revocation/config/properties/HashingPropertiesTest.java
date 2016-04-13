@@ -1,17 +1,10 @@
 package org.zalando.planb.revocation.config.properties;
 
-import com.datastax.driver.core.ConsistencyLevel;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.zalando.planb.revocation.config.RevocationConfig;
-import org.zalando.planb.revocation.config.StorageConfig;
+import org.zalando.planb.revocation.AbstractSpringTest;
 import org.zalando.planb.revocation.domain.RevocationType;
 
 import java.util.EnumMap;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,15 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = RevocationConfig.class)
-public class HashingPropertiesTest {
-
-    @Autowired
-    private HashingProperties properties;
+public class HashingPropertiesTest extends AbstractSpringTest {
 
     @Test
     public void testSetters() {
+        HashingProperties properties = new HashingProperties();
+
         EnumMap<RevocationType, String> algorithms = new EnumMap<RevocationType, String>(RevocationType.class);
         algorithms.put(RevocationType.CLAIM, "MD5");
         algorithms.put(RevocationType.TOKEN, "MD5");
