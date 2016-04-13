@@ -1,11 +1,12 @@
 package org.zalando.planb.revocation.config.properties;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.zalando.planb.revocation.config.PlanBRevocationConfig;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.zalando.planb.revocation.AbstractSpringTest;
+import org.zalando.planb.revocation.Main;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,9 +15,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = PlanBRevocationConfig.class)
-public class ApiSecurityPropertiesTest {
+@SpringApplicationConfiguration(classes = {Main.class})
+@WebIntegrationTest(randomPort = true)
+@ActiveProfiles("test")
+public class ApiSecurityPropertiesTest extends AbstractSpringTest {
 
     @Autowired
     private ApiSecurityProperties properties;
