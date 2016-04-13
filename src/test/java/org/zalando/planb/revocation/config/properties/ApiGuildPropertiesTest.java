@@ -7,6 +7,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.zalando.planb.revocation.config.PlanBRevocationConfig;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Unit tests for {@link ApiGuildProperties}.
  *
@@ -22,5 +24,13 @@ public class ApiGuildPropertiesTest {
     @Test(expected = NullPointerException.class)
     public void testNullPointerExceptionWhenNullValue() {
         properties.setSwaggerFile(null);
+    }
+
+    @Test
+    public void testSetSwaggerFile() {
+        String expected = "classpath:api/openapi.yaml";
+        properties.setSwaggerFile(expected);
+
+        assertThat(properties.getSwaggerFile()).isEqualTo(expected);
     }
 }
