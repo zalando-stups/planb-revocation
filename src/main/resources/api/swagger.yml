@@ -41,6 +41,10 @@ paths:
           description: Type mismatch. When the parameter 'from' is missing or not an integer
           schema:
             $ref: '#/definitions/Problem'
+        401:
+          description: Unauthorized request
+          schema:
+            $ref: '#/definitions/Problem'
     post:
       summary: Posts the specified revocation to be stored.
       description: |
@@ -60,6 +64,14 @@ paths:
           description: Revocation was successfully stored
         400:
           description: body is not readable because it is not valid JSON, or have an invalid JSON structure
+          schema:
+            $ref: '#/definitions/Problem'
+        401:
+          description: Authorization refused to perform the requested revocation
+          schema:
+            $ref: '#/definitions/Problem'
+        403:
+          description: Requested revocation is not allowed
           schema:
             $ref: '#/definitions/Problem'
         500:
@@ -94,6 +106,10 @@ paths:
           description: Notification was successfully stored
         400:
           description: type mismatch in parameter 'value'
+          schema:
+            $ref: '#/definitions/Problem'
+        401:
+          description: Unauthorized request
           schema:
             $ref: '#/definitions/Problem'
         500:
