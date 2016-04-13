@@ -62,6 +62,14 @@ paths:
           description: body is not readable because it is not valid JSON, or have an invalid JSON structure
           schema:
             $ref: '#/definitions/Problem'
+        401:
+          description: Authorization refused to perform the requested revocation
+          schema:
+            $ref: '#/definitions/Problem'
+        403:
+          description: Requested revocation is not allowed
+          schema:
+            $ref: '#/definitions/Problem'
         500:
           description: an internal error occurred, such as a failure to contact the revocation store.
           schema:
@@ -94,6 +102,10 @@ paths:
           description: Notification was successfully stored
         400:
           description: type mismatch in parameter 'value'
+          schema:
+            $ref: '#/definitions/Problem'
+        401:
+          description: Unauthorized request
           schema:
             $ref: '#/definitions/Problem'
         500:
