@@ -18,6 +18,6 @@ public class ApiGuildProperties {
     }
 
     public void setSwaggerFile(final String swaggerFile) {
-        this.swaggerFile = Preconditions.checkNotNull(swaggerFile);
+        this.swaggerFile = Preconditions.checkNotNull(swaggerFile, "api.swaggerFile cannot be 'null'");
     }
 }

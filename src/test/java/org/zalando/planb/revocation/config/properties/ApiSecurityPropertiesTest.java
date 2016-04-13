@@ -10,27 +10,27 @@ import org.zalando.planb.revocation.config.PlanBRevocationConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link ApiGuildProperties}.
+ * Unit tests for {@link ApiSecurityProperties}.
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = PlanBRevocationConfig.class)
-public class ApiGuildPropertiesTest {
+public class ApiSecurityPropertiesTest {
 
     @Autowired
-    private ApiGuildProperties properties;
+    private ApiSecurityProperties properties;
 
     @Test(expected = NullPointerException.class)
     public void testNullPointerExceptionWhenNullValue() {
-        properties.setSwaggerFile(null);
+        properties.setRevokeExpr(null);
     }
 
     @Test
     public void testSetters() {
-        String expected = "classpath:api/openapi.yaml";
-        properties.setSwaggerFile(expected);
+        String expected = "#oauth2.hasScope('uid')";
+        properties.setRevokeExpr(expected);
 
-        assertThat(properties.getSwaggerFile()).isEqualTo(expected);
+        assertThat(properties.getRevokeExpr()).isEqualTo(expected);
     }
 }
