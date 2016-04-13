@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Contains properties used for configuring the application according to Zalando's API Guild.
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @ConfigurationProperties(prefix = "api")
 public class ApiGuildProperties {
@@ -17,7 +17,7 @@ public class ApiGuildProperties {
         return swaggerFile;
     }
 
-    public void setSwaggerFile(String swaggerFile) {
+    public void setSwaggerFile(final String swaggerFile) {
         this.swaggerFile = Preconditions.checkNotNull(swaggerFile);
     }
 }
