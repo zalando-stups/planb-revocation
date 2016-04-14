@@ -1,6 +1,7 @@
 package org.zalando.planb.revocation.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -53,10 +54,8 @@ public class MessageHashTest extends AbstractSpringTest {
         String expected = Base64.getUrlEncoder().encodeToString(hasher.digest());
 
         String base64sha256Hashed = messageHasher.hashAndEncode(RevocationType.TOKEN, MESSAGE);
-        String base64sha256HashedSame = messageHasher.hashAndEncode(RevocationType.TOKEN, MESSAGE);
 
         assertEquals(expected, base64sha256Hashed);
-        assertEquals(expected, base64sha256HashedSame);
     }
 
     /**
@@ -89,5 +88,15 @@ public class MessageHashTest extends AbstractSpringTest {
 
         assertEquals(Base64.getEncoder().encodeToString(MESSAGE.getBytes()),
             nullHasher.hashAndEncode(RevocationType.TOKEN, MESSAGE));
+    }
+
+    /**
+     * Tests default value properties for the MessageHasher.
+     */
+    @Test
+    public void testDefaultValues() {
+        assertEquals("SHA-256", messageHasher.hashingAlgorithms().get(RevocationType.TOKEN).getAlgorithm());
+        assertEquals("SHA-256", messageHasher.hashingAlgorithms().get(RevocationType.CLAIM).getAlgorithm());
+        assertEquals('|', (char)messageHasher.separator());
     }
 }

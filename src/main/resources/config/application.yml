@@ -22,7 +22,4 @@ revocation:
   authorization:
     reloadInMilliseconds: 60000
   hashing:
-    algorithms:
-      TOKEN: SHA-256
-      CLAIM: SHA-256
     salt: seasaltisthebest
