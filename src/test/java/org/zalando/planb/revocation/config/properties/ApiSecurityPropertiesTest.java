@@ -3,6 +3,8 @@ package org.zalando.planb.revocation.config.properties;
 import org.junit.Test;
 import org.zalando.planb.revocation.AbstractSpringTest;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

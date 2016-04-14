@@ -1,7 +1,8 @@
 package org.zalando.planb.revocation.config.properties;
 
-import com.google.common.base.Preconditions;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.Objects;
 
 /**
  * Contains properties used for configuring OAuth 2 scopes for REST operations.
@@ -18,6 +19,6 @@ public class ApiSecurityProperties {
     }
 
     public void setRevokeExpr(String revokeExpr) {
-        this.revokeExpr = Preconditions.checkNotNull(revokeExpr, "api.security.revokeExpr cannot be 'null'");
+        this.revokeExpr = Objects.requireNonNull(revokeExpr, "'api.security.revokeExpr' cannot be null.");
     }
 }

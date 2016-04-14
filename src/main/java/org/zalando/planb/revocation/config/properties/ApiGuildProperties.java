@@ -1,7 +1,8 @@
 package org.zalando.planb.revocation.config.properties;
 
-import com.google.common.base.Preconditions;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.Objects;
 
 /**
  * Contains properties used for configuring the application according to Zalando's API Guild.
@@ -17,7 +18,7 @@ public class ApiGuildProperties {
         return swaggerFile;
     }
 
-    public void setSwaggerFile(final String swaggerFile) {
-        this.swaggerFile = Preconditions.checkNotNull(swaggerFile, "api.swaggerFile cannot be 'null'");
+    public void setSwaggerFile(String swaggerFile) {
+        this.swaggerFile = Objects.requireNonNull(swaggerFile, "'api.swaggerFile' cannot be null");
     }
 }
