@@ -1,20 +1,24 @@
 package org.zalando.planb.revocation.config.properties;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import java.util.Objects;
 
 /**
- * Created by rreis on 17/02/16.
+ * Contains properties used for configuring OAuth 2 scopes for REST operations.
+ *
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @ConfigurationProperties(prefix = "api.security")
-@Data
 public class ApiSecurityProperties {
 
     private String revokeExpr;
+
+    public String getRevokeExpr() {
+        return revokeExpr;
+    }
+
+    public void setRevokeExpr(String revokeExpr) {
+        this.revokeExpr = Objects.requireNonNull(revokeExpr, "'api.security.revokeExpr' cannot be null.");
+    }
 }

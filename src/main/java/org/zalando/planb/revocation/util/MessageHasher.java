@@ -1,43 +1,48 @@
 package org.zalando.planb.revocation.util;
 
-import lombok.Value;
+import org.immutables.value.Value;
 import org.zalando.planb.revocation.domain.RevocationType;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.EnumMap;
+import java.util.Map;
 
 /**
- * Message hasher.
+ * Utility class to hash messages.
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Value
-public class MessageHasher {
+@Value.Immutable
+public abstract class MessageHasher {
 
-    private final EnumMap<RevocationType, MessageDigest> hashers;
+    /**
+     * Returns a map containing hashers for each revocation type.
+     * <p>
+     * <p>Defaults to an empty map, meaning no hashing is done.</p>
+     *
+     * @return the aforementioned map
+     */
+    public abstract Map<RevocationType, MessageDigest> hashingAlgorithms();
 
-    private final String salt;
-
-    private final Character separator;
-
-    public MessageHasher(final EnumMap<RevocationType, String> hashingAlgorithms, final String salt, final Character
-            separator)
-            throws NoSuchAlgorithmException {
-        hashers = new EnumMap<>(RevocationType.class);
-        this.salt = (salt == null) ? "" : salt;
-        this.separator = separator;
-
-        if (hashingAlgorithms == null) {
-            return;
-        }
-
-        for (RevocationType type : hashingAlgorithms.keySet()) {
-            hashers.put(type, MessageDigest.getInstance(hashingAlgorithms.get(type)));
-        }
+    /**
+     * Returns the salt used to hash messages.
+     * <p>
+     * <p>The same salt must be used by other parties comparing the same hashed message.</p>
+     *
+     * @return the hashing salt
+     */
+    @Value.Default
+    public String salt() {
+        return "";
     }
+
+    /**
+     * Returns the separator used to hash multiple messages.
+     *
+     * @return the separator
+     */
+    public abstract Character separator();
 
     /**
      * Hashes the specified messages using the algorithm specified by the <code>RevocationType</code> parameter. Returns
@@ -50,19 +55,21 @@ public class MessageHasher {
      * @return a Base64 URL encoded version of the hash.
      */
     public String hashAndEncode(final RevocationType type, final String... messages) {
+
         StringBuilder messageConcatenated = new StringBuilder();
         for (String message : messages) {
-            messageConcatenated.append(message + (separator != null ? separator : ""));
+            messageConcatenated.append(message);
+            messageConcatenated.append(separator());
         }
 
-        String message = separator == null ? messageConcatenated.toString() : messageConcatenated.substring(0,
-                messageConcatenated.length() - 1);
+        String message = messageConcatenated.substring(0, messageConcatenated.length() - 1);
 
         byte[] hashed = message.getBytes();
 
-        if (hashers.containsKey(type)) {
-            hashers.get(type).update((salt + message).getBytes());
-            hashed = hashers.get(type).digest();
+        if (hashingAlgorithms().containsKey(type)) {
+
+            hashingAlgorithms().get(type).update((salt() + message).getBytes());
+            hashed = hashingAlgorithms().get(type).digest();
         }
 
         return Base64.getUrlEncoder().encodeToString(hashed);

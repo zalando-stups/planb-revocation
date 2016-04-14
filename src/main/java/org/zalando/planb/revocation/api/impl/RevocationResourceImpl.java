@@ -25,12 +25,10 @@ import org.zalando.planb.revocation.domain.RevocationList;
 import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
-import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
 import org.zalando.planb.revocation.domain.RevokedData;
 import org.zalando.planb.revocation.domain.RevokedGlobal;
 import org.zalando.planb.revocation.domain.RevokedInfo;
 import org.zalando.planb.revocation.domain.RevokedTokenData;
-import org.zalando.planb.revocation.domain.RevokedTokenInfo;
 import org.zalando.planb.revocation.persistence.CassandraRevocationStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.service.RevocationAuthorizationService;
@@ -91,15 +89,15 @@ public class RevocationResourceImpl implements RevocationResource {
                         .names(((RevokedClaimsData) data).claims().keySet())
                         .valueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
                                 ((RevokedClaimsData) data).claims().values()))
-                        .hashAlgorithm(messageHasher.getHashers().get(RevocationType.CLAIM).getAlgorithm())
+                        .hashAlgorithm(messageHasher.hashingAlgorithms().get(RevocationType.CLAIM).getAlgorithm())
                         .issuedBefore(((RevokedClaimsData) data).issuedBefore())
-                        .separator(messageHasher.getSeparator())
+                        .separator(messageHasher.separator())
                         .build();
 
             } else if (data instanceof RevokedTokenData) {
                 revokedInfo = ImmutableRevokedTokenInfo.builder()
                         .tokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN, ((RevokedTokenData) data).token()))
-                        .hashAlgorithm(messageHasher.getHashers().get(RevocationType.TOKEN).getAlgorithm())
+                        .hashAlgorithm(messageHasher.hashingAlgorithms().get(RevocationType.TOKEN).getAlgorithm())
                         .issuedBefore(((RevokedTokenData) data).issuedBefore())
                         .build();
             }
@@ -111,12 +109,10 @@ public class RevocationResourceImpl implements RevocationResource {
                     .build());
         }
 
-        RevocationList responseBody = ImmutableRevocationList.builder()
+        return ImmutableRevocationList.builder()
                 .meta(metaInformation())
                 .revocations(apiRevocations)
                 .build();
-
-        return responseBody;
     }
 
     /**
