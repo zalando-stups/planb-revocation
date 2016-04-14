@@ -1,5 +1,6 @@
 package org.zalando.planb.revocation.config.properties;
 
+import com.google.common.collect.ImmutableMap;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedClaimsInfo;
@@ -28,7 +29,9 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "revocation.hashing")
 public class HashingProperties {
 
-    private Map<RevocationType, String> algorithms;
+    private Map<RevocationType, String> algorithms = ImmutableMap.of(
+            RevocationType.TOKEN, "SHA-256",
+            RevocationType.CLAIM, "SHA-256");
 
     private String salt;
 
