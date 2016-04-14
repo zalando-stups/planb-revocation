@@ -17,9 +17,9 @@ import java.util.Base64;
 import static org.junit.Assert.assertEquals;
 
 /**
- * TODO: small javadoc
+ * Unit tests for message hashing.
  *
- * @author <a href="mailto:team-greendale@zalando.de">Team Greendale</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 @SpringApplicationConfiguration(classes = {Main.class})
 @WebIntegrationTest(randomPort = true)
