@@ -2,6 +2,7 @@ package org.zalando.planb.revocation.config;
 
 import com.datastax.driver.core.Session;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ import org.zalando.planb.revocation.persistence.InMemoryRevocationStore;
 import org.zalando.planb.revocation.persistence.RevocationStore;
 
 @Configuration
+@AutoConfigureAfter(CassandraConfig.class)
 public class StorageConfig {
 
     @Configuration
