@@ -22,6 +22,7 @@ public class StorageConfig {
 
     @Configuration
     @ConditionalOnBean(Session.class)
+    @Order(CassandraConfig.ORDER + 1)
     public static class CassandraStorageConfig {
 
         @Autowired
@@ -50,6 +51,7 @@ public class StorageConfig {
 
     @Configuration
     @ConditionalOnMissingBean(Session.class)
+    @Order(CassandraConfig.ORDER + 1)
     public static class InMemoryStorageConfig {
 
         @Bean
