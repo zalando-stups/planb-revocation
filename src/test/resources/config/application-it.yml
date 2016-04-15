@@ -9,4 +9,5 @@ cassandra:
 logging:
   level:
     org.zalando.planb: DEBUG
-    com.datastax.driver: TRACE
+    org.springframework.context: DEBUG
+    org.springframework.boot.autoconfigure: DEBUG
