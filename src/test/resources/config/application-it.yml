@@ -5,6 +5,8 @@ spring:
 cassandra:
   contactPoints: 127.0.0.1
   clusterName: Local Cluster
+  username: cassandra
+  password: cassandra
 
 logging:
   level:

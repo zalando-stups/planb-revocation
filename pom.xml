@@ -239,6 +239,9 @@
                             <startNativeTransport>true</startNativeTransport>
                             <cqlVersion>3.0.0</cqlVersion>
                             <script>revocation_schema.cql</script>
+                            <yaml>authenticator: PasswordAuthenticator</yaml>
+                            <username>cassandra</username>
+                            <password>cassandra</password>
                             <!--<cqlScript>src/test/resources/testdata.cql</cqlScript>-->
                             <!--
                             <systemPropertyVariables>
