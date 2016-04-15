@@ -28,7 +28,7 @@ public class RuleBasedClaimRevocationAuthorizationService extends AbstractAuthor
     protected void checkClaimBasedRevocation(final RevokedClaimsData claimsData) {
         final AuthorizationRule sourceRule = ImmutableAuthorizationRule
                 .builder()
-                .requiredUserClaims(getSourceClaims()).build();
+                .requiredUserClaims(getRequiredUserClaimsFromContext()).build();
         final AuthorizationRule targetRule = ImmutableAuthorizationRule
                 .builder()
                 .allowedRevocationClaims(claimsData.claims()).build();
@@ -39,7 +39,7 @@ public class RuleBasedClaimRevocationAuthorizationService extends AbstractAuthor
                 .orElseThrow(() -> new RevocationUnauthorizedException(targetRule));
     }
 
-    private Map<String, String> getSourceClaims() {
+    private Map<String, String> getRequiredUserClaimsFromContext() {
         String accessToken = Optional.of(SecurityContextHolder.getContext())
                 .map(SecurityContext::getAuthentication)
                 .map(auth -> (OAuth2Authentication) auth)
@@ -49,10 +49,10 @@ public class RuleBasedClaimRevocationAuthorizationService extends AbstractAuthor
                 .map(m -> (String) m.get("access_token"))
                 .orElseThrow(() -> new IllegalStateException("Could not find access_token in SecurityContext"));
         try {
-            Map<String, Object> sourceClaims = JWTParser.parse(accessToken).getJWTClaimsSet().getClaims();
-            return sourceClaims.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+            Map<String, Object> requiredUserClaims = JWTParser.parse(accessToken).getJWTClaimsSet().getClaims();
+            return requiredUserClaims.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
         } catch (ParseException e) {
-            throw new IllegalStateException("Could not parse source claims in service token", e);
+            throw new IllegalArgumentException("Could not parse client token, non-JWT tokens are not allowed for claim-based revocation", e);
         }
     }
 }
