@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.zalando.planb.revocation.config.properties.ApiSecurityProperties;
+import org.zalando.planb.revocation.domain.CurrentUser;
 import org.zalando.stups.oauth2.spring.security.expression.ExtendedOAuth2WebSecurityExpressionHandler;
 import org.zalando.stups.oauth2.spring.server.TokenInfoResourceServerTokenServices;
 
@@ -70,5 +71,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Reso
 
     private HstsHeaderWriter hstsHeaderWriter() {
         return new HstsHeaderWriter(AnyRequestMatcher.INSTANCE, TimeUnit.DAYS.toSeconds(365), true);
+    }
+
+    @Bean
+    public CurrentUser currentUser(){
+        return new CurrentUser();
     }
 }

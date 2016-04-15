@@ -11,7 +11,6 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.zalando.planb.revocation.api.exception.SerializationException;
 import org.zalando.planb.revocation.domain.CurrentUser;
 import org.zalando.planb.revocation.domain.ImmutableRefresh;
@@ -103,24 +102,25 @@ public class CassandraRevocationStore implements RevocationStore {
 
     private final Map<RevocationType, RevocationDataMapper> dataMappers = new EnumMap<>(RevocationType.class);
 
-    @Autowired
-    private CurrentUser currentUser;
+    private final CurrentUser currentUser;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     /**
      * Constructs a new instance configured with the provided {@code session} and {@code maxTimeDelta}.
-     *
-     * @param session      session configured to a Cassandra cluster
+     *  @param session      session configured to a Cassandra cluster
      * @param read         consistency level for SELECT queries
      * @param write        consistency level for INSERT queries
      * @param maxTimeDelta maximum time span limit to get revocations, in seconds
+     * @param currentUser currentUser supplier
+     * @param objectMapper the object mapper
      */
     public CassandraRevocationStore(final Session session, final ConsistencyLevel read, final ConsistencyLevel write,
-                                    final int maxTimeDelta) {
+                                    final int maxTimeDelta, final CurrentUser currentUser, final ObjectMapper objectMapper) {
         this.session = session;
         this.maxTimeDelta = maxTimeDelta;
+        this.currentUser = currentUser;
+        this.objectMapper = objectMapper;
 
         getFrom = session.prepare(SELECT_REVOCATION).setConsistencyLevel(read);
         insertRevocation = session.prepare(INSERT_REVOCATION).setConsistencyLevel(write);

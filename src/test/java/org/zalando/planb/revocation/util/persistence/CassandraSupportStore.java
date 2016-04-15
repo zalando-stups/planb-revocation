@@ -151,10 +151,6 @@ public class CassandraSupportStore {
     public String getCreatedBy() {
         int yearBucket = LocalDate.now(ZoneId.of("UTC")).getYear();
 
-        // TODO remove this
-        System.out.println(yearBucket);
-        System.out.println("\n\n\n" + session.execute("SELECT * FROM refresh;").all() + "\n\n");
-
         // TODO Include the case when it's the beginning of the year (2 buckets needed)
         ResultSet rs = session.execute(getCreatedBy.bind(yearBucket));
 

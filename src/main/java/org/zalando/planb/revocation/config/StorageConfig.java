@@ -1,14 +1,15 @@
 package org.zalando.planb.revocation.config;
 
 import com.datastax.driver.core.Session;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
+import org.zalando.planb.revocation.domain.CurrentUser;
 import org.zalando.planb.revocation.management.CassandraHealthIndicator;
 import org.zalando.planb.revocation.persistence.AuthorizationRulesStore;
 import org.zalando.planb.revocation.persistence.CassandraAuthorizationRuleStore;
@@ -19,7 +20,6 @@ import org.zalando.planb.revocation.persistence.RevocationStore;
 
 @Configuration
 @AutoConfigureAfter(CassandraConfig.class)
-@Import(CassandraConfig.class)
 public class StorageConfig {
 
     @Configuration
@@ -33,9 +33,10 @@ public class StorageConfig {
         private Session session;
 
         @Bean
-        public RevocationStore revocationStore() {
+        public RevocationStore revocationStore(final CurrentUser currentUser, final ObjectMapper objectMapper) {
             return new CassandraRevocationStore(session, cassandraProperties.getReadConsistencyLevel(),
-                    cassandraProperties.getWriteConsistencyLevel(), cassandraProperties.getMaxTimeDelta());
+                    cassandraProperties.getWriteConsistencyLevel(), cassandraProperties.getMaxTimeDelta(),
+                    currentUser, objectMapper);
         }
 
         @Bean
