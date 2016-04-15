@@ -259,8 +259,10 @@ public class CassandraRevocationStore implements RevocationStore {
 
     @Override
     public void storeRefresh(final int from) {
-
         int yearBucket = LocalDate.now(ZoneId.of("UTC")).getYear();
+
+        LOG.debug("Store refresh in Cassandra yearBucket={} from={}", yearBucket, from);
+
         BoundStatement statement = storeRefresh.bind(yearBucket, UnixTimestamp.now(), from, currentUser.get());
         session.execute(statement);
     }
