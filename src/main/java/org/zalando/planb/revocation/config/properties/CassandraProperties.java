@@ -58,6 +58,8 @@ public class CassandraProperties {
     // Maybe this maxTimeDelta should be derived from the bucket size in Cassandra...
     private int maxTimeDelta = (int) Duration.ofDays(31).getSeconds();
 
+    private String healthCheckQuery = "SELECT release_version FROM system.local;";
+
     public String getKeyspace() {
         return keyspace;
     }
@@ -128,5 +130,13 @@ public class CassandraProperties {
 
     public void setMaxTimeDelta(int maxTimeDelta) {
         this.maxTimeDelta = maxTimeDelta;
+    }
+
+    public String getHealthCheckQuery() {
+        return healthCheckQuery;
+    }
+
+    public void setHealthCheckQuery(String healthCheckQuery) {
+        this.healthCheckQuery = healthCheckQuery;
     }
 }
