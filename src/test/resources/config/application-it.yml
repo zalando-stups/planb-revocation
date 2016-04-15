@@ -9,3 +9,4 @@ cassandra:
 logging:
   level:
     org.zalando.planb: DEBUG
+    com.datastax.driver: TRACE

@@ -20,7 +20,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -148,6 +150,10 @@ public class CassandraSupportStore {
      */
     public String getCreatedBy() {
         int yearBucket = LocalDate.now(ZoneId.of("UTC")).getYear();
+
+        // TODO remove this
+        System.out.println(yearBucket);
+        System.out.println("\n\n\n" + session.execute("SELECT * FROM refresh;").all() + "\n\n");
 
         // TODO Include the case when it's the beginning of the year (2 buckets needed)
         ResultSet rs = session.execute(getCreatedBy.bind(yearBucket));
