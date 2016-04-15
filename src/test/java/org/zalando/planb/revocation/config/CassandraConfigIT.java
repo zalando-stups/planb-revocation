@@ -34,7 +34,8 @@ public class CassandraConfigIT {
                     .web(false)
                     .bannerMode(OFF)
                     .profiles("it")
-                    .run("--cassandra.password=theWrongOne");
+                    .run("--cassandra.password=theWrongOne",
+                            "--logging.level.org.springframework.boot.SpringApplication=OFF");
             failBecauseExceptionWasNotThrown(BeansException.class);
         } catch (BeansException e) {
             assertThat(e).hasRootCauseInstanceOf(AuthenticationException.class);
@@ -47,7 +48,23 @@ public class CassandraConfigIT {
             new SpringApplicationBuilder(CassandraConfig.class)
                     .web(false)
                     .bannerMode(OFF)
-                    .run("--cassandra.contact-points=127.0.0.1");
+                    .run("--cassandra.contact-points=127.0.0.1",
+                            "--logging.level.org.springframework.boot.SpringApplication=OFF");
+            failBecauseExceptionWasNotThrown(BeansException.class);
+        } catch (BeansException e) {
+            assertThat(e).hasRootCauseInstanceOf(AuthenticationException.class);
+        }
+    }
+
+    @Test
+    public void testCassandraConnectionWithMissingPassword() throws Exception {
+        try {
+            new SpringApplicationBuilder(CassandraConfig.class)
+                    .web(false)
+                    .bannerMode(OFF)
+                    .run("--cassandra.contact-points=127.0.0.1",
+                            "--cassandra.username=cassandra",
+                            "--logging.level.org.springframework.boot.SpringApplication=OFF");
             failBecauseExceptionWasNotThrown(BeansException.class);
         } catch (BeansException e) {
             assertThat(e).hasRootCauseInstanceOf(AuthenticationException.class);
