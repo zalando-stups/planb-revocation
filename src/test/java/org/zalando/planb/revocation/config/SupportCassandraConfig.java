@@ -1,5 +1,6 @@
 package org.zalando.planb.revocation.config;
 
+import com.datastax.driver.core.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -7,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.persistence.CassandraAuthorizationRuleStore;
-import org.zalando.planb.revocation.persistence.CassandraRevocationStore;
 import org.zalando.planb.revocation.util.persistence.CassandraSupportStore;
 
 /**
@@ -24,18 +24,18 @@ public class SupportCassandraConfig {
     private CassandraProperties cassandraProperties;
 
     @Autowired
-    private StorageConfig storageConfig;
+    private Session session;
 
     @Bean
     public CassandraSupportStore auditStore() {
-        return new CassandraSupportStore(storageConfig.cassandraSession(),
+        return new CassandraSupportStore(session,
                 cassandraProperties.getReadConsistencyLevel(), cassandraProperties.getWriteConsistencyLevel(),
                 cassandraProperties.getMaxTimeDelta());
     }
 
     @Bean
     public CassandraAuthorizationRuleStore cassandraAuthorizationRuleStore() {
-        return new CassandraAuthorizationRuleStore(storageConfig.cassandraSession(), cassandraProperties.getReadConsistencyLevel(),
+        return new CassandraAuthorizationRuleStore(session, cassandraProperties.getReadConsistencyLevel(),
                 cassandraProperties.getWriteConsistencyLevel());
     }
 }

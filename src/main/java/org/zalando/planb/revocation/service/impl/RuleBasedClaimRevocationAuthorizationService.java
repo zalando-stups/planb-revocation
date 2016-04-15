@@ -1,13 +1,13 @@
 package org.zalando.planb.revocation.service.impl;
 
 import com.nimbusds.jwt.JWTParser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.stereotype.Component;
 import org.zalando.planb.revocation.api.exception.RevocationUnauthorizedException;
+import org.zalando.planb.revocation.config.properties.CassandraProperties;
+import org.zalando.planb.revocation.config.properties.RevocationProperties;
 import org.zalando.planb.revocation.domain.AuthorizationRule;
 import org.zalando.planb.revocation.domain.ImmutableAuthorizationRule;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
@@ -19,11 +19,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
 public class RuleBasedClaimRevocationAuthorizationService extends AbstractAuthorizationService {
 
-    @Autowired
-    private AuthorizationRulesStore authorizationRulesStore;
+    private final AuthorizationRulesStore authorizationRulesStore;
+
+    public RuleBasedClaimRevocationAuthorizationService(
+            AuthorizationRulesStore authorizationRulesStore,
+            RevocationProperties revocationProperties,
+            CassandraProperties cassandraProperties) {
+        super(revocationProperties, cassandraProperties);
+        this.authorizationRulesStore = authorizationRulesStore;
+    }
 
     protected void checkClaimBasedRevocation(final RevokedClaimsData claimsData) {
         final AuthorizationRule sourceRule = ImmutableAuthorizationRule

@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.util.Map;
 
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.yaml.snakeyaml.Yaml;
 import org.zalando.planb.revocation.api.exception.YamlParsingException;
@@ -20,14 +19,14 @@ import org.zalando.planb.revocation.service.SwaggerService;
  */
 public class SwaggerFromYamlFileService implements SwaggerService {
 
-    @Autowired
-    private ApplicationContext context;
+    private final ApplicationContext context;
 
     private final String yamlResource;
 
     private String swaggerJson;
 
-    public SwaggerFromYamlFileService(final String yamlResource) {
+    public SwaggerFromYamlFileService(ApplicationContext context, final String yamlResource) {
+        this.context = context;
         this.yamlResource = yamlResource;
     }
 

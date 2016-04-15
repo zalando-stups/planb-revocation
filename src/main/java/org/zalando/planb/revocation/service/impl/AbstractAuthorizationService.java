@@ -1,6 +1,5 @@
 package org.zalando.planb.revocation.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.zalando.planb.revocation.api.exception.AncientRevocationException;
@@ -17,11 +16,14 @@ import org.zalando.planb.revocation.util.UnixTimestamp;
 
 public abstract class AbstractAuthorizationService implements RevocationAuthorizationService {
 
-    @Autowired
-    private RevocationProperties revocationProperties;
+    private final RevocationProperties revocationProperties;
 
-    @Autowired
-    private CassandraProperties cassandraProperties;
+    private final CassandraProperties cassandraProperties;
+
+    protected AbstractAuthorizationService(RevocationProperties revocationProperties, CassandraProperties cassandraProperties) {
+        this.revocationProperties = revocationProperties;
+        this.cassandraProperties = cassandraProperties;
+    }
 
     @Override
     public void checkAuthorization(final RevocationRequest revocationRequest) {
