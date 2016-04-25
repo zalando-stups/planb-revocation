@@ -1,8 +1,8 @@
 package org.zalando.planb.revocation.config.properties;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.util.Objects;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Contains properties used for configuring the application according to Zalando's API Guild.
@@ -12,7 +12,7 @@ import java.util.Objects;
 @ConfigurationProperties(prefix = "api")
 public class ApiGuildProperties {
 
-    private String swaggerFile = "classpath:api/swagger.yml";
+    private String swaggerFile = "/api/swagger.yml";
 
     public String getSwaggerFile() {
         return swaggerFile;
