@@ -1,42 +1,56 @@
 package org.zalando.planb.revocation.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
 
 import java.util.List;
-import java.util.Set;
 
 /**
- * <ul>
- *     <li>{@code names}: List with claim names;</li>
- *     <li>{@code valueHash}: The revoked claim values, concatenated using a separator character (default is '|').
- *     The string hashed using {@code hash_algorithm}, in URL Base64 encoding;
- *     </li>
- *     <li>{@code separator}: The character used to concatenate claim values;</li>
- *     <li>{@code hashAlgorithm}: The algorithm used for hashing the Claim;</li>
- *     <li>{@code issuedBefore}: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked.</li>
- * </ul>
+ * Holds information about revoked claims.
  *
- * <p>When posting a Claim Revocation, if {@code issuedBefore} is not set, it will default to the current UNIX
- * timestamp (UTC).</p>
- *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Team Greendale</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">rodrigo Reis</a>
  */
-@Data
-@NoArgsConstructor
-public class RevokedClaimsInfo implements RevokedInfo {
-    private Set<String> names;
+@Value.Immutable
+@JsonSerialize
+@JsonDeserialize(as = ImmutableRevokedClaimsInfo.class)
+public interface RevokedClaimsInfo extends RevokedInfo {
 
-    @JsonProperty("value_hash")
-    private String valueHash;
+    /**
+     * Returns a list with the claim names used in the revocation.
+     *
+     * @return a list with the claim names
+     */
+    List<String> names();
 
-    @JsonProperty("hash_algorithm")
-    private String hashAlgorithm;
+    /**
+     * Returns the corresponding revoked claim values, concatenated using a separator character.
+     * <p>
+     * <p>The string is hashed using {@code hash_algorithm}, in URL Base64 encoding.</p>
+     *
+     * @return the hashed string, URL Base64 encoded
+     */
+    String valueHash();
 
-    private Character separator;
+    /**
+     * Returns the algorithm used for hashing {@link RevokedClaimsInfo#valueHash()}.
+     *
+     * @return the hashing algorithm
+     */
+    String hashAlgorithm();
 
-    @JsonProperty("issued_before")
-    private Integer issuedBefore;
+    /**
+     * Returns the character used to concatenate values in {@link RevokedClaimsInfo#valueHash()}.</li>
+     *
+     * @return the concatenation character
+     */
+    Character separator();
+
+    /**
+     * Returns a UNIX Timestamp (UTC), indicating that the tokens related to this revocation are revoked if issued
+     * before it.
+     *
+     * @return the UNIX Timestamp (UTC)
+     */
+    Integer issuedBefore();
 }

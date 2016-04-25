@@ -53,13 +53,21 @@ paths:
             the revocation associated with the tokens to revoke
           in: body
           schema:
-            $ref: '#/definitions/RevocationRequest'
+            $ref: '#/definitions/RevocationData'
       responses:
         # Response code
         201:
           description: Revocation was successfully stored
         400:
           description: body is not readable because it is not valid JSON, or have an invalid JSON structure
+          schema:
+            $ref: '#/definitions/Problem'
+        401:
+          description: Authorization refused to perform the requested revocation
+          schema:
+            $ref: '#/definitions/Problem'
+        403:
+          description: Requested revocation is not allowed
           schema:
             $ref: '#/definitions/Problem'
         500:
@@ -94,6 +102,10 @@ paths:
           description: Notification was successfully stored
         400:
           description: type mismatch in parameter 'value'
+          schema:
+            $ref: '#/definitions/Problem'
+        401:
+          description: Unauthorized request
           schema:
             $ref: '#/definitions/Problem'
         500:
@@ -164,7 +176,7 @@ definitions:
       properties:
         issued_before:
           type: integer
-          description: a UNIX Timestamp (UTC) indication that tokens issued before it are revoked.
+          description: a UNIX Timestamp (UTC) indicating that tokens issued before this value are revoked.
   RevokedTokenInfo:
     allOf:
     - $ref: '#/definitions/RevokedInfo'
@@ -176,6 +188,9 @@ definitions:
         hash_algorithm:
           type: string
           description: The algorithm used for hashing the Token
+        issued_before:
+          type: integer
+          description: a UNIX Timestamp (UTC) indicating that tokens issued before this value are revoked.
 
   RevocationData:
     type: object
@@ -216,7 +231,7 @@ definitions:
           description: The claim of the tokens to revoke
         issued_before:
           type: integer
-          description: a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked. If this property is not set when posting a Claim Revocation, it will default to the current UNIX timestamp (UTC).
+          description: a UNIX Timestamp (UTC) indicating that tokens issued before this value are revoked. If this value is not set when posting a Claim Revocation, it will default to the current UNIX timestamp (UTC).
   ClaimTuple:
     properties:
       name:
@@ -232,7 +247,7 @@ definitions:
       properties:
         issued_before:
           type: integer
-          description: a UNIX Timestamp (UTC) indication that tokens issued before it are revoked.
+          description: a UNIX Timestamp (UTC) indicating that tokens issued before this value are revoked. If this value is not set when posting a Claim Revocation, it will default to the current UNIX timestamp (UTC).
   RevokedTokenData:
     allOf:
     - $ref: '#/definitions/RevokedData'
@@ -241,6 +256,9 @@ definitions:
         token:
           type: string
           description: The revoked token
+        issued_before:
+          type: integer
+          description: a UNIX Timestamp (UTC) indicating that tokens issued before this value are revoked. If this value is not set when posting a Claim Revocation, it will default to the current UNIX timestamp (UTC).
 
   Problem:
     type: object

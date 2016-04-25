@@ -1,18 +1,36 @@
 package org.zalando.planb.revocation.domain;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
+import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
- * <ul>
- *     <li>{@code token}: the token to revoke.</li>
- * </ul>
+ * Holds the data of a new token {@link RevocationRequest}.
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Data
-@NoArgsConstructor
-public class RevokedTokenData implements RevokedData {
+@Value.Immutable
+@JsonSerialize
+@JsonDeserialize(as = ImmutableRevokedTokenData.class)
+public abstract class RevokedTokenData implements RevokedData {
 
-    private String token;
+    /**
+     * Returns the new OAuth2 token to revoke.
+     *
+     * @return the token to revoke
+     */
+    public abstract String token();
+
+    /**
+     * Returns a UNIX Timestamp (UTC) indicating that tokens issued before it are revoked.
+     * <p>
+     * <p>When not set, defaults to the current UNIX timestamp.</p>
+     *
+     * @return the aforementioned UNIX Timestamp (UTC)
+     */
+    @Value.Default
+    public Integer issuedBefore() {
+        return UnixTimestamp.now();
+    }
 }

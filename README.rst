@@ -83,8 +83,22 @@ Revoking tokens by "sub" claim:
     $ curl -X POST \
          -H "Authorization: Bearer $tok" \
          -H 'Content-Type: application/json' \
-         -d '{"type": "CLAIM", "data": {"name": "sub", "value_hash": ""}}' \
+         -d '{"type": "CLAIM", "data": {"claims": {"sub": "jdoe"}}}' \
          "http://localhost:8080/revocations"
+
+Configuration
+=============
+
+``TOKENINFO_URL``
+    OAuth2 token info URL (can point to Plan B Token Info), this is used to secure the ``/revocations`` REST endpoint.
+``CASSANDRA_CONTACT_POINTS``
+    Comma separated list of Cassandra cluster IPs.
+``CASSANDRA_CLUSTER_NAME``
+    Cassandra cluster name.
+``API_SECURITY_REVOKE_EXPR``
+    Spring security expression, e.g. "#oauth2.hasScope('planb-revocation.write')"
+``REVOCATION_HASHING_SALT``
+    Shared salt with Token Info. Used for hasing tokens for the Plan B Token Info.
 
 .. _Plan B OpenID Connect Provider: https://github.com/zalando/planb-provider
 .. _Plan B Agent: https://github.com/zalando/planb-agent

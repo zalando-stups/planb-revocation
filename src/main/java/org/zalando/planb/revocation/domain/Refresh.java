@@ -1,41 +1,30 @@
 package org.zalando.planb.revocation.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import com.google.auto.value.AutoValue;
-
 /**
- * Represents a notification to refresh all revocations since a point in time.
+ * A notification to refresh all revocations since an instant in time.
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@AutoValue
+@Value.Immutable
+@JsonSerialize
+@JsonDeserialize(as = ImmutableRefresh.class)
 public abstract class Refresh {
-
-    Refresh() { } // Avoid subclassing
-
-    @JsonCreator
-    public static Refresh create(@JsonProperty("refresh_from") final Integer refreshFrom,
-            @JsonProperty("refresh_timestamp") final Integer refreshTimestamp) {
-        return new AutoValue_Refresh(refreshFrom, refreshTimestamp != null ? refreshTimestamp : UnixTimestamp.now());
-    }
-
-    public static Refresh create(final Integer refreshFrom) {
-        return create(refreshFrom, UnixTimestamp.now());
-    }
 
     /**
      * The instant from when to refresh notifications, in UTC UNIX timestamp.
      */
-    @JsonProperty("refresh_from")
     public abstract Integer refreshFrom();
 
     /**
-     * The instant that this refresh notification was created, in UTC UNIX Timestamp.
+     * The instant that this refresh notification was created, in UTC UNIX Timestamp. Defaults to the current timestamp.
      */
-    @JsonProperty("refresh_timestamp")
-    public abstract Integer refreshTimestamp();
+    @Value.Default
+    public Integer refreshTimestamp() {
+        return UnixTimestamp.now();
+    }
 }

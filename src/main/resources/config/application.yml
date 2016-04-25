@@ -1,7 +1,6 @@
 api:
   security:
-    oauth2-scopes:
-      revokeStandard: "#oauth2.hasScope('uid') && (#oauth2.hasRealm('/services') || #oauth2.hasRealm('/employees'))"
+    revokeExpr: "#oauth2.hasScope('uid') && (#oauth2.hasRealm('/services') || #oauth2.hasRealm('/employees'))"
 
 security:
   oauth2:
@@ -20,8 +19,7 @@ server:
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
 
 revocation:
+  authorization:
+    reloadInMilliseconds: 60000
   hashing:
-    algorithms:
-      TOKEN: SHA-256
-      CLAIM: SHA-256
     salt: seasaltisthebest

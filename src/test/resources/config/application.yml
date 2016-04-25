@@ -1,0 +1,24 @@
+api:
+  security:
+    revokeExpr: "#oauth2.hasScope('uid') && (#oauth2.hasRealm('/services') || #oauth2.hasRealm('/employees'))"
+
+security:
+  oauth2:
+    resource:
+      # Get Environment variable
+      tokenInfoUri: ${TOKENINFO_URL}
+
+management:
+  security:
+    enabled: false
+
+server:
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+revocation:
+  authorization:
+    reloadInMilliseconds: 60000
+  hashing:
+    salt: seasaltisthebest

@@ -18,7 +18,6 @@ import java.util.function.Supplier;
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Component
 public class CurrentUser implements Supplier<String> {
 
     private static final String FORMAT = "%s/%s";

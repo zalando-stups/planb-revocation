@@ -1,33 +1,36 @@
 package org.zalando.planb.revocation.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 
 /**
- * TODO: small javadoc
+ * Holds data about a newly submitted revocation to be stored.
  *
- * @author  <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@Setter
-@Getter
-@NoArgsConstructor
-public class RevocationData {
+@Value.Immutable
+@JsonSerialize
+@JsonDeserialize(as = ImmutableRevocationData.class)
+public abstract class RevocationData {
 
-    private RevocationType type;
+    /**
+     * Returns the original revocation request to be stored.
+     *
+     * @return the original revocation request to be stored
+     */
+    public abstract RevocationRequest revocationRequest();
 
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
-    @JsonSubTypes(
-        {
-            @JsonSubTypes.Type(value = RevokedTokenData.class, name = "TOKEN"),
-            @JsonSubTypes.Type(value = RevokedClaimsData.class, name = "CLAIM"),
-            @JsonSubTypes.Type(value = RevokedGlobal.class, name = "GLOBAL"),
-        }
-    )
-    private RevokedData data;
+    /**
+     * Returns the instant when the revocation was submitted.
+     * <p>
+     * <p>Defaults to the current UTC Unix Timestamp.</p>
+     *
+     * @return the instant when the revocation was submitted, in UTC Unix Timestamp format
+     */
+    @Value.Default
+    public Integer revokedAt() {
+        return UnixTimestamp.now();
+    }
 }

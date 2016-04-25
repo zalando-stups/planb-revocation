@@ -5,7 +5,7 @@ import org.zalando.planb.revocation.api.RevocationResource;
 /**
  * Notification types available as meta information.
  *
- * @author <a href="mailto:rodrigo.reis@zalando.de">Team Greendale</a>
+ * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
 public enum NotificationType {
     /**

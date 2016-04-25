@@ -3,8 +3,11 @@ spring:
     include: test
 
 cassandra:
+  health-check-query: "SELECT release_version FROM system.local;"
   contactPoints: 127.0.0.1
   clusterName: Local Cluster
+  username: cassandra
+  password: cassandra
 
 logging:
   level:

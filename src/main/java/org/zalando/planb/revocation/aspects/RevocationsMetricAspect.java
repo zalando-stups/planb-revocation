@@ -47,10 +47,10 @@ public class RevocationsMetricAspect extends MetricsAspect {
         if (revocation == null) {
             return UNKNOWN;
         } else {
-            if (revocation.getType() == null) {
+            if (revocation.type() == null) {
                 return UNKNOWN;
             }else{
-                return revocation.getType().toString().toLowerCase();
+                return revocation.type().toString().toLowerCase();
             }
         }
     }

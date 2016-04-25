@@ -1,0 +1,10 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.zalando.planb.revocation.config.AopConfig,\
+org.zalando.planb.revocation.config.AwsConfig,\
+org.zalando.planb.revocation.config.CassandraConfig,\
+org.zalando.planb.revocation.config.MetricsConfigurer,\
+org.zalando.planb.revocation.config.PlanBRevocationConfig,\
+org.zalando.planb.revocation.config.RevocationConfig,\
+org.zalando.planb.revocation.config.SecurityConfig,\
+org.zalando.planb.revocation.config.StorageConfig,\
+org.zalando.planb.revocation.config.WebConfig

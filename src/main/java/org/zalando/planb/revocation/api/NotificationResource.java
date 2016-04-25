@@ -17,7 +17,6 @@ public interface NotificationResource {
      *
      * @param type  the type of notification
      * @param value the value of the notification to be stored
-     * @return HTTP Status {@code CREATED}, if the notification was successfully stored
      */
-    HttpEntity<String> post(NotificationType type, Object value);
+    void post(NotificationType type, Object value);
 }

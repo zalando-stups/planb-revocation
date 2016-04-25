@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.zalando.planb.revocation.config.SupportCassandraConfig,\
+org.zalando.planb.revocation.config.CassandraTestAddressTranslatorConfig
