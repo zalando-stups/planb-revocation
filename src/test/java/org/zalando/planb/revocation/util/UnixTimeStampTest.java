@@ -12,7 +12,7 @@ public class UnixTimeStampTest {
         long unixTimestamp = UnixTimestamp.now();
 
         long millis = System.currentTimeMillis();
-        long ut1 = UnixTimestamp.internalToSeconds(millis);
+        long ut1 = UnixTimestamp.millisToSeconds(millis);
         long ut2 = UnixTimestamp.of(new Date(millis));
 
         Assertions.assertThat(ut1).isEqualTo(ut2);

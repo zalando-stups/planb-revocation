@@ -10,14 +10,14 @@ public abstract class UnixTimestamp {
     }
 
     public static int now() {
-        return internalToSeconds(System.currentTimeMillis());
+        return millisToSeconds(System.currentTimeMillis());
     }
 
     public static int of(Date date) {
-        return internalToSeconds(date.getTime());
+        return millisToSeconds(date.getTime());
     }
 
-    protected static int internalToSeconds(long millis) {
+    protected static int millisToSeconds(long millis) {
         return (int) MILLISECONDS.toSeconds(millis);
     }
 }
