@@ -11,6 +11,10 @@ import org.zalando.planb.revocation.service.SwaggerService;
 import org.zalando.planb.revocation.service.impl.StaticSchemaDiscoveryService;
 import org.zalando.planb.revocation.service.impl.SwaggerFromYamlFileService;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+
 @Configuration
 @EnableConfigurationProperties(ApiGuildProperties.class)
 public class PlanBRevocationConfig {
@@ -20,7 +24,7 @@ public class PlanBRevocationConfig {
 
     @Bean
     public SwaggerService swaggerService(ApplicationContext context) {
-        return new SwaggerFromYamlFileService(context, apiGuildProperties.getSwaggerFile());
+        return new SwaggerFromYamlFileService(apiGuildProperties.getSwaggerFile());
     }
 
     @Bean
