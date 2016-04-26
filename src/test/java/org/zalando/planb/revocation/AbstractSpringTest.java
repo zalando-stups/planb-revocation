@@ -34,6 +34,7 @@ import org.zalando.planb.revocation.domain.RevokedData;
 
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -45,7 +46,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 /**
  * @author jbellmann
  */
-@ContextConfiguration(classes = PlanBRevocationConfig.class)
 public abstract class AbstractSpringTest {
 
     public static final String SAMPLE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
@@ -74,8 +74,8 @@ public abstract class AbstractSpringTest {
 
     private RestTemplate restTemplate;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired(required = false)
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Rule
     public WireMockRule wireMock = new WireMockRule(Integer.valueOf(System.getProperty("wiremock.port", "10080")));

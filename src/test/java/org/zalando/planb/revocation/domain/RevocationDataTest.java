@@ -1,13 +1,7 @@
 package org.zalando.planb.revocation.domain;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.zalando.planb.revocation.config.PlanBRevocationConfig;
 import org.zalando.planb.revocation.util.InstantTimestamp;
 import org.zalando.planb.revocation.util.UnixTimestamp;
 import org.zalando.planb.revocation.util.domain.DomainUtils;
@@ -21,12 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = PlanBRevocationConfig.class)
-public class RevocationDataTest {
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class RevocationDataTest extends AbstractDomainTest {
 
     private final static RevocationType TYPE = RevocationType.TOKEN;
 

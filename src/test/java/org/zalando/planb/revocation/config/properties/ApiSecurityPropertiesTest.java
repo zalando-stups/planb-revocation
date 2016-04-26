@@ -1,7 +1,6 @@
 package org.zalando.planb.revocation.config.properties;
 
 import org.junit.Test;
-import org.zalando.planb.revocation.AbstractSpringTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-public class ApiSecurityPropertiesTest extends AbstractSpringTest {
+public class ApiSecurityPropertiesTest {
 
     @Test(expected = NullPointerException.class)
     public void testNullPointerExceptionWhenNullValue() {

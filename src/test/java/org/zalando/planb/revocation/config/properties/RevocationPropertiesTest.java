@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-public class RevocationPropertiesTest extends AbstractSpringTest {
+public class RevocationPropertiesTest {
 
     @Test
     public void testSetters() {

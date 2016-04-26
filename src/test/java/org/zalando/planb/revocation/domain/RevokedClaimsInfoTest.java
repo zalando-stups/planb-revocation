@@ -1,13 +1,7 @@
 package org.zalando.planb.revocation.domain;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.zalando.planb.revocation.config.PlanBRevocationConfig;
 import org.zalando.planb.revocation.util.InstantTimestamp;
 
 import java.io.IOException;
@@ -19,12 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = PlanBRevocationConfig.class)
-public class RevokedClaimsInfoTest {
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class RevokedClaimsInfoTest extends AbstractDomainTest {
 
     private final static String[] NAMES = {"uid", "azp"};
 
@@ -33,8 +22,8 @@ public class RevokedClaimsInfoTest {
     // Workaround to add double quotes around claim names (for JSON comparison)
     static {
         StringBuilder jsonNamesBuilder = new StringBuilder();
-        for (int i = 0; i < NAMES.length; i++) {
-            jsonNamesBuilder.append("\"" + NAMES[i] + "\",");
+        for (String NAME : NAMES) {
+            jsonNamesBuilder.append("\"").append(NAME).append("\",");
         }
         JSON_NAMES = "[" + jsonNamesBuilder.substring(0, jsonNamesBuilder.length() - 1) + "]";
     }
