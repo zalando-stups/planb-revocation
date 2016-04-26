@@ -20,12 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = PlanBRevocationConfig.class)
-public class RevocationInfoTest {
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class RevocationInfoTest extends AbstractDomainTest {
 
     private final static RevocationType TYPE = RevocationType.TOKEN;
 

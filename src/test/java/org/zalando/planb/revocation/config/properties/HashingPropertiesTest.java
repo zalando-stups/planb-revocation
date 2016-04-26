@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author <a href="mailto:rodrigo.reis@zalando.de">Rodrigo Reis</a>
  */
-public class HashingPropertiesTest extends AbstractSpringTest {
+public class HashingPropertiesTest {
 
     @Test
     public void testSetters() {

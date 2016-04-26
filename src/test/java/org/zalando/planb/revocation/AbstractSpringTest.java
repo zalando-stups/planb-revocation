@@ -19,11 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.web.client.RestTemplate;
-import org.zalando.planb.revocation.config.PlanBRevocationConfig;
 import org.zalando.planb.revocation.domain.ImmutableRevocationRequest;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsData;
 import org.zalando.planb.revocation.domain.ImmutableRevokedGlobal;
@@ -45,12 +43,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 /**
  * @author jbellmann
  */
-@ContextConfiguration(classes = PlanBRevocationConfig.class)
 public abstract class AbstractSpringTest {
 
     public static final String SAMPLE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
             + ".eyJzdWIiOiIxIiwibmFtZSI6InJyZWlzIiwiYWRtaW4iOnRydWV9.UlZhyvrY9e7tRU88l8sfRb37oWGiL2t4insnO9Nsn1c";
-    public static final String SAMPLE_TOKEN_2 = "eyJraWQiOiJ0ZXN0a2V5LWVzMjU2IiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJ0ZXN0MCIsInNjb3BlIjpbInVpZCIsImNuIl0sImlzcyI6IkIiLCJyZWFsbSI6Ii9zZXJ2aWNlcyIsImV4cCI6MTQ1OTk3MzMyOSwiaWF0IjoxNDU5OTQ0NTI5fQ.Vo8_jbqCET31ej1iLAlcQFc2FzArzQrQwDY3c34keKhpJoDQoHVOX-pqjiM5J_Tp0p13HNZbB3-O4o0U2d2LzA";
+    public static final String SAMPLE_TOKEN_2 = "eyJraWQiOiJ0ZXN0a2V5LWVzMjU2IiwiYWxnIjoiRVMyNTYifQ" +
+            ".eyJzdWIiOiJ0ZXN0MCIsInNjb3BlIjpbInVpZCIsImNuIl0sImlzcyI6IkIiLCJyZWFsbSI6Ii9zZXJ2aWNlcyIsImV4cCI6MTQ1OTk3MzMyOSwiaWF0IjoxNDU5OTQ0NTI5fQ" +
+            ".Vo8_jbqCET31ej1iLAlcQFc2FzArzQrQwDY3c34keKhpJoDQoHVOX-pqjiM5J_Tp0p13HNZbB3-O4o0U2d2LzA";
     public static final String VALID_ACCESS_TOKEN = "Bearer " + SAMPLE_TOKEN_2;
     public static final String INVALID_ACCESS_TOKEN = "Bearer 987654321";
     public static final String INSUFFICIENT_SCOPES_ACCESS_TOKEN = "Bearer 123456";
@@ -72,8 +71,8 @@ public abstract class AbstractSpringTest {
 
     private RestTemplate restTemplate;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired(required = false)
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Rule
     public WireMockRule wireMock = new WireMockRule(Integer.valueOf(System.getProperty("wiremock.port", "10080")));
@@ -120,18 +119,18 @@ public abstract class AbstractSpringTest {
     private void prepareTokenInfoMock() {
         stubFor(get(urlEqualTo("/tokeninfo")).withHeader(HttpHeaders.AUTHORIZATION, equalTo(VALID_ACCESS_TOKEN))
                 .willReturn(
-                    aResponse().withStatus(HttpStatus.OK.value()).withHeader(ContentTypeHeader.KEY,
-                        MediaType.APPLICATION_JSON_VALUE).withBody(TOKENINFO_RESPONSE)));
+                        aResponse().withStatus(HttpStatus.OK.value()).withHeader(ContentTypeHeader.KEY,
+                                MediaType.APPLICATION_JSON_VALUE).withBody(TOKENINFO_RESPONSE)));
 
         stubFor(get(urlEqualTo("/tokeninfo")).withHeader(HttpHeaders.AUTHORIZATION, equalTo(INVALID_ACCESS_TOKEN))
                 .willReturn(
-                    aResponse().withStatus(HttpStatus.BAD_REQUEST.value()).withHeader(ContentTypeHeader.KEY,
-                        MediaType.APPLICATION_JSON_VALUE).withBody(EXPIRED_ACCESS_TOKEN_RESPONSE)));
+                        aResponse().withStatus(HttpStatus.BAD_REQUEST.value()).withHeader(ContentTypeHeader.KEY,
+                                MediaType.APPLICATION_JSON_VALUE).withBody(EXPIRED_ACCESS_TOKEN_RESPONSE)));
 
         stubFor(get(urlEqualTo("/tokeninfo")).withHeader(HttpHeaders.AUTHORIZATION,
                 equalTo(INSUFFICIENT_SCOPES_ACCESS_TOKEN)).willReturn(
                 aResponse().withStatus(HttpStatus.OK.value()).withHeader(ContentTypeHeader.KEY,
-                    MediaType.APPLICATION_JSON_VALUE).withBody(TOKENINFO_RESPONSE_INSUFFICIENT_SCOPES)));
+                        MediaType.APPLICATION_JSON_VALUE).withBody(TOKENINFO_RESPONSE_INSUFFICIENT_SCOPES)));
 
         stubFor(get(urlEqualTo("/tokeninfo")).withHeader(HttpHeaders.AUTHORIZATION,
                 equalTo(SERVER_ERROR_ACCESS_TOKEN)).willReturn(
@@ -173,7 +172,7 @@ public abstract class AbstractSpringTest {
                 data = ImmutableRevokedTokenData.builder().token(SAMPLE_TOKEN).build();
                 break;
 
-            case CLAIM :
+            case CLAIM:
                 return generateClaimBasedRevocation(ImmutableMap.of("uid", "rreis", "sub", "abcd"));
 
             case GLOBAL:

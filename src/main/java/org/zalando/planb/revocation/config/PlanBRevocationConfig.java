@@ -23,12 +23,6 @@ public class PlanBRevocationConfig {
     private ApiGuildProperties apiGuildProperties;
 
     @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper().registerModule(new GuavaModule()).setPropertyNamingStrategy(
-                PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
-    }
-
-    @Bean
     public SwaggerService swaggerService(ApplicationContext context) {
         return new SwaggerFromYamlFileService(apiGuildProperties.getSwaggerFile());
     }
