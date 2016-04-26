@@ -19,11 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.web.client.RestTemplate;
-import org.zalando.planb.revocation.config.PlanBRevocationConfig;
 import org.zalando.planb.revocation.domain.ImmutableRevocationRequest;
 import org.zalando.planb.revocation.domain.ImmutableRevokedClaimsData;
 import org.zalando.planb.revocation.domain.ImmutableRevokedGlobal;
@@ -34,7 +32,6 @@ import org.zalando.planb.revocation.domain.RevokedData;
 
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
