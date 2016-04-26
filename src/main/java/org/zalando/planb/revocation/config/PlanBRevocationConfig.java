@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +16,7 @@ import org.zalando.planb.revocation.service.SwaggerService;
 import org.zalando.planb.revocation.service.impl.StaticSchemaDiscoveryService;
 import org.zalando.planb.revocation.service.impl.SwaggerFromYamlFileService;
 
+@AutoConfigureBefore(JacksonAutoConfiguration.class)
 @Configuration
 @EnableConfigurationProperties(ApiGuildProperties.class)
 public class PlanBRevocationConfig {
