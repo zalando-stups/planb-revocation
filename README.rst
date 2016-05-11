@@ -51,7 +51,7 @@ Insert schema (you might need to wait a few seconds for Cassandra to boot):
 
 .. code-block:: bash
 
-    $ docker run -i --link dev-cassandra:cassandra --rm cassandra:2.1 cqlsh cassandra < revocation_schema.cql
+    $ docker run -i --link dev-cassandra:cassandra --rm cassandra:2.1 cqlsh cassandra < schema.cql
 
 General cqlsh access to your dev instance:
 

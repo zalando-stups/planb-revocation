@@ -19,7 +19,7 @@ import static com.datastax.driver.core.ConsistencyLevel.ONE;
  * <p>
  * <ul>
  * <li>{@code cassandra.keyspace} - Keyspace in the Cassandra cluster. Default value is {@code revocation} (See the
- * provided <a href="https://github.com/zalando/planb-revocation/blob/master/revocation_schema.cql">CQL
+ * provided <a href="https://github.com/zalando/planb-revocation/blob/master/schema.cql">CQL
  * Script</a>);</li>
  * <li>{@code cassandra.contactPoints} - Comma separated list of hosts;</li>
  * <li>{@code cassandra.clusterName} - Name of the Cassandra cluster. Default value is {@code Cassandra};</li>

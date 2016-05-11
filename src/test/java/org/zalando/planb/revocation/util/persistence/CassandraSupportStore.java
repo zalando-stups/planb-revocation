@@ -35,7 +35,7 @@ public class CassandraSupportStore {
     private static final Logger log = getLogger(CassandraSupportStore.class);
 
     /*
-     * Tables and queries for revocation_schema.cql
+     * Tables and queries for schema.cql
      */
     private static final String REVOCATION_TABLE = "revocation";
 

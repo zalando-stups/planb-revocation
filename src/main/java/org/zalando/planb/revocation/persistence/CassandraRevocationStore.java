@@ -53,7 +53,7 @@ public class CassandraRevocationStore implements RevocationStore {
     private static final Logger LOG = getLogger(CassandraRevocationStore.class);
 
     /*
-     * Tables and queries for revocation_schema.cql
+     * Tables and queries for schema.cql
      */
     private static final String REVOCATION_TABLE = "revocation";
 
