@@ -36,7 +36,7 @@ public class RevocationResourceTest extends AbstractSpringTest {
 
     private static final String GLOBAL_REVOCATION = "{ " +
             "\"type\": \"GLOBAL\", " +
-            "\"data\": {\"issued_before\":1459939746} }";
+            "\"data\": {\"issued_before\":" + InstantTimestamp.ONE_HOUR_AGO.seconds() + "}}";
 
     @Autowired
     private WebApplicationContext context;
