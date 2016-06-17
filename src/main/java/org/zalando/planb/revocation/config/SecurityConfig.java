@@ -19,6 +19,7 @@ import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.zalando.planb.revocation.config.properties.ApiSecurityProperties;
 import org.zalando.planb.revocation.domain.CurrentUser;
 import org.zalando.stups.oauth2.spring.security.expression.ExtendedOAuth2WebSecurityExpressionHandler;
+import org.zalando.stups.oauth2.spring.server.DefaultAuthenticationExtractor;
 import org.zalando.stups.oauth2.spring.server.TokenInfoResourceServerTokenServices;
 
 import java.util.concurrent.TimeUnit;
@@ -39,7 +40,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Reso
 
     @Bean
     public ResourceServerTokenServices tokenInfoTokenServices() {
-        return new TokenInfoResourceServerTokenServices(resourceServerProperties.getTokenInfoUri());
+        return new TokenInfoResourceServerTokenServices("CLIENT_ID_NOT_NEEDED",
+                new DefaultAuthenticationExtractor(),
+                new FallbackTokenInfoRequestExecutor(resourceServerProperties.getTokenInfoUri()));
     }
 
     @Override
