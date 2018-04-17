@@ -35,6 +35,7 @@ public class ExceptionsResource {
     @ResponseBody
     public Problem revocationUnauthorized(final RevocationUnauthorizedException e) {
         log.debug("Revocation request was unauthorized", e);
+
         return Problem.fromException(e, HttpStatus.UNAUTHORIZED);
     }
 
@@ -142,8 +143,7 @@ public class ExceptionsResource {
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public Problem serializationException(final SerializationException e) {
-        log.error("A serialization exception occurred: {}", e.getMessage());
-        log.debug("Error details: ", e);
+        log.error("A serialization exception occurred", e);
 
         return Problem.fromException(e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -161,8 +161,7 @@ public class ExceptionsResource {
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public Problem handleGenericException(final Exception e) {
-        log.error("An unexpected error occurred: {}", e.getMessage() != null ? e.getMessage() : e.getClass().getName());
-        log.debug("Error details: ", e);
+        log.error("An unexpected error occurred", e);
 
         return Problem.fromMessage("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
     }
