@@ -4,6 +4,7 @@ import org.immutables.value.Value;
 import org.zalando.planb.revocation.domain.RevocationType;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
@@ -23,7 +24,7 @@ public abstract class MessageHasher {
      *
      * @return the aforementioned map
      */
-    public abstract Map<RevocationType, MessageDigest> hashingAlgorithms();
+    public abstract Map<RevocationType, String> hashingAlgorithms();
 
     /**
      * Returns the salt used to hash messages.
@@ -54,7 +55,7 @@ public abstract class MessageHasher {
      * @param messages the messages to hash.
      * @return a Base64 URL encoded version of the hash.
      */
-    public String hashAndEncode(final RevocationType type, final String... messages) {
+    public String hashAndEncode(final RevocationType type, final String... messages) throws NoSuchAlgorithmException {
 
         StringBuilder messageConcatenated = new StringBuilder();
         for (String message : messages) {
@@ -67,9 +68,8 @@ public abstract class MessageHasher {
         byte[] hashed = message.getBytes();
 
         if (hashingAlgorithms().containsKey(type)) {
-
-            hashingAlgorithms().get(type).update((salt() + message).getBytes());
-            hashed = hashingAlgorithms().get(type).digest();
+            String algorithm = hashingAlgorithms().get(type);
+            hashed = MessageDigest.getInstance(algorithm).digest((salt() + message).getBytes());
         }
 
         return Base64.getUrlEncoder().encodeToString(hashed);
@@ -85,7 +85,7 @@ public abstract class MessageHasher {
      * @param messages the messages to hash.
      * @return a Base64 URL encoded version of the hash.
      */
-    public String hashAndEncode(final RevocationType type, final Collection<String> messages) {
+    public String hashAndEncode(final RevocationType type, final Collection<String> messages) throws NoSuchAlgorithmException {
         return hashAndEncode(type, messages.toArray(new String[]{}));
     }
 }

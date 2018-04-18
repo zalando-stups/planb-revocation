@@ -89,8 +89,8 @@ public class MessageHashTest extends AbstractSpringTest {
      */
     @Test
     public void testDefaultValues() {
-        assertEquals("SHA-256", messageHasher.hashingAlgorithms().get(RevocationType.TOKEN).getAlgorithm());
-        assertEquals("SHA-256", messageHasher.hashingAlgorithms().get(RevocationType.CLAIM).getAlgorithm());
+        assertEquals("SHA-256", messageHasher.hashingAlgorithms().get(RevocationType.TOKEN));
+        assertEquals("SHA-256", messageHasher.hashingAlgorithms().get(RevocationType.CLAIM));
         assertEquals('|', (char) messageHasher.separator());
     }
 }

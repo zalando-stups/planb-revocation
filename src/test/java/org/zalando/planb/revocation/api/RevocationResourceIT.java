@@ -35,6 +35,7 @@ import org.zalando.planb.revocation.util.MessageHasher;
 import org.zalando.planb.revocation.util.security.WithMockCustomUser;
 
 import java.net.URI;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 
 import static com.google.common.collect.ImmutableMap.of;
@@ -287,7 +288,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
      */
     @Test
     @WithMockCustomUser
-    public void testSHA256TokenHashing() {
+    public void testSHA256TokenHashing() throws NoSuchAlgorithmException {
         RevocationRequest tokenRevocation = generateRevocation(RevocationType.TOKEN);
         RevokedTokenData revocationData = (RevokedTokenData) tokenRevocation.data();
         String unhashedToken = revocationData.token();
@@ -302,7 +303,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
 
         RevokedTokenInfo fromService = (RevokedTokenInfo) response.getBody().revocations().get(0).data();
         assertThat(fromService.hashAlgorithm())
-                .isEqualTo(messageHasher.hashingAlgorithms().get(RevocationType.TOKEN).getAlgorithm());
+                .isEqualTo(messageHasher.hashingAlgorithms().get(RevocationType.TOKEN));
 
         String hashedToken = messageHasher.hashAndEncode(RevocationType.TOKEN, unhashedToken);
         assertThat(fromService.tokenHash()).isEqualTo(hashedToken);
@@ -324,7 +325,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
      */
     @Test
     @WithMockCustomUser
-    public void testClaimHashing() {
+    public void testClaimHashing() throws NoSuchAlgorithmException {
         RevocationRequest claimRevocation = generateRevocation(RevocationType.CLAIM);
         revocationStore.storeRevocation(claimRevocation);
 
@@ -336,7 +337,7 @@ public class RevocationResourceIT extends AbstractSpringIT {
         // Assert that it contains revocation
         RevokedClaimsInfo fromService = (RevokedClaimsInfo) response.getBody().revocations().get(0).data();
         assertThat(fromService.hashAlgorithm())
-                .isEqualTo(messageHasher.hashingAlgorithms().get(RevocationType.CLAIM).getAlgorithm());
+                .isEqualTo(messageHasher.hashingAlgorithms().get(RevocationType.CLAIM));
 
         String hashedValue = messageHasher.hashAndEncode(RevocationType.CLAIM, ((RevokedClaimsData) claimRevocation
                 .data()).claims().values());

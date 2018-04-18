@@ -4,4 +4,4 @@ spring:
 
 cassandra:
   contactPoints: 127.0.0.1
-  clusterName: Local Cluster
+  clusterName: Test Cluster

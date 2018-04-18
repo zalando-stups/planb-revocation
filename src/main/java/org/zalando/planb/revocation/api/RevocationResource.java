@@ -1,9 +1,9 @@
 package org.zalando.planb.revocation.api;
 
-import org.springframework.http.HttpEntity;
-
-import org.zalando.planb.revocation.domain.RevocationRequest;
 import org.zalando.planb.revocation.domain.RevocationList;
+import org.zalando.planb.revocation.domain.RevocationRequest;
+
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Resource to get and post revocations.
@@ -21,7 +21,7 @@ public interface RevocationResource {
      *
      * @return  all the revocations since the specified timestamp
      */
-    RevocationList get(int from);
+    RevocationList get(int from) throws NoSuchAlgorithmException;
 
     /**
      * Posts the specified revocation to be stored.
