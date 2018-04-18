@@ -68,8 +68,8 @@ public abstract class MessageHasher {
         byte[] hashed = message.getBytes();
 
         if (hashingAlgorithms().containsKey(type)) {
-             String algorithm = hashingAlgorithms().get(type);
-            hashed =  MessageDigest.getInstance(algorithm).digest((salt() + message).getBytes());
+            String algorithm = hashingAlgorithms().get(type);
+            hashed = MessageDigest.getInstance(algorithm).digest((salt() + message).getBytes());
         }
 
         return Base64.getUrlEncoder().encodeToString(hashed);
