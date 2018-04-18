@@ -24,7 +24,7 @@
         <logger name="org.thymeleaf" level="warn"/>
 
         <!-- Additional loggers with different levels can easily be added in Spring manner, e.g. application.yaml -->
-        <Root level="debug">
+        <Root level="info">
             <AppenderRef ref="Console"/>
         </Root>
     </Loggers>
