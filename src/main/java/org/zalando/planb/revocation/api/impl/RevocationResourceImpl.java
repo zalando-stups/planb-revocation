@@ -23,7 +23,6 @@ import org.zalando.planb.revocation.domain.RevocationData;
 import org.zalando.planb.revocation.domain.RevocationInfo;
 import org.zalando.planb.revocation.domain.RevocationList;
 import org.zalando.planb.revocation.domain.RevocationRequest;
-import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.domain.RevokedClaimsData;
 import org.zalando.planb.revocation.domain.RevokedData;
 import org.zalando.planb.revocation.domain.RevokedGlobal;
@@ -34,6 +33,7 @@ import org.zalando.planb.revocation.persistence.RevocationStore;
 import org.zalando.planb.revocation.service.RevocationAuthorizationService;
 import org.zalando.planb.revocation.util.MessageHasher;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -43,6 +43,8 @@ import java.util.List;
 
 import static java.time.Instant.ofEpochSecond;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.zalando.planb.revocation.domain.RevocationType.CLAIM;
+import static org.zalando.planb.revocation.domain.RevocationType.TOKEN;
 
 /**
  * Controller implementation for the revocations endpoint.
@@ -71,7 +73,7 @@ public class RevocationResourceImpl implements RevocationResource {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public RevocationList get(@RequestParam final int from) {
+    public RevocationList get(@RequestParam final int from) throws NoSuchAlgorithmException {
         log.debug("GET revocations since {} ({})", from, ZonedDateTime.ofInstant(ofEpochSecond(from), ZoneId.systemDefault()));
         Collection<RevocationData> revocations = storage.getRevocations(from);
 
@@ -87,17 +89,16 @@ public class RevocationResourceImpl implements RevocationResource {
             } else if (data instanceof RevokedClaimsData) {
                 revokedInfo = ImmutableRevokedClaimsInfo.builder()
                         .names(((RevokedClaimsData) data).claims().keySet())
-                        .valueHash(messageHasher.hashAndEncode(RevocationType.CLAIM,
-                                ((RevokedClaimsData) data).claims().values()))
-                        .hashAlgorithm(messageHasher.hashingAlgorithms().get(RevocationType.CLAIM).getAlgorithm())
+                        .valueHash(messageHasher.hashAndEncode(CLAIM, ((RevokedClaimsData) data).claims().values()))
+                        .hashAlgorithm(messageHasher.hashingAlgorithms().get(CLAIM))
                         .issuedBefore(((RevokedClaimsData) data).issuedBefore())
                         .separator(messageHasher.separator())
                         .build();
 
             } else if (data instanceof RevokedTokenData) {
                 revokedInfo = ImmutableRevokedTokenInfo.builder()
-                        .tokenHash(messageHasher.hashAndEncode(RevocationType.TOKEN, ((RevokedTokenData) data).token()))
-                        .hashAlgorithm(messageHasher.hashingAlgorithms().get(RevocationType.TOKEN).getAlgorithm())
+                        .tokenHash(messageHasher.hashAndEncode(TOKEN, ((RevokedTokenData) data).token()))
+                        .hashAlgorithm(messageHasher.hashingAlgorithms().get(TOKEN))
                         .issuedBefore(((RevokedTokenData) data).issuedBefore())
                         .build();
             }

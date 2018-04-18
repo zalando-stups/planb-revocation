@@ -7,17 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import org.zalando.planb.revocation.config.properties.CassandraProperties;
 import org.zalando.planb.revocation.config.properties.HashingProperties;
 import org.zalando.planb.revocation.config.properties.RevocationProperties;
-import org.zalando.planb.revocation.domain.RevocationType;
 import org.zalando.planb.revocation.persistence.AuthorizationRulesStore;
 import org.zalando.planb.revocation.service.RevocationAuthorizationService;
 import org.zalando.planb.revocation.service.impl.RuleBasedClaimRevocationAuthorizationService;
 import org.zalando.planb.revocation.util.ImmutableMessageHasher;
 import org.zalando.planb.revocation.util.MessageHasher;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Configuration
 @EnableConfigurationProperties({HashingProperties.class, RevocationProperties.class})
@@ -27,14 +21,9 @@ public class RevocationConfig {
     private HashingProperties hashingProperties;
 
     @Bean
-    public MessageHasher messageHasher() throws NoSuchAlgorithmException {
-        Map<RevocationType, MessageDigest> hashers = new HashMap<>(hashingProperties.getAlgorithms().size());
-        for (RevocationType type : hashingProperties.getAlgorithms().keySet()) {
-            hashers.put(type, MessageDigest.getInstance(hashingProperties.getAlgorithms().get(type)));
-        }
-
+    public MessageHasher messageHasher() {
         return ImmutableMessageHasher.builder()
-                .hashingAlgorithms(hashers)
+                .hashingAlgorithms(hashingProperties.getAlgorithms())
                 .salt(hashingProperties.getSalt())
                 .separator(hashingProperties.getSeparator())
                 .build();
