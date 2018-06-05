@@ -31,3 +31,6 @@ CREATE TABLE revocation.authorization_rule (
     last_modified_by TEXT,
     PRIMARY KEY(uuid)
 );
+
+ALTER TABLE revocation.revocation
+WITH default_time_to_live = 7200;
